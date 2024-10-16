@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const rol = localStorage.getItem('rol');  // Obtener el rol del usuario desde localStorage
 
     // Variable para almacenar el tiempo límite de inactividad (30 segundos = 30000 ms)
-    const INACTIVITY_LIMIT = 30000; // 30 segundos
+    const INACTIVITY_LIMIT = 300000; // 30 segundos
 
     // Variable para almacenar el temporizador de inactividad
     let inactivityTimer;
