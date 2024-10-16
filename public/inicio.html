@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel El Dodo</title>
+    <link rel="stylesheet" href="css/inicio.css">
+</head>
+<body>
+    <!-- Barra de navegación -->
+    <header>
+        <div class="container">
+            <div class="logo">Hotel El Dodo</div>
+            <nav>
+                <a href="inicio.html">Home</a>
+                <a href="habitacion.html">Habitaciones</a>
+                <a href="servicio.html">Servicios</a>
+                <a href="paquete.html">Paquetes</a>
+                <a href="wizard.html">Reservar</a>
+            </nav>
+            <div class="user-actions">
+                <a href="register.html" class="register-button">Registrarse</a>
+                <button id="authButton" class="auth-button">Iniciar Sesión</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Disfruta de tus Vacaciones de Ensueño</h1>
+            <p>Reserva habitaciones y paquetes a precios inmejorables</p>
+            <div class="search-box">
+                <div class="input-group">
+                    <label>Ubicación</label>
+                    <input type="text" placeholder="¿A dónde vas?">
+                </div>
+                <div class="input-group">
+                    <label>Check In</label>
+                    <input type="date">
+                </div>
+                <div class="input-group">
+                    <label>Check Out</label>
+                    <input type="date">
+                </div>
+                <div class="input-group">
+                    <label>Huéspedes</label>
+                    <input type="number" placeholder="Número de huéspedes">
+                </div>
+                <button class="search-button">Buscar</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Habitaciones Populares -->
+    <section class="popular-hotels">
+        <h2>Hoteles Populares</h2>
+        <ul id="hotelList">
+            <li>
+                <img src="/imagenes/playa.jpg" alt="Hotel 1">
+                <div class="hotel-info">
+                    <strong>Hotel Hilton</strong>
+                    <p>JBR, Dubai Marina</p>
+                    <p class="price">AED 549</p>
+                </div>
+            </li>
+            <li>
+                <img src="https://via.placeholder.com/400x200" alt="Hotel 2">
+                <div class="hotel-info">
+                    <strong>Atlantis</strong>
+                    <p>Palm Jumeirah, Dubai</p>
+                    <p class="price">AED 1500</p>
+                </div>
+            </li>
+            <li>
+                <img src="https://via.placeholder.com/400x200" alt="Hotel 3">
+                <div class="hotel-info">
+                    <strong>JA Resorts</strong>
+                    <p>Hatta, Jebelpias</p>
+                    <p class="price">AED 456</p>
+                </div>
+            </li>
+        </ul>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>© 2024 Hotel El Dodo. Todos los derechos reservados.</p>
+    </footer>
+
+</body>
+</html>

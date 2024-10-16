@@ -1,0 +1,165 @@
+/* General */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.wizard-container {
+    width: 60%; /* Un poco más ancho que antes */
+    margin: 0 auto;
+    padding: 30px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+    margin-top: 50px;
+}
+
+/* Indicador de pasos */
+.steps-indicator {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.steps-indicator .step {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.steps-indicator .step.active {
+    background-color: #667eea;
+    color: white;
+}
+
+/* Contenido de los pasos del wizard */
+.step-content {
+    display: none;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+/* Estilo de las tarjetas para habitaciones y servicios */
+.habitacion-card, .servicio-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    cursor: pointer;
+    background-color: #fff;
+}
+
+.habitacion-card:hover, .servicio-card:hover {
+    transform: translateY(-5px);
+}
+
+.habitacion-card h4, .servicio-card h4 {
+    font-size: 1.3rem;
+    color: #333;
+}
+
+.habitacion-card p, .servicio-card p {
+    font-size: 1rem;
+    color: #666;
+    margin: 5px 0;
+}
+
+.habitacion-card .price, .servicio-card .price {
+    font-size: 1.2rem;
+    color: #e74c3c;
+    font-weight: bold;
+}
+
+/* Botones para los pasos del wizard */
+button {
+    padding: 12px 20px;
+    background-color: #667eea;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    font-size: 1rem;
+    margin-right: 10px;
+}
+
+button:hover {
+    background-color: #764ba2;
+}
+
+/* Botones de navegación entre pasos */
+.next-btn, .prev-btn {
+    margin-top: 20px;
+}
+
+/* Estilo para los selectores de métodos de pago */
+#metodo-pago {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-top: 15px;
+    font-size: 1rem;
+}
+
+/* Pie de página */
+footer {
+    margin-top: auto;
+    background: linear-gradient(to right, #667eea, #764ba2);
+    color: white;
+    text-align: center;
+    padding: 20px 0;
+    width: 100%;
+}
+
+/* Ajustes de las imágenes */
+.habitacion-card img, .servicio-card img {
+    width: 100%; /* Ancho máximo al 100% del contenedor */
+    height: auto; /* Mantener la proporción de la imagen */
+    max-width: 300px; /* Limitar el ancho máximo */
+    max-height: 200px; /* Limitar la altura máxima */
+    border-radius: 8px;
+    margin-bottom: 10px;
+    object-fit: cover; /* Ajustar la imagen sin distorsionar */
+}
+
+
+.habitacion-card:hover, .servicio-card:hover {
+    transform: translateY(-5px);
+}
+
+/* Ajustes de las imágenes */
+.habitacion-card img, .servicio-card img {
+    width: 100%; /* Ancho máximo al 100% del contenedor */
+    height: auto; /* Mantener la proporción de la imagen */
+    max-width: 300px; /* Limitar el ancho máximo */
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+#servicios-container {
+    display: flex;
+    flex-wrap: wrap; /* Permitir que las tarjetas de servicios se ajusten en varias filas */
+    gap: 15px; /* Espacio entre las tarjetas */
+}
+
+.servicio-card {
+    flex: 1 1 calc(25% - 15px); /* Cada tarjeta ocupará el 25% del contenedor con un espacio */
+    box-sizing: border-box;
+}

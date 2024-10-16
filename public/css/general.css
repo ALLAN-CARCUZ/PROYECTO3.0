@@ -1,0 +1,146 @@
+/* general.css */
+
+/* Reset y estilos generales */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f7f6;
+    margin: 0;
+    padding: 0;
+}
+
+/* Estilos del header */
+header {
+    background: linear-gradient(to right, #667eea, #764ba2);
+    padding: 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}
+
+.header-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-left a {
+    color: white;
+    text-decoration: none;
+    font-size: 1.2rem;
+    margin: 0 15px;
+    transition: color 0.3s ease;
+}
+
+.nav-left a:hover {
+    color: #ddd;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+}
+
+/* Botón de cerrar sesión */
+.logout-button {
+    background-color: #dc3545;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-right: 10px;
+}
+
+.logout-button:hover {
+    background-color: #c82333;
+}
+
+/* Botón para abrir el modal */
+.open-modal-btn {
+    display: block;
+    margin: 35px auto 20px;
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.open-modal-btn:hover {
+    background-color: #218838;
+}
+
+/* Estilos de los botones */
+button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-right: 10px;
+    margin-top: 15px;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #218838;
+}
+
+button.delete {
+    background-color: #dc3545;
+}
+
+button.delete:hover {
+    background-color: #c82333;
+}
+
+/* Estilos del footer */
+footer {
+    background: linear-gradient(to right, #667eea, #764ba2);
+    color: white;
+    text-align: center;
+    padding: 20px;
+    margin-top: 40px;
+    width: 100%;
+}
+
+/* Ajustes para evitar desplazamiento horizontal */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 10px;
+    overflow-x: hidden;
+}
+
+/* Ajuste general de la página */
+main {
+    flex: 1;
+    padding: 100px 20px 20px;
+}
+
+/* Responsividad */
+@media (max-width: 768px) {
+    ul#habitacionList li,
+    ul#servicioList li,
+    ul#paqueteList li {
+        width: 100%;
+    }
+}
