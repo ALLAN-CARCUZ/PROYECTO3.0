@@ -8,20 +8,23 @@ body {
 
 h1 {
     text-align: center;
-    margin-top: 20px;
-    font-size: 2rem;
+    margin-top: 30px;
+    font-size: 2.5rem;
     color: #333;
 }
 
 /* Estilos para el formulario de inicio de sesión */
 form#loginForm {
-    max-width: 400px;
+    max-width: 450px; /* Ancho del formulario */
     margin: 40px auto;
     background-color: #fff;
-    padding: 25px;
-    border-radius: 10px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-    border: 1px solid #e0e0e0;
+    padding: 30px; /* Espacio interno */
+    border-radius: 12px; /* Bordes redondeados */
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); /* Sombra */
+    border: none; /* Sin bordes */
+    display: flex;
+    flex-direction: column; /* Hacer que los elementos dentro del formulario sigan una dirección en columna */
+    align-items: center; /* Alinear los elementos al centro */
 }
 
 form#loginForm label {
@@ -30,40 +33,45 @@ form#loginForm label {
     margin-bottom: 8px;
     color: #555;
     text-align: left;
+    width: 100%; /* Mantener los labels alineados al ancho del formulario */
 }
 
 form#loginForm input[type="email"],
 form#loginForm input[type="password"] {
-    width: 100%;
+    width: 100%; /* Mantener el ancho completo de los campos */
     padding: 12px;
     margin-bottom: 15px;
     border: 1px solid #ccc;
-    border-radius: 6px;
+    border-radius: 8px; /* Borde redondeado */
     font-size: 1rem;
     outline: none;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s, box-shadow 0.2s; /* Transición suave */
 }
 
 form#loginForm input[type="email"]:focus,
 form#loginForm input[type="password"]:focus {
     border-color: #764ba2;
+    box-shadow: 0 0 5px rgba(118, 75, 162, 0.5); /* Sombra al enfoque */
 }
 
 /* Botón de enviar */
 form#loginForm button[type="submit"] {
-    width: 100%;
+    width: 100%; /* Asegurar que el botón ocupe el 100% del espacio disponible */
     background: linear-gradient(to right, #667eea, #764ba2);
     color: white;
     border: none;
     padding: 14px;
     font-size: 1rem;
-    border-radius: 6px;
+    border-radius: 8px; /* Bordes redondeados */
     cursor: pointer;
-    transition: background 0.3s ease;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+    margin-top: 10px; /* Añadir espacio entre el botón y los campos */
+    text-align: center; /* Asegurar que el texto esté centrado */
 }
 
 form#loginForm button[type="submit"]:hover {
     background: linear-gradient(to right, #764ba2, #667eea);
+    box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4); /* Sombra al pasar el mouse */
 }
 
 /* Caja de mensajes de error o éxito */
@@ -84,7 +92,7 @@ form#loginForm button[type="submit"]:hover {
 
 /* Barra de navegación superior */
 header {
-    background-color: #667eea;
+    background: linear-gradient(to right, #667eea, #764ba2);
     padding: 15px 0;
 }
 
@@ -100,10 +108,31 @@ nav.nav-left a {
     color: #fff;
     text-decoration: none;
     padding: 10px 15px;
-    font-size: 1rem;
-    border-radius: 6px;
+    font-size: 1.1rem;
+    font-weight: bold;
 }
 
 nav.nav-left a:hover {
     background-color: #5a67d8;
+    padding: 10px 15px;
+    border-radius: 5px;
+}
+
+/* Estilos para el texto de redirección a registro */
+.account-prompt {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 1rem;
+    color: #333;
+}
+
+.account-prompt a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.account-prompt a:hover {
+    color: #764ba2;
+    text-decoration: underline;
 }

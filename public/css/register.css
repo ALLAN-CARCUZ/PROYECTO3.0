@@ -8,18 +8,21 @@ body {
 
 h1 {
     text-align: center;
-    margin-top: 20px;
+    margin-top: 100px; /* Aumentar margen superior para que no quede oculto por el header */
+    color: #333; /* Color más oscuro para que sea más visible */
+    font-size: 2rem; /* Ajuste de tamaño */
 }
 
 /* Estilos para el formulario de registro */
 form#usuarioForm {
-    max-width: 500px;
+    max-width: 450px; /* Reducir el tamaño máximo del formulario */
     margin: 40px auto;
     background-color: #fff;
-    padding: 20px;
+    padding: 30px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
+
 
 /* Títulos y campos del formulario */
 form#usuarioForm label {
@@ -33,7 +36,7 @@ form#usuarioForm label {
 form#usuarioForm input[type="text"],
 form#usuarioForm input[type="email"],
 form#usuarioForm input[type="password"] {
-    width: 100%;
+    width: 90%; /* Reducir el tamaño de los campos de texto */
     padding: 10px;
     margin-bottom: 15px;
     border: 1px solid #ccc;
@@ -43,6 +46,7 @@ form#usuarioForm input[type="password"] {
     transition: border-color 0.2s;
 }
 
+
 form#usuarioForm input[type="text"]:focus,
 form#usuarioForm input[type="email"]:focus,
 form#usuarioForm input[type="password"]:focus {
@@ -51,7 +55,9 @@ form#usuarioForm input[type="password"]:focus {
 
 /* Botón de enviar */
 form#usuarioForm button[type="submit"] {
-    width: 100%;
+    width: 80%; /* Reducir el ancho del botón */
+    margin: 0 auto; /* Centrar el botón */
+    display: block;
     background: linear-gradient(to right, #667eea, #764ba2);
     color: white;
     border: none;
@@ -61,6 +67,7 @@ form#usuarioForm button[type="submit"] {
     cursor: pointer;
     transition: background 0.3s ease;
 }
+
 
 form#usuarioForm button[type="submit"]:hover {
     background: linear-gradient(to right, #764ba2, #667eea);
@@ -84,8 +91,9 @@ form#usuarioForm button[type="submit"]:hover {
 
 /* Barra de navegación superior */
 header {
-    background-color: #333;
-    padding: 10px 0;
+    background: linear-gradient(to right, #667eea, #764ba2); /* Mismo color de header */
+    padding: 15px 0;
+    color: white;
 }
 
 .header-container {
@@ -99,14 +107,32 @@ header {
 nav.nav-left a {
     color: #fff;
     text-decoration: none;
-    padding: 10px;
-    font-size: 1rem;
+    padding: 10px 15px;
+    font-size: 1.2rem; /* Ajuste de tamaño de fuente */
+    font-family: 'Arial', sans-serif; /* Tipo de letra */
 }
 
 nav.nav-left a:hover {
     background-color: #444;
     padding: 10px 15px;
     border-radius: 5px;
+    transition: background 0.3s ease;
+}
+
+.nav-right a {
+    color: white;
+    text-decoration: none;
+    padding: 10px;
+    margin-left: 10px;
+    background: linear-gradient(to right, #667eea, #764ba2);
+    border-radius: 5px;
+    font-size: 1rem;
+    font-family: 'Arial', sans-serif;
+    transition: background 0.3s ease;
+}
+
+.nav-right a:hover {
+    background: linear-gradient(to right, #764ba2, #667eea);
 }
 
 /* Estilos del modal (en caso de que uses modal para otras acciones) */
@@ -197,4 +223,23 @@ nav.nav-left a:hover {
 .modal-content .close-btn:hover {
     background-color: rgba(220, 53, 69, 0.1); /* Fondo ligero al pasar el cursor */
     color: #c82333; /* Color más oscuro al pasar el cursor */
+}
+
+/* Estilos para el enlace de "¿Ya tienes cuenta?" */
+.login-link {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 1rem;
+    color: #333;
+}
+
+.login-link a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+.login-link a:hover {
+    color: #764ba2;
 }
