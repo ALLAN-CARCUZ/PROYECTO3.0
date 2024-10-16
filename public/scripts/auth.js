@@ -4,6 +4,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const userGreeting = document.getElementById('userGreeting');
     const rol = localStorage.getItem('rol');  // Obtener el rol del usuario desde localStorage
 
+    // Variable para almacenar el tiempo límite de inactividad (30 segundos = 30000 ms)
+    const INACTIVITY_LIMIT = 30000; // 30 segundos
+
+    // Variable para almacenar el temporizador de inactividad
+    let inactivityTimer;
+
+    // Iniciar el temporizador de inactividad
+    function startInactivityTimer() {
+        clearTimeout(inactivityTimer);
+        inactivityTimer = setTimeout(() => {
+            alert('Sesión cerrada por inactividad.');
+            logoutUser(); // Cerrar sesión por inactividad
+        }, INACTIVITY_LIMIT);
+    }
+
+    // Reiniciar el temporizador de inactividad cada vez que el usuario interactúe
+    function resetInactivityTimer() {
+        startInactivityTimer();
+    }
+
     // Comprobar si el usuario está logueado verificando el token en localStorage
     function isLoggedIn() {
         const token = localStorage.getItem('token');
@@ -55,22 +75,32 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Función para cerrar sesión
+    function logoutUser() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('username');
+        localStorage.removeItem('rol');  // Asegúrate de eliminar el rol también
+        alert('Cerraste sesión');
+        window.location.href = 'login.html';
+    }
+
     // Manejar el clic en el botón de autenticación
     authButton.addEventListener('click', () => {
         if (isLoggedIn()) {
-            // Cerrar sesión: eliminar el token del localStorage
-            localStorage.removeItem('token');
-            localStorage.removeItem('username');
-            localStorage.removeItem('rol');  // Asegúrate de eliminar el rol también
-            alert('Cerraste sesión');
-            window.location.reload();  // Recargar la página para actualizar el estado
+            logoutUser();
         } else {
-            // Redirigir a la página de inicio de sesión
-            window.location.href = 'login.html';  // Asegúrate de que 'login.html' sea la página correcta
+            window.location.href = 'login.html';
         }
     });
 
     // Inicializar el estado de la UI
     updateAuthUI();
-});
 
+    // Iniciar el temporizador de inactividad al cargar la página
+    startInactivityTimer();
+
+    // Reiniciar el temporizador cuando el usuario interactúe con la página
+    document.addEventListener('mousemove', resetInactivityTimer);
+    document.addEventListener('keypress', resetInactivityTimer);
+    document.addEventListener('click', resetInactivityTimer);
+});
