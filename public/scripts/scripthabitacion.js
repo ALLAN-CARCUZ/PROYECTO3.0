@@ -39,6 +39,7 @@ async function loadHabitaciones() {
                 <strong>${habitacion.nombre}</strong>
                 <p>${habitacion.descripcion}</p>
                 <p class="price">Precio: $${habitacion.precio}</p>
+                 <button onclick="irAWizard(${habitacion.id})">Reservar</button>
             `;
 
             // Si el rol es admin, agregar los botones de Actualizar y Eliminar
@@ -122,6 +123,10 @@ async function loadHabitaciones() {
     }
 }
 
+//Redirección al archivo habitavión.html
+function irAWizard(habitacionId) {
+    window.location.href = `wizard.html?id=${habitacionId}`;
+}
 
 // Función para actualizar una habitación
 async function updateHabitacion(id, nombre, descripcion, precio, imagen) {
