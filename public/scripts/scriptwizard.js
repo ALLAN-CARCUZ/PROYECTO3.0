@@ -9,7 +9,7 @@ let fechaSalida = null;
 
 async function confirmarReservacion() {
     const data = {
-        id_usuario: 1,  // ID del usuario que está haciendo la reserva
+        id_usuario: 3,  // ID del usuario que está haciendo la reserva
         id_habitacion: selectedHabitacion.id,
         id_paquete: null,  // Si hay un paquete seleccionado, lo colocas aquí
         costo_total: total,
@@ -206,8 +206,21 @@ function loadServicios() {
     calcularPrecioTotal();
 }
 
+
+//Calcular precios
 function calcularPrecioTotal() {
-    let totalPrecio = selectedHabitacion ? selectedHabitacion.precio : 0;
+    // Calcular la cantidad de noches de estadía
+    if (!fechaEntrada || !fechaSalida) {
+        console.error("No se han seleccionado las fechas de entrada y salida.");
+        return;
+    }
+
+    const fecha1 = new Date(fechaEntrada);
+    const fecha2 = new Date(fechaSalida);
+    const diferenciaTiempo = fecha2.getTime() - fecha1.getTime();
+    const cantidadNoches = Math.ceil(diferenciaTiempo / (1000 * 3600 * 24)); // Convertir a días
+
+    let totalPrecio = selectedHabitacion ? selectedHabitacion.precio * cantidadNoches : 0;
 
     // Sumar los precios de los servicios seleccionados
     selectedServicios.forEach(servicioId => {
@@ -216,11 +229,12 @@ function calcularPrecioTotal() {
         }
     });
 
+    total = totalPrecio; // Actualizar el total global
+
     // Verificar si el contenedor de la habitación seleccionada existe
     const resumenContainer = document.getElementById('selected-habitacion-container');
     
     if (resumenContainer) {
-        // Verificar si existe el elemento con la clase .price
         const priceElement = resumenContainer.querySelector('.price');
         if (priceElement) {
             priceElement.textContent = `Total: Q${totalPrecio.toFixed(2)}`;
@@ -260,7 +274,7 @@ function updateResumen() {
 
 async function confirmarReservacion() {
     const data = {
-        id_usuario: 1,  // ID del usuario que está haciendo la reserva
+        id_usuario: 3,  // ID del usuario que está haciendo la reserva
         id_habitacion: selectedHabitacion.id,
         id_paquete: null,  // Si hay un paquete seleccionado, lo colocas aquí
         costo_total: total,
