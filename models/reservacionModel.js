@@ -118,10 +118,69 @@ async function deleteReservacion(id_reservacion) {
     }
 }
 
+// Función para obtener las reservaciones de un usuario
+async function getReservacionesByUsuario(id_usuario) {
+    let connection;
+
+    try {
+        connection = await oracledb.getConnection(dbConfig);
+        
+        // Consulta para obtener las reservaciones y sus servicios
+        const result = await connection.execute(
+            `SELECT r.ID_RESERVACION, h.NOMBRE AS NOMBRE_HABITACION, r.FECHA_INGRESO, r.FECHA_SALIDA, r.COSTO_TOTAL, s.NOMBRE AS NOMBRE_SERVICIO
+             FROM RESERVACIONES r
+             JOIN HABITACIONES h ON r.ID_HABITACION = h.ID
+             LEFT JOIN RESERVACIONES_SERVICIOS rs ON r.ID_RESERVACION = rs.ID_RESERVACION
+             LEFT JOIN SERVICIOS s ON rs.ID_SERVICIO = s.ID
+             WHERE r.ID_USUARIO = :id_usuario
+             ORDER BY r.FECHA_INGRESO DESC`,
+            [id_usuario]
+        );
+
+        const reservaciones = [];
+
+        // Procesar los resultados para estructurarlos correctamente
+        result.rows.forEach(row => {
+            const [id_reservacion, nombre_habitacion, fecha_ingreso, fecha_salida, costo_total, nombre_servicio] = row;
+
+            // Buscar si la reservación ya está en el array
+            let reservacion = reservaciones.find(r => r.id_reservacion === id_reservacion);
+
+            if (!reservacion) {
+                // Si la reservación no está, agregarla al array
+                reservacion = {
+                    id_reservacion,
+                    nombre_habitacion,
+                    fecha_ingreso,
+                    fecha_salida,
+                    costo_total,
+                    servicios: [] // Inicializar un array de servicios
+                };
+                reservaciones.push(reservacion);
+            }
+
+            // Si hay un servicio asociado, agregarlo
+            if (nombre_servicio) {
+                reservacion.servicios.push(nombre_servicio);
+            }
+        });
+
+        return reservaciones;
+
+    } catch (error) {
+        console.error('Error al obtener las reservaciones del usuario:', error);
+        throw new Error('Error al obtener las reservaciones del usuario');
+    } finally {
+        if (connection) {
+            await connection.close();
+        }
+    }
+}
+
 module.exports = { 
     createReservacion, 
     getReservaciones, 
     updateReservacion, 
-    deleteReservacion 
+    deleteReservacion,
+    getReservacionesByUsuario  // Exportar la nueva función
 };
-

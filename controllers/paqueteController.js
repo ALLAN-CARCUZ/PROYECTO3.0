@@ -31,8 +31,8 @@ async function getPaquetes(req, res) {
 async function updatePaquete(req, res) {
     const { id } = req.params;
     const { nombre, descripcion, precio, imagen, habitacion_id, servicios, descuento } = req.body;
-    if (!nombre || !precio || !habitacion_id || !servicios || servicios.length === 0) {
-        return res.status(400).json({ error: 'Nombre, precio, habitación y servicios son requeridos' });
+    if (!nombre || isNaN(precio) || !habitacion_id || servicios.length === 0) {
+        return res.status(400).json({ error: 'Nombre, precio válido, habitación y servicios son requeridos' });
     }
     try {
         const result = await paqueteModel.updatePaquete(id, nombre, descripcion, precio, imagen, habitacion_id, servicios, descuento);
@@ -62,8 +62,8 @@ async function deletePaquete(req, res) {
 // Obtener habitaciones y servicios para el formulario
 async function getHabitacionesYServicios(req, res) {
     try {
-        const habitaciones = await habitacionModel.getHabitaciones(); // Asegúrate de que este modelo también devuelve el precio
-        const servicios = await servicioModel.getServicios(); // Asegúrate de que este modelo también devuelve el costo
+        const habitaciones = await habitacionModel.getHabitaciones();
+        const servicios = await servicioModel.getServicios();
         res.json({ habitaciones, servicios });
     } catch (error) {
         res.status(500).json({ error: error.message });

@@ -150,6 +150,12 @@ async function updatePaquete(id, nombre, descripcion, precio, imagen, habitacion
     try {
         connection = await oracledb.getConnection(dbConfig);
 
+        // Bloquear el paquete que se va a actualizar para evitar modificaciones concurrentes
+        await connection.execute(
+            `SELECT /*+ NO_PARALLEL */ id FROM paquetes WHERE id = :id FOR UPDATE`,
+            { id }
+        );
+
         // Actualizar la tabla 'paquetes'
         const result = await connection.execute(
             `UPDATE paquetes SET nombre = :nombre, descripcion = :descripcion,
@@ -161,7 +167,7 @@ async function updatePaquete(id, nombre, descripcion, precio, imagen, habitacion
                 precio,
                 imagen: imagen ? Buffer.from(imagen, 'base64') : null,
                 habitacion_id,
-                descuento,  // Actualizamos el descuento
+                descuento,
                 id
             },
             { autoCommit: false }
@@ -195,6 +201,7 @@ async function updatePaquete(id, nombre, descripcion, precio, imagen, habitacion
         }
     }
 }
+
 
 
 // Eliminar un paquete

@@ -235,16 +235,17 @@ async function loadPaquetes() {
 
                     // Limpiar el valor del precio para eliminar el símbolo de dólar
                     const precioTotalStr = document.getElementById('updatePrecio').value;
-                    const newPrecio = parseFloat(precioTotalStr.replace('$', '').trim());
+                    
 
                     const newHabitacion_id = document.getElementById('updateHabitacion_id').value;
                     const newServicios = Array.from(document.querySelectorAll('#updateServiciosContainer input[name="updateServicios"]:checked')).map(cb => cb.value);
                     const newImagenInput = document.getElementById('newImagen').files[0];
-
+                    const newPrecio = parseFloat(precioTotalStr.replace('$', '').trim());
                     if (!newNombre || isNaN(newPrecio) || !newHabitacion_id || newServicios.length === 0) {
-                        alert('Por favor, completa todos los campos requeridos y selecciona al menos un servicio.');
-                        return;
+                    alert('Por favor, completa todos los campos requeridos y selecciona al menos un servicio.');
+                    return;
                     }
+
 
                     let imagenBase64 = paquete.imagen; // Mantener la imagen actual si no se selecciona una nueva
 
@@ -382,6 +383,7 @@ async function updatePaquete(id, nombre, descripcion, precio, imagen, habitacion
         }
     } catch (error) {
         console.error('Error al actualizar el paquete:', error);
+        res.status(500).json({ error: error.message });
     }
 }
 
