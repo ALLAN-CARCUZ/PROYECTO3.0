@@ -20,6 +20,8 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
             localStorage.setItem('token', result.token);
             localStorage.setItem('username', result.username || 'Usuario');
 
+            
+
             // Decodificar el token para obtener el rol del usuario y el tiempo de expiración
             const decodedToken = parseJwt(result.token);
             localStorage.setItem('rol', decodedToken.rol);  // Guardamos el rol en localStorage
@@ -38,7 +40,7 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
             }, expirationTime);
 
             alert('Inicio de sesión exitoso');
-            window.location.href = 'habitacion.html'; 
+            window.location.href = 'inicio.html'; 
         } else {
             document.getElementById('messageBox').innerText = `Error: ${result.message}`;
         }
