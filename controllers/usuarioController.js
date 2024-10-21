@@ -64,9 +64,10 @@ async function loginUsuario(req, res) {
         }
 
         // Generar un token JWT
-        const token = jwt.sign({ id: user.id, rol: user.rol }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign({ id: user.id, rol: user.rol, nombre: user.nombre }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-        res.json({ message: 'Inicio de sesión exitoso', token });
+
+        res.json({ message: 'Inicio de sesión exitoso', token, username: user.nombre });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

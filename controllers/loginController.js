@@ -23,13 +23,14 @@ async function loginUsuario(req, res) {
     }
 
     // Crear el token con el rol del usuario
-    const token = jwt.sign({ id: user.id, rol: user.rol }, process.env.JWT_SECRET, { expiresIn: '2m' });
-    
+    const token = jwt.sign({ id: user.id, rol: user.rol, nombre: user.nombre }, process.env.JWT_SECRET, { expiresIn: '2m' });
+
     // Devolver token y nombre de usuario en la respuesta
     res.json({ 
-        token, 
-        username: user.nombre  // Aquí se incluye el nombre del usuario si fuera necesario
+        token,
+        username: user.nombre // Aquí se incluye el nombre del usuario si fuera necesario
     });
+    console.log(user.nombre);  // Depuración para verificar el nombre
 }
 
 module.exports = { loginUsuario };

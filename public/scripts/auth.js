@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const registerButton = document.getElementById('registerButton');
     const userGreeting = document.getElementById('userGreeting');
     const rol = localStorage.getItem('rol');  // Obtener el rol del usuario desde localStorage
+    
 
     // Variable para almacenar el tiempo límite de inactividad (30 segundos = 30000 ms)
     const INACTIVITY_LIMIT = 300000; // 30 segundos
@@ -34,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Obtener el nombre de usuario desde localStorage
     function getUsername() {
         const username = localStorage.getItem('username') || 'Usuario';
-        console.log("Nombre de usuario encontrado: ", username); // Depuración
+        console.log("Nombre de usuario encontrado en auth.js: ", username); // Depuración
         return username;
     }
 
@@ -62,6 +63,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (isLoggedIn()) {
             authButton.textContent = 'Cerrar Sesión';
+            const username = getUsername(); // Depuración para asegurar que se obtiene el nombre de usuario
+            console.log("Mostrando en la UI el nombre: ", username);
             userGreeting.textContent = `Hola, ${getUsername()}!`;
             registerButton.style.display = 'none';
             manageAdminButtons();  // Verificar si se muestran los botones de admin
