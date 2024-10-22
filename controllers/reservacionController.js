@@ -102,20 +102,31 @@ async function updateReservacion(req, res) {
     }
 }
 
-// Eliminar una reservación (DELETE)
 async function deleteReservacion(req, res) {
-    const { id } = req.params;
+    const { id_reservacion } = req.params;
+    console.log("ID de la reservación a eliminar:", id_reservacion);
+
+    if (!id_reservacion) {
+        return res.status(400).json({ error: 'El ID de la reservación es requerido' });
+    }
 
     try {
-        const result = await reservacionModel.deleteReservacion(id);
+        // Eliminar las relaciones de la tabla intermedia (RESERVACIONES_SERVICIOS)
+        await reservacionModel.deleteReservacionServicios(id_reservacion);
+        console.log("Relaciones de servicios eliminadas para la reservación:", id_reservacion);
 
-        if (result.rowsAffected === 0) {
+        // Ahora eliminar la reservación en la tabla principal (RESERVACIONES)
+        const result = await reservacionModel.deleteReservacion(id_reservacion);
+        console.log("Resultado de la eliminación de la reservación:", result);
+
+        if (!result || result.rowsAffected === 0) {
             return res.status(404).json({ error: 'Reservación no encontrada' });
         }
 
-        res.status(200).json({ message: 'Reservación eliminada exitosamente' });
+        res.status(200).json({ message: 'Reservación y relaciones eliminadas exitosamente' });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error("Error durante la eliminación:", error);
+        res.status(500).json({ error: 'Error interno del servidor: ' + error.message });
     }
 }
 

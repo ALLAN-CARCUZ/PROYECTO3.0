@@ -100,7 +100,26 @@ async function updateReservacion(id_reservacion, id_habitacion, id_paquete, cost
     }
 }
 
-// Eliminar una reservación
+// Función para eliminar las relaciones de servicios en la tabla intermedia
+async function deleteReservacionServicios(id_reservacion) {
+    let connection;
+    try {
+        connection = await oracledb.getConnection(dbConfig);
+        const query = `DELETE FROM RESERVACIONES_SERVICIOS WHERE ID_RESERVACION = :id_reservacion`;
+        const result = await connection.execute(query, { id_reservacion }, { autoCommit: true });
+        console.log("Relaciones eliminadas en RESERVACIONES_SERVICIOS:", result);
+        return result;
+    } catch (error) {
+        console.error("Error eliminando relaciones de servicios:", error);
+        throw new Error("Error al eliminar relaciones de servicios: " + error.message);
+    } finally {
+        if (connection) {
+            await connection.close();
+        }
+    }
+}
+
+// Función para eliminar una reservación
 async function deleteReservacion(id_reservacion) {
     let connection;
     try {
@@ -110,7 +129,11 @@ async function deleteReservacion(id_reservacion) {
             { id_reservacion },
             { autoCommit: true }
         );
+        console.log("Reservación eliminada en RESERVACIONES:", result);
         return result;
+    } catch (error) {
+        console.error("Error eliminando la reservación:", error);
+        throw new Error("Error al eliminar la reservación: " + error.message);
     } finally {
         if (connection) {
             await connection.close();
@@ -182,5 +205,6 @@ module.exports = {
     getReservaciones, 
     updateReservacion, 
     deleteReservacion,
-    getReservacionesByUsuario  // Exportar la nueva función
+    getReservacionesByUsuario,  // Exportar la nueva función
+    deleteReservacionServicios
 };
