@@ -49,6 +49,22 @@ async function createReservacion(req, res) {
         // Enviar el correo
         await transporter.sendMail(mailOptions);
 
+        const serviciosEspeciales = [1, 2, 3, 4, 5];
+        const servicioSolicitado = servicios.find(servicio => serviciosEspeciales.includes(servicio));
+
+        if (servicioSolicitado) {
+            // Preparar el correo para medicappcom@gmail.com
+            const mailOptionsEspecial = {
+                from: process.env.EMAIL_USER,
+                to: 'medicappcom@gmail.com',
+                subject: 'Notificación de Servicio Especial Solicitado',
+                text: `Se ha solicitado el servicio con ID: ${servicioSolicitado} para la habitación con ID: ${id_habitacion}.`
+            };
+
+            // Enviar el correo a medicappcom@gmail.com
+            await transporter.sendMail(mailOptionsEspecial);
+        }
+
         // Si la reservación se crea exitosamente, responder con éxito
         res.status(201).json({ message: 'Reservación creada exitosamente, y correo enviado al cliente.', id_reservacion: result.id_reservacion });
     } catch (error) {
