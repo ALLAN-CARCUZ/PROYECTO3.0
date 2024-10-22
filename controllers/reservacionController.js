@@ -81,26 +81,25 @@ async function getReservaciones(req, res) {
 
 // Actualizar una reservación (PUT)
 async function updateReservacion(req, res) {
-    const { id } = req.params;
-    const { id_habitacion, id_paquete, costo_total, metodo_pago, fecha_ingreso, fecha_salida } = req.body;
+    const { id } = req.params;  // Aquí estamos obteniendo el ID de los parámetros de la URL
+    const { id_habitacion, id_paquete, costo_total, metodo_pago, fecha_ingreso, fecha_salida, servicios } = req.body;
 
-    // Validar los campos requeridos
-    if (!id_habitacion || !costo_total || !metodo_pago || !fecha_ingreso || !fecha_salida) {
-        return res.status(400).json({ error: 'Todos los campos son requeridos: id_habitacion, costo_total, metodo_pago, fecha_ingreso y fecha_salida' });
+    console.log('ID de la reservación:', id);  // Verifica si el ID se está recibiendo correctamente
+        // Agrega este log para verificar si el ID se recibe correctamente
+        console.log('ID recibido en params:', req.params.id);
+
+    if (!id || !id_habitacion || !costo_total || !metodo_pago || !fecha_ingreso || !fecha_salida) {
+        return res.status(400).json({ error: 'Todos los campos son requeridos, incluyendo el ID de la reservación' });
     }
 
     try {
-        const result = await reservacionModel.updateReservacion(id, id_habitacion, id_paquete, costo_total, metodo_pago, fecha_ingreso, fecha_salida);
-
-        if (result.rowsAffected === 0) {
-            return res.status(404).json({ error: 'Reservación no encontrada' });
-        }
-
+        const result = await reservacionModel.updateReservacion(id, id_habitacion, id_paquete, costo_total, metodo_pago, fecha_ingreso, fecha_salida, servicios);
         res.status(200).json({ message: 'Reservación actualizada exitosamente' });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 }
+
 
 async function deleteReservacion(req, res) {
     const { id_reservacion } = req.params;
@@ -130,11 +129,32 @@ async function deleteReservacion(req, res) {
     }
 }
 
+
+const obtenerReservacionPorId = async (req, res) => {
+    const { id } = req.params;
+    console.log(`Buscando reservación con ID: ${id}`);
+    try {
+        const reservacion = await reservacionModel.findByPk(id);  // Cambiamos a `reservacionModel.findByPk`
+        
+        if (!reservacion) {
+            return res.status(404).json({ error: 'Reservación no encontrada' });
+        }
+        res.json(reservacion);
+    } catch (error) {
+        res.status(500).json({ error: 'Error al obtener la reservación' });
+    }
+};
+
+
+
+
+
 module.exports = { 
     createReservacion, 
     getReservaciones, 
     updateReservacion, 
     deleteReservacion,
-    getReservacionesByUsuario 
+    getReservacionesByUsuario,
+    obtenerReservacionPorId
 };
 

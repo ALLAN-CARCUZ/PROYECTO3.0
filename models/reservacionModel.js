@@ -31,13 +31,18 @@ async function createReservacion(id_usuario, id_habitacion, id_paquete, costo_to
         const id_reservacion = result.outBinds.id_reservacion[0]; // Obtener el ID de la reservación generada
 
         // Luego insertamos los servicios asociados a la reservación
-        for (const id_servicio of servicios) {
-            await connection.execute(
-                `INSERT INTO RESERVACIONES_SERVICIOS (ID_RESERVACION, ID_SERVICIO) 
-                 VALUES (:id_reservacion, :id_servicio)`,
-                { id_reservacion, id_servicio }
-            );
+        if (servicios && servicios.length > 0) {
+            for (const id_servicio of servicios) {
+                await connection.execute(
+                    `INSERT INTO RESERVACIONES_SERVICIOS (ID_RESERVACION, ID_SERVICIO) 
+                    VALUES (:id_reservacion, :id_servicio)`,
+                    { id_reservacion, id_servicio }
+                );
+            }
+        } else {
+            console.log('No hay servicios para asociar a esta reservación.');
         }
+        
 
         // Confirmar la transacción
         await connection.commit();
@@ -81,24 +86,54 @@ async function getReservaciones() {
     }
 }
 
-// Actualizar una reservación
-async function updateReservacion(id_reservacion, id_habitacion, id_paquete, costo_total, metodo_pago, fecha_ingreso, fecha_salida) {
+
+async function updateReservacion(id_reservacion, id_habitacion, id_paquete, costo_total, metodo_pago, fecha_ingreso, fecha_salida, servicios) {
     let connection;
     try {
         connection = await oracledb.getConnection(dbConfig);
+
+        // Actualizar la reservación principal
         const result = await connection.execute(
             `UPDATE RESERVACIONES SET ID_HABITACION = :id_habitacion, ID_PAQUETE = :id_paquete, COSTO_TOTAL = :costo_total, METODO_PAGO = :metodo_pago, 
              FECHA_INGRESO = TO_DATE(:fecha_ingreso, 'YYYY-MM-DD'), FECHA_SALIDA = TO_DATE(:fecha_salida, 'YYYY-MM-DD') WHERE ID_RESERVACION = :id_reservacion`,
             { id_habitacion, id_paquete, costo_total, metodo_pago, fecha_ingreso, fecha_salida, id_reservacion },
-            { autoCommit: true }
+            { autoCommit: false }
         );
+
+        // Eliminar las relaciones anteriores de servicios
+        await deleteReservacionServicios(id_reservacion);
+
+        // Insertar las nuevas relaciones de servicios
+        for (const id_servicio of servicios) {
+            await connection.execute(
+                `INSERT INTO RESERVACIONES_SERVICIOS (ID_RESERVACION, ID_SERVICIO) VALUES (:id_reservacion, :id_servicio)`,
+                { id_reservacion, id_servicio }
+            );
+        }
+
+        // Confirmar la transacción
+        await connection.commit();
+
         return result;
+    } catch (error) {
+        console.error('Error al actualizar la reservación:', error);
+        console.log('ID de la reservación:', id_reservacion); // Verificar si el id_reservacion está llegando correctamente
+
+        if (connection) {
+            await connection.rollback();
+        }
+        throw error;
     } finally {
         if (connection) {
             await connection.close();
         }
     }
+    
 }
+
+
+
+
 
 // Función para eliminar las relaciones de servicios en la tabla intermedia
 async function deleteReservacionServicios(id_reservacion) {
@@ -200,11 +235,50 @@ async function getReservacionesByUsuario(id_usuario) {
     }
 }
 
+// Obtener una reservación por ID
+async function findByPk(id_reservacion) {
+    let connection;
+    try {
+        connection = await oracledb.getConnection(dbConfig);
+        const result = await connection.execute(
+            `SELECT ID_RESERVACION, ID_USUARIO, ID_HABITACION, ID_PAQUETE, COSTO_TOTAL, METODO_PAGO, FECHA_INGRESO, FECHA_SALIDA
+             FROM RESERVACIONES WHERE ID_RESERVACION = :id_reservacion`,
+            { id_reservacion }
+        );
+
+        if (result.rows.length === 0) {
+            return null; // Si no se encuentra la reservación
+        }
+
+        const row = result.rows[0];
+        return {
+            id_reservacion: row[0],
+            id_usuario: row[1],
+            id_habitacion: row[2],
+            id_paquete: row[3],
+            costo_total: row[4],
+            metodo_pago: row[5],
+            fecha_ingreso: row[6],
+            fecha_salida: row[7]
+        };
+    } catch (error) {
+        console.error('Error al obtener la reservación por ID:', error);
+        throw new Error('Error al obtener la reservación');
+    } finally {
+        if (connection) {
+            await connection.close();
+        }
+    }
+}
+
+
+
 module.exports = { 
     createReservacion, 
     getReservaciones, 
     updateReservacion, 
     deleteReservacion,
     getReservacionesByUsuario,  // Exportar la nueva función
-    deleteReservacionServicios
+    deleteReservacionServicios,
+    findByPk
 };
