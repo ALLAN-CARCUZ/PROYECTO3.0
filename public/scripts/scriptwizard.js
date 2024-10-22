@@ -8,17 +8,34 @@ let fechaSalida = null;
 
 
 async function confirmarReservacion() {
+    // Obtener el token almacenado en el localStorage
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+        alert('Debes iniciar sesión para hacer una reservación');
+        return;
+    }
+
+    // Decodificar el token para obtener el ID del usuario
+    const decoded = jwt_decode(token);
+    console.log('Token decodificado:', decoded);  // <-- Verifica el contenido del token decodificado aquí
+    const id_usuario = decoded.id || decoded.userId;  // Asegúrate de que el token contenga este campo
+
+    // Crear el objeto de datos para la reservación
     const data = {
-        id_usuario: 3,  // ID del usuario que está haciendo la reserva
+        id_usuario: id_usuario,  // Usar el ID dinámico del usuario
         id_habitacion: selectedHabitacion.id,
-        id_paquete: null,  // Si hay un paquete seleccionado, lo colocas aquí
+        id_paquete: null,
         costo_total: total,
         metodo_pago: document.getElementById('metodo-pago').value,
         fecha_ingreso: fechaEntrada,
         fecha_salida: fechaSalida,
-        servicios: selectedServicios  // Lista de IDs de los servicios seleccionados
+        servicios: selectedServicios
     };
 
+    console.log('Datos enviados al servidor:', data);  // Verificar qué datos se están enviando
+
+    // Enviar la solicitud al servidor
     const response = await fetch('http://localhost:3000/api/reservaciones/create', {
         method: 'POST',
         headers: {
@@ -28,7 +45,7 @@ async function confirmarReservacion() {
     });
 
     const result = await response.json();
-    if (result.success) {
+    if (response.ok && result.success) {
         alert('Reservación creada exitosamente.');
     } else {
         alert('Error al crear la reservación: ' + result.message);
@@ -270,36 +287,6 @@ function updateResumen() {
         <p>Servicios adicionales: Q${selectedServicios.reduce((acc, servicio) => acc + servicio.costo, 0)}</p>
         <p>Total: Q${total}</p>
     `;
-}
-
-async function confirmarReservacion() {
-    const data = {
-        id_usuario: 3,  // ID del usuario que está haciendo la reserva
-        id_habitacion: selectedHabitacion.id,
-        id_paquete: null,  // Si hay un paquete seleccionado, lo colocas aquí
-        costo_total: total,
-        metodo_pago: document.getElementById('metodo-pago').value,
-        fecha_ingreso: fechaEntrada,
-        fecha_salida: fechaSalida,
-        servicios: selectedServicios  // Lista de IDs de los servicios seleccionados
-    };
-
-    console.log('Datos enviados al servidor:', data);  // <-- Esto te permitirá ver qué datos se están enviando
-
-    const response = await fetch('http://localhost:3000/api/reservaciones/create', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-    });
-
-    const result = await response.json();
-    if (response.ok && result.success) {
-        alert('Reservación creada exitosamente.');
-    } /*else {
-        alert('Error al crear la reservación: ' + result.message);
-    }*/
 }
 
 
