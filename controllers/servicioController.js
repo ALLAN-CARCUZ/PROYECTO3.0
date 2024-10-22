@@ -57,4 +57,20 @@ async function deleteServicio(req, res) {
     }
 }
 
-module.exports = { createServicio, getServicios, updateServicio, deleteServicio };
+// Buscar un servicio por ID
+async function getServicioById(req, res) {
+    const { id } = req.params;
+    try {
+        const servicio = await servicioModel.getServicioById(id);
+        if (!servicio) {
+            return res.status(404).json({ error: 'Servicio no encontrado' });
+        }
+        res.json(servicio);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
+
+
+module.exports = { createServicio, getServicios, updateServicio, deleteServicio, getServicioById };

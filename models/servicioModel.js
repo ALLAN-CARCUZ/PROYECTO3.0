@@ -95,4 +95,41 @@ async function deleteServicio(id) {
     }
 }
 
-module.exports = { createServicio, getServicios, updateServicio, deleteServicio };
+// Buscar un servicio por ID
+async function getServicioById(id) {
+    let connection;
+    try {
+        connection = await oracledb.getConnection(dbConfig);
+        const result = await connection.execute(
+            `SELECT id, nombre, descripcion, costo, imagen FROM servicios WHERE id = :id`,
+            { id }
+        );
+
+        if (result.rows.length === 0) {
+            return null; // Retornar null si no se encuentra ningún servicio con ese ID
+        }
+
+        const row = result.rows[0];
+        let imagenBase64 = '';
+        if (row[4]) { // row[4] es el BLOB de la imagen
+            const buffer = await row[4].getData(); // Obtener los datos del BLOB
+            imagenBase64 = buffer.toString('base64'); // Convertir buffer a base64
+        }
+
+        // Devolver el servicio encontrado
+        return {
+            id: row[0],
+            nombre: row[1],
+            descripcion: row[2],
+            costo: row[3],
+            imagen: imagenBase64 // Devolver la imagen como cadena base64
+        };
+    } finally {
+        if (connection) {
+            await connection.close();
+        }
+    }
+}
+
+
+module.exports = { createServicio, getServicios, updateServicio, deleteServicio, getServicioById };

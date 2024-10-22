@@ -1,5 +1,6 @@
 const reservacionModel = require('../models/reservacionModel');
 const { getUserById } = require('../models/usuarioModel');
+const { getServicioById } = require('../models/servicioModel'); // Importamos la función de búsqueda de servicio por ID
 const nodemailer = require('nodemailer');
 
 // Configurar el transporte para enviar correos
@@ -24,7 +25,7 @@ async function createReservacion(req, res) {
         const result = await reservacionModel.createReservacion(id_usuario, id_habitacion, id_paquete, costo_total, metodo_pago, fecha_ingreso, fecha_salida, servicios);
 
         // Obtener la información del usuario para el correo
-        const usuario = await getUserById(id_usuario);  // Ahora usamos 'ID' en lugar de 'ID_USUARIO'
+        const usuario = await getUserById(id_usuario);
 
         if (!usuario) {
             return res.status(404).json({ error: 'Usuario no encontrado' });
@@ -53,12 +54,16 @@ async function createReservacion(req, res) {
         const servicioSolicitado = servicios.find(servicio => serviciosEspeciales.includes(servicio));
 
         if (servicioSolicitado) {
+            // Obtener el nombre del servicio solicitado
+            const servicioInfo = await getServicioById(servicioSolicitado);
+            const nombreServicio = servicioInfo ? servicioInfo.nombre : 'Servicio desconocido';
+
             // Preparar el correo para medicappcom@gmail.com
             const mailOptionsEspecial = {
                 from: process.env.EMAIL_USER,
                 to: 'medicappcom@gmail.com',
                 subject: 'Notificación de Servicio Especial Solicitado',
-                text: `Se ha solicitado el servicio con ID: ${servicioSolicitado} para la habitación con ID: ${id_habitacion}.`
+                text: `Se ha solicitado el servicio: ${nombreServicio} para la habitación con ID: ${id_habitacion}.`
             };
 
             // Enviar el correo a medicappcom@gmail.com
@@ -66,11 +71,13 @@ async function createReservacion(req, res) {
         }
 
         // Si la reservación se crea exitosamente, responder con éxito
-        res.status(201).json({ message: 'Reservación creada exitosamente, y correo enviado al cliente.', id_reservacion: result.id_reservacion });
+        res.status(201).json({ message: 'Reservación creada exitosamente, y correos enviados.', id_reservacion: result.id_reservacion });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 }
+
+
 
 // Función para obtener las reservaciones del usuario autenticado
 async function getReservacionesByUsuario(req, res) {
