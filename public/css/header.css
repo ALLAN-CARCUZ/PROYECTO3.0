@@ -37,6 +37,44 @@ nav a {
     transition: background 0.3s ease;
 }
 
+/* Estilos para el boton Registrar */
+.register-button {
+    background: linear-gradient(to right, #667eea, #764ba2);
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    text-transform: uppercase;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.3s ease;
+    margin-left: 10px; /* Agrega un pequeño margen */
+}
+
+.register-button:hover {
+    background: linear-gradient(to right, #764ba2, #667eea);
+}
+
+/* Estilos para el boton Iniciar Sesión */
+.auth-button {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-transform: uppercase;
+    font-weight: bold;
+    margin-right: 10px;
+    transition: background 0.3s ease;
+}
+
+.auth-button:hover {
+    background-color: #218838;
+    color: white;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+
 /* Ajuste para la posición del dropdown */
 .auth-menu {
     position: relative; /* Para hacer que el menú desplegable sea relativo al contenedor del botón */
