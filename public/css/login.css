@@ -90,34 +90,6 @@ form#loginForm button[type="submit"]:hover {
     color: #2ecc71; /* Estilo de color para éxito */
 }
 
-/* Barra de navegación superior */
-header {
-    background: linear-gradient(to right, #667eea, #764ba2);
-    padding: 15px 0;
-}
-
-.header-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-nav.nav-left a {
-    color: #fff;
-    text-decoration: none;
-    padding: 10px 15px;
-    font-size: 1.1rem;
-    font-weight: bold;
-}
-
-nav.nav-left a:hover {
-    background-color: #5a67d8;
-    padding: 10px 15px;
-    border-radius: 5px;
-}
-
 /* Estilos para el texto de redirección a registro */
 .account-prompt {
     text-align: center;

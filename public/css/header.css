@@ -1,0 +1,91 @@
+header {
+    background: linear-gradient(to right, #667eea, #764ba2);
+    color: white;
+    padding: 15px 0;
+    width: 100%;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    margin: 0 15px;
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+}
+
+.register-button, .auth-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+/* Ajuste para la posición del dropdown */
+.auth-menu {
+    position: relative; /* Para hacer que el menú desplegable sea relativo al contenedor del botón */
+}
+
+.auth-menu .dropdown-toggle {
+    background-color: #667eea;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    margin-left: 20px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.auth-menu .dropdown-toggle:hover {
+    background-color: #764ba2;
+    box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Estilos para el menú desplegable */
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    background-color: white;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+    border-radius: 5px;
+    right: 0;
+    top: 170%; /* Esto coloca el menú justo debajo del botón */
+    padding: 10px 0;
+}
+
+
+.dropdown-menu a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-menu a:hover {
+    background-color: #f1f1f1;
+    border-radius: 5px;
+}
+
+.auth-menu:hover .dropdown-menu {
+    display: block;
+}

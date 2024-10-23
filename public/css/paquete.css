@@ -48,18 +48,6 @@ ul#paqueteList li .price {
     font-weight: bold;
 }
 
-/* Estilos del contenedor del usuario y cerrar sesión */
-.nav-right {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-#userGreeting {
-    margin-right: 25px; /* Separación del texto "Hola, Usuario!" */
-    margin-top: 10px;
-}
-
 /* Ajuste del botón "Agregar Paquete" para que no se solape */
 .open-modal-btn {
     margin-top: 75px; /* Añadir espacio debajo del header */
@@ -197,24 +185,4 @@ footer {
 .modal-content .close-btn:hover {
     background-color: rgba(220, 53, 69, 0.1); /* Fondo ligero al pasar el cursor */
     color: #c82333; /* Color más oscuro al pasar el cursor */
-}
-
-/* Estilo para el botón "Registrarse" */
-.register-button {
-    background: linear-gradient(to right, #667eea, #764ba2);
-    color: white;
-    padding: 10px 20px;
-    font-size: 1rem;
-    text-transform: uppercase;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    text-align: center;
-    transition: background 0.3s ease;
-    margin-right: 15px; /* Espacio a la derecha */
-    margin-top: 15px;
-}
-
-.register-button:hover {
-    background: linear-gradient(to right, #764ba2, #667eea);
 }
