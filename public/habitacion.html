@@ -6,29 +6,18 @@
     <title>Administrar Habitaciones</title>
     <link rel="stylesheet" href="css/general.css">
     <link rel="stylesheet" href="css/habitacion.css">
+    <link rel="stylesheet" href="css/header.css">
 </head>
 <body>
 
     <!-- Barra de navegación superior -->
     <header>
-        <div class="header-container">
-            <nav class="nav-left">
-                <a href="inicio.html">Inicio</a>
-                <a href="habitacion.html">Habitaciones</a>
-                <a href="servicio.html">Servicios</a>
-                <a href="paquete.html">Paquetes</a>
-                <a href="reservaciones.html">Reservaciones</a>
-            </nav>
-            <div class="nav-right">
-                <span id="userGreeting"></span>
-                <a href="register.html" id="registerButton" class="register-button">Registrarse</a>
-                <button id="authButton" class="auth-button">Iniciar Sesión</button>
-            </div>
-        </div>
     </header>
+    
 
     <!-- Botón para abrir el formulario de registro de habitación (solo visible para admin) -->
     <button class="open-modal-btn admin-only" id="openRegisterModal" style="display: none;">Agregar Habitación</button>
+
 
     <!-- Modal para registrar nueva habitación -->
     <div id="registerModal" class="modal" style="display: none;">
@@ -83,5 +72,6 @@
     <!-- Mover los scripts justo antes del cierre de body para asegurar que el DOM esté cargado -->
     <script src="scripts/scripthabitacion.js"></script>
     <script src="scripts/auth.js"></script>
+    <script src="scripts/header.js"></script>
 </body>
 </html>

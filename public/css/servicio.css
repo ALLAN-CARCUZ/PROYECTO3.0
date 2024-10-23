@@ -48,18 +48,6 @@ ul#servicioList li .price {
     font-weight: bold;
 }
 
-/* Estilos del contenedor del usuario y cerrar sesión */
-.nav-right {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-#userGreeting {
-    margin-right: 25px; /* Separación del texto "Hola, Usuario!" */
-    margin-top: 10px;
-}
-
 /* Ajuste del botón "Agregar Servicio" para que no se solape */
 .open-modal-btn {
     margin-top: 75px; /* Añadir espacio debajo del header */
@@ -84,25 +72,6 @@ footer {
     text-align: center;
     padding: 20px 0;
     width: 100%;
-}
-
-/* Estilo para el botón "Registrarse" */
-.register-button {
-    background: linear-gradient(to right, #667eea, #764ba2);
-    color: white;
-    padding: 10px 20px;
-    font-size: 1rem;
-    text-transform: uppercase;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    text-align: center;
-    transition: background 0.3s ease;
-    margin-right: 15px; /* Espacio a la derecha */
-}
-
-.register-button:hover {
-    background: linear-gradient(to right, #764ba2, #667eea);
 }
 
 /* Estilos de los popups (modales) */
@@ -188,6 +157,7 @@ footer {
 .modal-content button:hover {
     background: linear-gradient(to right, #764ba2, #667eea);
 }
+
 
 /* Botón de cerrar en la esquina superior derecha del modal */
 .modal-content .close-btn {
