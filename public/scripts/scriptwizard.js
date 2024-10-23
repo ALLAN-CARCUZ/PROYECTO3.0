@@ -83,14 +83,17 @@ function showStep(step) {
     });
     document.querySelector(`#step-${step}`).style.display = 'block';
     
-    // Si estamos en el paso 2, mostrar la habitación seleccionada
+    // Si estamos en el paso 2, mostrar la habitación seleccionada y calcular el precio total
     if (step === 2) {
         displaySelectedHabitacion();
+        calcularPrecioTotal();  // <-- Añadir esta línea
     }
 
     updateStepsIndicator(step);
 }
 
+
+// Validar el paso actual
 // Validar el paso actual
 function validateStep(step) {
     if (step === 1) {
@@ -126,9 +129,13 @@ function validateStep(step) {
         // Almacenar las fechas si son válidas
         fechaEntrada = entrada;
         fechaSalida = salida;
+
+        // Calcular el precio total cuando las fechas son válidas
+        calcularPrecioTotal();  // <-- Añadir esta línea
     }
     return true;
 }
+
 
 // Actualizar el indicador de pasos
 function updateStepsIndicator(step) {
@@ -167,6 +174,9 @@ function loadHabitaciones() {
                 `;
                 container.appendChild(habitacionCard);
             });
+
+            // Actualizar los botones después de cargar las habitaciones
+            updateButtonsState();  // <--- Añadir esta línea
         })
         .catch(error => {
             console.error('Error al cargar las habitaciones:', error);
@@ -174,10 +184,19 @@ function loadHabitaciones() {
         });
 }
 
+
 // Seleccionar habitación
 function selectHabitacion(id, nombre, descripcion, imagen, precio) {
-    console.log('Datos de la habitación seleccionada:', { id, nombre, descripcion, imagen, precio });
     
+        // Comprobar si el usuario está autenticado
+        if (!isAuthenticated()) {
+            alert('Debes iniciar sesión para comenzar con una reserva');
+            window.location.href = 'login.html'; // Redirigir a la página de inicio de sesión
+            return;
+        }
+    
+    console.log('Datos de la habitación seleccionada:', { id, nombre, descripcion, imagen, precio });
+
     if (!id || !precio) {
         console.error('ID o precio no definidos:', { id, precio });
         alert('Error al seleccionar la habitación, faltan datos.');
@@ -186,8 +205,30 @@ function selectHabitacion(id, nombre, descripcion, imagen, precio) {
 
     selectedHabitacion = { id, nombre, descripcion, imagen, precio };  // Almacenar todos los detalles de la habitación seleccionada
     total = precio;
+
+    // Actualizar los botones
+    updateButtonsState();
+
     alert(`Has seleccionado la habitación con ID: ${id}, Precio: Q${precio}`);
 }
+
+function updateButtonsState() {
+    const buttons = document.querySelectorAll('.habitacion-card button');  // Seleccionar todos los botones de habitaciones
+
+    buttons.forEach(button => {
+        const habitacionId = button.getAttribute('onclick').match(/\d+/)[0];  // Extraer el ID de la habitación del atributo `onclick`
+        if (parseInt(habitacionId) === selectedHabitacion.id) {
+            button.textContent = 'Seleccionada';  // Cambiar el texto del botón
+            button.disabled = true;  // Deshabilitar el botón de la habitación seleccionada
+            button.classList.add('selected');  // Agregar la clase 'selected' al botón seleccionado
+        } else {
+            button.textContent = 'Seleccionar';  // Cambiar de nuevo a "Seleccionar" si no es la habitación elegida
+            button.disabled = false;  // Habilitar los otros botones
+            button.classList.remove('selected');  // Quitar la clase 'selected' de los demás botones
+        }
+    });
+}
+
 
 
 // Mostrar la habitación seleccionada en el paso 2
@@ -273,7 +314,7 @@ function calcularPrecioTotal() {
 
     let totalPrecio = selectedHabitacion ? selectedHabitacion.precio * cantidadNoches : 0;
 
-    // Sumar los precios de los servicios seleccionados
+    // Sumar los precios de los servicios seleccionados (si los hay)
     selectedServicios.forEach(servicioId => {
         if (preciosServicios[servicioId]) {
             totalPrecio += preciosServicios[servicioId];
@@ -283,6 +324,7 @@ function calcularPrecioTotal() {
     total = totalPrecio; // Actualizar el total global
     actualizarResumenPrecio();
 }
+
 
 // Actualizar el resumen del precio en la UI
 function actualizarResumenPrecio() {
@@ -389,6 +431,12 @@ document.addEventListener('DOMContentLoaded', () => {
     setMinFechaEntrada();  // Establecer la fecha mínima en los campos de fecha
     showStep(1);
 });
+
+// Función para verificar si el usuario ha iniciado sesión
+function isAuthenticated() {
+    const token = localStorage.getItem('token');
+    return token !== null; // Si hay un token en el localStorage, consideramos que el usuario está autenticado
+}
 
 
 

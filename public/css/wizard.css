@@ -163,3 +163,51 @@ footer {
     flex: 1 1 calc(25% - 15px); /* Cada tarjeta ocupará el 25% del contenedor con un espacio */
     box-sizing: border-box;
 }
+
+/* Estilo para los botones seleccionados */
+button.selected {
+    background-color: #4CAF50; /* Color verde para indicar selección */
+    color: white;  /* Color del texto */
+    border: 2px solid #4CAF50;  /* Un borde del mismo color */
+    cursor: default;  /* Cambiar el cursor para deshabilitar */
+}
+
+button.selected:hover {
+    background-color: #4CAF50;  /* Mantener el mismo color al pasar el cursor */
+    cursor: default;  /* Deshabilitar el cursor de hover */
+}
+
+#habitaciones-container {
+    display: flex;
+    flex-wrap: wrap; /* Permitir que las tarjetas se ajusten en varias filas */
+    gap: 15px; /* Espacio entre las tarjetas */
+    justify-content: space-between; /* Distribuir el espacio entre las tarjetas */
+}
+
+.habitacion-card {
+    flex: 1 1 calc(25% - 20px); /* Cada tarjeta ocupará aproximadamente el 25% del contenedor */
+    box-sizing: border-box;
+    margin: 10px;
+}
+
+/* Opcional: para ajustar el diseño en pantallas más pequeñas */
+@media (max-width: 1200px) {
+    .habitacion-card {
+        flex: 1 1 calc(33.33% - 20px); /* En pantallas medianas, mostrar 3 tarjetas por fila */
+    }
+}
+
+@media (max-width: 768px) {
+    .habitacion-card {
+        flex: 1 1 calc(50% - 20px); /* En pantallas pequeñas, mostrar 2 tarjetas por fila */
+    }
+}
+
+@media (max-width: 480px) {
+    .habitacion-card {
+        flex: 1 1 100%; /* En pantallas muy pequeñas, mostrar 1 tarjeta por fila */
+    }
+}
+
+
+
