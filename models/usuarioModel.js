@@ -44,6 +44,9 @@ async function createUsuario(nombre, apellido, email, password, pais) {
 
         connection = await oracledb.getConnection(dbConfig);
         const rol = 'usuario';
+        
+        console.log('País que se va a insertar en la base de datos:', pais);  // Verificar que el país llega correctamente aquí
+
         const result = await connection.execute(
             `INSERT INTO usuarios (id, nombre, apellido, email, password, rol, pais) 
              VALUES (usuarios_seq.NEXTVAL, :nombre, :apellido, :email, :password, :rol, :pais)`,
@@ -57,6 +60,7 @@ async function createUsuario(nombre, apellido, email, password, pais) {
         }
     }
 }
+
 
 
 // Función para buscar un usuario por correo electrónico

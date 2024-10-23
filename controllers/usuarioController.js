@@ -34,9 +34,15 @@ async function getUserById(id) {
 // Crear un nuevo usuario
 async function createUsuario(req, res) {
     const { nombre, apellido, email, password, pais } = req.body;
+
+    // Verificar si req.body tiene la estructura correcta
+    console.log('Datos recibidos en el servidor:', req.body);  // Verifica todo el contenido del body
+    console.log('País recibido en el servidor:', pais);  // Verificar si el país está siendo recibido
+
     if (!nombre || !apellido || !email || !password || !pais) {
         return res.status(400).json({ error: 'Todos los campos son requeridos' });
     }
+
     try {
         const result = await usuarioModel.createUsuario(nombre, apellido, email, password, pais);
         res.status(201).json({ message: 'Usuario registrado exitosamente', result });
@@ -44,6 +50,8 @@ async function createUsuario(req, res) {
         res.status(500).json({ error: error.message });
     }
 }
+
+
 
 
 // Inicio de sesión

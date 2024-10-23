@@ -25,7 +25,6 @@ if (process.env.TNS_ADMIN) {
 
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
-app.use(express.json());
 
 // Usar el enrutador de habitaciones
 app.use('/api/habitaciones', habitacionRouter);  // Actualizar la ruta para habitaciones
