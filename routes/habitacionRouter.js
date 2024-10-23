@@ -14,4 +14,8 @@ router.put('/update/:id', habitacionController.updateHabitacion);
 // Ruta para eliminar una habitación
 router.delete('/delete/:id', habitacionController.deleteHabitacion);
 
+// Ruta para obtener una habitación por ID
+router.get('/:id', habitacionController.getHabitacionById);
+
+
 module.exports = router;

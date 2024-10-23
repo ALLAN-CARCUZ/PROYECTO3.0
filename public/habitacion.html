@@ -65,13 +65,15 @@
 
     <h2 style="margin-top: 100px;">Lista de Habitaciones</h2>
     <ul id="habitacionList">
-        <li>
-            <span>Nombre de la habitación</span>
-            <!-- Botones de actualizar y eliminar (solo visibles para admin) -->
-            <button class="admin-only" style="display: none;">Actualizar</button>
-            <button class="admin-only" style="display: none;">Eliminar</button>
+        <!-- Cada tarjeta de habitación -->
+        <li onclick="irAWizard(habitacion.id)">
+            <img src="data:image/jpeg;base64,${habitacion.imagen}" alt="${habitacion.nombre}">
+            <strong>${habitacion.nombre}</strong>
+            <p>${habitacion.descripcion}</p>
+            <p class="price">Precio: $${habitacion.precio}</p>
         </li>
     </ul>
+    
 
     <!-- Pie de página -->
     <footer>

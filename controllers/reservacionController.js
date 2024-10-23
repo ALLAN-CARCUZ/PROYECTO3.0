@@ -15,6 +15,8 @@ const transporter = nodemailer.createTransport({
 async function createReservacion(req, res) {
     const { id_usuario, id_habitacion, id_paquete, costo_total, metodo_pago, fecha_ingreso, fecha_salida, servicios } = req.body;
 
+    console.log("Datos recibidos:", req.body);
+
     // Validar los campos requeridos
     if (!id_usuario || !id_habitacion || !costo_total || !metodo_pago || !fecha_ingreso || !fecha_salida) {
         return res.status(400).json({ error: 'Todos los campos son requeridos: id_usuario, id_habitacion, costo_total, metodo_pago, fecha_ingreso y fecha_salida' });
@@ -23,10 +25,9 @@ async function createReservacion(req, res) {
     try {
         // Intentar crear la reservación
         const result = await reservacionModel.createReservacion(id_usuario, id_habitacion, id_paquete, costo_total, metodo_pago, fecha_ingreso, fecha_salida, servicios);
-
+        
         // Obtener la información del usuario para el correo
         const usuario = await getUserById(id_usuario);
-
         if (!usuario) {
             return res.status(404).json({ error: 'Usuario no encontrado' });
         }
@@ -50,6 +51,7 @@ async function createReservacion(req, res) {
         // Enviar el correo
         await transporter.sendMail(mailOptions);
 
+        // Si la reservación incluye un servicio especial (1, 2, 3, 4 o 5), enviar el correo adicional
         const serviciosEspeciales = [1, 2, 3, 4, 5];
         const servicioSolicitado = servicios.find(servicio => serviciosEspeciales.includes(servicio));
 
@@ -70,12 +72,15 @@ async function createReservacion(req, res) {
             await transporter.sendMail(mailOptionsEspecial);
         }
 
-        // Si la reservación se crea exitosamente, responder con éxito
-        res.status(201).json({ message: 'Reservación creada exitosamente, y correos enviados.', id_reservacion: result.id_reservacion });
+        // Si la reservación se crea exitosamente, responder con éxito y finalizar el flujo
+        return res.status(201).json({ message: 'Reservación creada exitosamente, y correos enviados.', id_reservacion: result.id_reservacion });
+
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        console.error("Error al crear la reservación:", error);  // <-- Este log te ayudará a identificar la causa del error 500
+        return res.status(500).json({ error: 'Error al crear la reservación: ' + error.message });
     }
 }
+
 
 
 
@@ -95,12 +100,13 @@ async function getReservacionesByUsuario(req, res) {
 // Obtener todas las reservaciones (GET)
 async function getReservaciones(req, res) {
     try {
-        const reservaciones = await reservacionModel.getReservaciones();
-        res.json(reservaciones);
+        const reservaciones = await reservacionModel.getReservaciones();  // Obtener todas las reservaciones desde el modelo
+        res.status(200).json(reservaciones);  // Devolver las reservaciones en formato JSON
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 }
+
 
 // Actualizar una reservación (PUT)
 async function updateReservacion(req, res) {

@@ -62,29 +62,61 @@ async function createReservacion(id_usuario, id_habitacion, id_paquete, costo_to
     }
 }
 
-// Obtener todas las reservaciones
+
 async function getReservaciones() {
     let connection;
     try {
         connection = await oracledb.getConnection(dbConfig);
-        const result = await connection.execute(`SELECT ID_RESERVACION, ID_USUARIO, ID_HABITACION, ID_PAQUETE, COSTO_TOTAL, METODO_PAGO, FECHA_INGRESO, FECHA_SALIDA FROM RESERVACIONES`);
+        // Modificar la consulta para obtener el nombre del usuario
+        const result = await connection.execute(
+            `SELECT r.ID_RESERVACION, h.NOMBRE AS NOMBRE_HABITACION, r.FECHA_INGRESO, r.FECHA_SALIDA, r.COSTO_TOTAL, s.NOMBRE AS NOMBRE_SERVICIO, u.NOMBRE AS NOMBRE_USUARIO
+             FROM RESERVACIONES r
+             JOIN HABITACIONES h ON r.ID_HABITACION = h.ID
+             LEFT JOIN RESERVACIONES_SERVICIOS rs ON r.ID_RESERVACION = rs.ID_RESERVACION
+             LEFT JOIN SERVICIOS s ON rs.ID_SERVICIO = s.ID
+             JOIN USUARIOS u ON r.ID_USUARIO = u.ID  -- Unir con la tabla de usuarios
+             ORDER BY r.FECHA_INGRESO DESC`
+        );
 
-        return result.rows.map(row => ({
-            id_reservacion: row[0],
-            id_usuario: row[1],
-            id_habitacion: row[2],
-            id_paquete: row[3],
-            costo_total: row[4],
-            metodo_pago: row[5],
-            fecha_ingreso: row[6],
-            fecha_salida: row[7]
-        }));
+        const reservaciones = [];
+
+        // Procesar los resultados para estructurarlos correctamente
+        result.rows.forEach(row => {
+            const [id_reservacion, nombre_habitacion, fecha_ingreso, fecha_salida, costo_total, nombre_servicio, nombre_usuario] = row;
+
+            // Buscar si la reservación ya está en el array
+            let reservacion = reservaciones.find(r => r.id_reservacion === id_reservacion);
+
+            if (!reservacion) {
+                // Si la reservación no está, agregarla al array
+                reservacion = {
+                    id_reservacion,
+                    nombre_habitacion,
+                    fecha_ingreso,
+                    fecha_salida,
+                    costo_total,
+                    nombre_usuario,  // Agregar el nombre del usuario
+                    servicios: [] // Inicializar un array de servicios
+                };
+                reservaciones.push(reservacion);
+            }
+
+            // Si hay un servicio asociado, agregarlo
+            if (nombre_servicio) {
+                reservacion.servicios.push(nombre_servicio);
+            }
+        });
+
+        return reservaciones;
+
     } finally {
         if (connection) {
             await connection.close();
         }
     }
 }
+
+
 
 
 async function updateReservacion(id_reservacion, id_habitacion, id_paquete, costo_total, metodo_pago, fecha_ingreso, fecha_salida, servicios) {

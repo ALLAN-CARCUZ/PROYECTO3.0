@@ -5,6 +5,7 @@ let preciosServicios = {};
 
 document.addEventListener('DOMContentLoaded', async () => {
     const token = localStorage.getItem('token');
+    const rol = localStorage.getItem('rol');
 
     if (!token) {
         alert('Debes iniciar sesión para ver tus reservaciones.');
@@ -13,13 +14,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     try {
-        const response = await fetch('http://localhost:3000/api/reservaciones/usuario', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                 'Content-Type': 'application/json'
-            }
-        });
+        let response;
+        // Si el rol es "admin", cargar todas las reservaciones, si no, solo las del usuario
+        if (rol === 'admin') {
+            response = await fetch('http://localhost:3000/api/reservaciones', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+        } else {
+            response = await fetch('http://localhost:3000/api/reservaciones/usuario', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+        }
 
         const reservaciones = await response.json();
 
@@ -34,39 +47,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-function mostrarReservaciones(reservaciones) {
-    const container = document.getElementById('reservacionesContainer');
-    container.innerHTML = '';
-
-    if (reservaciones.length === 0) {
-        container.innerHTML = '<p>No tienes reservaciones aún.</p>';
-        return;
-    }
-
-    reservaciones.forEach(reservacion => {
-        const reservacionElement = document.createElement('div');
-        reservacionElement.classList.add('reservacion-item');
-        
-        // Crear una lista de servicios
-        let serviciosList = '';
-        if (reservacion.servicios.length > 0) {
-            serviciosList = reservacion.servicios.map(servicio => `<li>${servicio}</li>`).join('');
-        } else {
-            serviciosList = '<li>No hay servicios adicionales</li>';
-        }
-
-        reservacionElement.innerHTML = `
-            <h3>Reservación ID: ${reservacion.id_reservacion}</h3>
-            <p>Habitación: ${reservacion.nombre_habitacion}</p>
-            <p>Fecha de Ingreso: ${new Date(reservacion.fecha_ingreso).toLocaleDateString()}</p>
-            <p>Fecha de Salida: ${new Date(reservacion.fecha_salida).toLocaleDateString()}</p>
-            <p>Total: Q${reservacion.costo_total.toFixed(2)}</p>
-            <h4>Servicios Incluidos:</h4>
-            <ul>${serviciosList}</ul>
-        `;
-        container.appendChild(reservacionElement);
-    });
-}
 
 function mostrarReservaciones(reservaciones) {
     const container = document.getElementById('reservacionesContainer');
@@ -317,4 +297,95 @@ async function updateReservacion(id_reservacion, newIdHabitacion, newServicios, 
         console.error('Error al actualizar la reservación:', error);
         alert('Error al actualizar la reservación.');
     }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const token = localStorage.getItem('token');
+    const rol = localStorage.getItem('rol');
+
+    if (!token) {
+        alert('Debes iniciar sesión para ver tus reservaciones.');
+        window.location.href = 'login.html';
+        return;
+    }
+
+    try {
+        let response;
+        // Si el rol es "admin", cargar todas las reservaciones, si no, solo las del usuario
+        if (rol === 'admin') {
+            response = await fetch('http://localhost:3000/api/reservaciones', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+        } else {
+            response = await fetch('http://localhost:3000/api/reservaciones/usuario', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+        }
+
+        const reservaciones = await response.json();
+
+        // Agregar una verificación para asegurarse de que la respuesta sea un array
+        if (response.ok && Array.isArray(reservaciones)) {
+            mostrarReservaciones(reservaciones);
+        } else {
+            console.error('La respuesta no es un array o hubo un error:', reservaciones);
+            alert('Error al cargar reservaciones: ' + (reservaciones.message || 'Datos no válidos.'));
+        }
+    } catch (error) {
+        console.error('Error al obtener las reservaciones:', error);
+        alert('Error al obtener las reservaciones.');
+    }
+});
+
+function mostrarReservaciones(reservaciones) {
+    const container = document.getElementById('reservacionesContainer');
+    container.innerHTML = '';
+
+    // Verificación adicional antes de intentar recorrer el array
+    if (!Array.isArray(reservaciones) || reservaciones.length === 0) {
+        container.innerHTML = '<p>No tienes reservaciones aún.</p>';
+        return;
+    }
+
+    reservaciones.forEach(reservacion => {
+        console.log('Datos de la reservación:', reservacion); // Para ver la estructura de la reservación en la consola
+    
+        const reservacionElement = document.createElement('div');
+        reservacionElement.classList.add('reservacion-item');
+        
+        // Crear una lista de servicios
+        let serviciosList = '';
+        if (reservacion.servicios && reservacion.servicios.length > 0) {
+            serviciosList = reservacion.servicios.map(servicio => `<li>${servicio}</li>`).join('');
+        } else {
+            serviciosList = '<li>No hay servicios adicionales</li>';
+        }
+    
+        // Botones para modificar y cancelar
+        const modificarBtn = `<button onclick="modificarReservacion(${reservacion.id_reservacion})">Modificar</button>`;
+        const cancelarBtn = `<button onclick="cancelarReservacion(${reservacion.id_reservacion})">Cancelar</button>`;
+    
+        // Agregar el nombre del usuario en la interfaz
+        reservacionElement.innerHTML = `
+            <h3>Reservación ID: ${reservacion.id_reservacion}</h3>
+            <p>Usuario: ${reservacion.nombre_usuario || 'Usuario no disponible'}</p>  <!-- Mostrar el nombre del usuario -->
+            <p>Habitación: ${reservacion.nombre_habitacion || 'Nombre de la habitación no disponible'}</p>
+            <p>Fecha de Ingreso: ${new Date(reservacion.fecha_ingreso).toLocaleDateString()}</p>
+            <p>Fecha de Salida: ${new Date(reservacion.fecha_salida).toLocaleDateString()}</p>
+            <p>Total: Q${reservacion.costo_total.toFixed(2)}</p>
+            <h4>Servicios Incluidos:</h4>
+            <ul>${serviciosList}</ul>
+            ${modificarBtn}
+            ${cancelarBtn}
+        `;
+        container.appendChild(reservacionElement);
+    });
 }

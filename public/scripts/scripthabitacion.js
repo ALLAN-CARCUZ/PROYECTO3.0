@@ -19,6 +19,7 @@ document.getElementById('closeRegisterModal').addEventListener('click', () => cl
 document.getElementById('closeUpdateModal').addEventListener('click', () => closeModal('updateModal'));
 
 // Función para cargar las habitaciones y mostrarlas en la lista
+// Función para cargar las habitaciones y mostrarlas en la lista
 async function loadHabitaciones() {
     try {
         const response = await fetch('/api/habitaciones');
@@ -34,21 +35,26 @@ async function loadHabitaciones() {
         // Recorrer las habitaciones y agregarlas a la lista
         habitaciones.forEach(habitacion => {
             const li = document.createElement('li');
+            
+            // Estructura de la tarjeta de la habitación
             li.innerHTML = `
                 <img src="data:image/jpeg;base64,${habitacion.imagen}" alt="${habitacion.nombre}">
                 <strong>${habitacion.nombre}</strong>
                 <p>${habitacion.descripcion}</p>
                 <p class="price">Precio: $${habitacion.precio}</p>
-                 <button onclick="irAWizard(${habitacion.id})">Reservar</button>
             `;
 
             // Si el rol es admin, agregar los botones de Actualizar y Eliminar
             if (rol === 'admin') {
+
                 // Botón para actualizar
                 const updateBtn = document.createElement('button');
                 updateBtn.textContent = 'Actualizar';
                 updateBtn.classList.add('admin-only');
-                updateBtn.onclick = () => {
+
+                // Evitar que el clic en "Actualizar" dispare el evento de reserva
+                updateBtn.onclick = (e) => {
+                    e.stopPropagation(); // Evita la redirección
                     // Crear el formulario de actualización
                     const updateForm = `
                         <label for="newNombre">Nuevo nombre:</label>
@@ -108,7 +114,10 @@ async function loadHabitaciones() {
                 const deleteBtn = document.createElement('button');
                 deleteBtn.textContent = 'Eliminar';
                 deleteBtn.classList.add('admin-only');
-                deleteBtn.onclick = () => {
+
+                // Evitar que el clic en "Eliminar" dispare el evento de reserva
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation(); // Evita la redirección
                     if (confirm('¿Estás seguro de que deseas eliminar esta habitación?')) {
                         deleteHabitacion(habitacion.id);
                     }
@@ -116,12 +125,20 @@ async function loadHabitaciones() {
                 li.appendChild(deleteBtn);
             }
 
+            // Clic en la tarjeta redirige al wizard, solo si no es admin
+            li.onclick = () => {
+                if (rol !== 'admin') {
+                    irAWizard(habitacion.id); // Redirigir al proceso de reserva
+                }
+            };
+
             habitacionList.appendChild(li);
         });
     } catch (error) {
         console.error('Error al cargar las habitaciones:', error);
     }
 }
+
 
 //Redirección al archivo habitavión.html
 function irAWizard(habitacionId) {
