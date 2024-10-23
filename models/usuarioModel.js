@@ -36,7 +36,7 @@ async function getUserById(id) {
 
 
 // Crear un nuevo usuario
-async function createUsuario(nombre, apellido, email, password) {
+async function createUsuario(nombre, apellido, email, password, pais) {
     let connection;
     try {
         const saltRounds = 10;
@@ -45,9 +45,9 @@ async function createUsuario(nombre, apellido, email, password) {
         connection = await oracledb.getConnection(dbConfig);
         const rol = 'usuario';
         const result = await connection.execute(
-            `INSERT INTO usuarios (id, nombre, apellido, email, password, rol) 
-             VALUES (usuarios_seq.NEXTVAL, :nombre, :apellido, :email, :password, :rol)`,
-            { nombre, apellido, email, password: hashedPassword, rol },
+            `INSERT INTO usuarios (id, nombre, apellido, email, password, rol, pais) 
+             VALUES (usuarios_seq.NEXTVAL, :nombre, :apellido, :email, :password, :rol, :pais)`,
+            { nombre, apellido, email, password: hashedPassword, rol, pais },
             { autoCommit: true }
         );
         return result;
@@ -57,6 +57,7 @@ async function createUsuario(nombre, apellido, email, password) {
         }
     }
 }
+
 
 // Función para buscar un usuario por correo electrónico
 async function findByEmail(email) {
