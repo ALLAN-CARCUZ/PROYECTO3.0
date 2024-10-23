@@ -48,7 +48,7 @@ async function confirmarReservacion() {
     if (response.ok && result.success) {
         alert('Reservación creada exitosamente.');
     } else {
-        alert('Error al crear la reservación: ' + result.message);
+        alert('' + result.message);
     }
 }
 
@@ -166,10 +166,19 @@ function loadHabitaciones() {
 
 // Seleccionar habitación
 function selectHabitacion(id, nombre, descripcion, imagen, precio) {
+    console.log('Datos de la habitación seleccionada:', { id, nombre, descripcion, imagen, precio });
+    
+    if (!id || !precio) {
+        console.error('ID o precio no definidos:', { id, precio });
+        alert('Error al seleccionar la habitación, faltan datos.');
+        return;
+    }
+
     selectedHabitacion = { id, nombre, descripcion, imagen, precio };  // Almacenar todos los detalles de la habitación seleccionada
     total = precio;
     alert(`Has seleccionado la habitación con ID: ${id}, Precio: Q${precio}`);
 }
+
 
 // Mostrar la habitación seleccionada en el paso 2
 function displaySelectedHabitacion() {
@@ -292,10 +301,47 @@ function updateResumen() {
 
 // Inicializar el wizard
 function initWizard() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const habitacionId = urlParams.get('id');
+
+    if (habitacionId) {
+        // Seleccionar automáticamente la habitación si el ID está en la URL
+        selectHabitacionPorId(habitacionId);
+    }
+
     setMinFechaEntrada();  // Establecer la fecha mínima en los campos de fecha
     loadHabitaciones();
     loadServicios();
     showStep(1);
 }
+
+function selectHabitacionPorId(id) {
+    fetch(`/api/habitaciones/${id}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Error al obtener la habitación: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(habitacion => {
+            console.log('Habitación obtenida:', habitacion);  // Verificar cómo se reciben los datos
+
+            // Asegúrate de que habitacion sea un arreglo con los valores correctos
+            if (habitacion && habitacion.length > 3) {
+                // Desestructuramos el arreglo para obtener los datos
+                const [id, nombre, descripcion, precio] = habitacion;
+                selectHabitacion(id, nombre, descripcion, '', precio);  // Asigna los valores correctos
+            } else {
+                console.error('Datos incompletos de la habitación:', habitacion);
+                alert('Los datos de la habitación están incompletos.');
+            }
+        })
+        .catch(error => {
+            console.error('Error al seleccionar la habitación:', error);
+            alert('No se pudo cargar la habitación seleccionada.');
+        });
+}
+
+
 
 document.addEventListener('DOMContentLoaded', initWizard);

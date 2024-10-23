@@ -11,6 +11,8 @@ router.post('/create', reservacionController.createReservacion);
 router.put('/update/:id', authenticateToken, updateReservacion);
 router.delete('/cancel/:id_reservacion', authenticateToken, deleteReservacion);
 router.get('/:id', obtenerReservacionPorId);
+router.get('/', authenticateToken, reservacionController.getReservaciones);
+
 
 module.exports = router;
 

@@ -57,4 +57,26 @@ async function deleteHabitacion(req, res) {
     }
 }
 
-module.exports = { createHabitacion, getHabitaciones, updateHabitacion, deleteHabitacion };
+
+// Obtener una habitación por ID
+async function getHabitacionById(req, res) {
+    const { id } = req.params;
+    try {
+        const habitacion = await habitacionModel.getHabitacionById(id);
+        if (!habitacion) {
+            return res.status(404).json({ error: 'Habitación no encontrada' });
+        }
+        res.json(habitacion);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
+module.exports = { 
+    createHabitacion, 
+    getHabitaciones, 
+    updateHabitacion, 
+    deleteHabitacion, 
+    getHabitacionById  // Añadir este método a las exportaciones
+};
+

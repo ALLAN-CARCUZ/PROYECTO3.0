@@ -97,4 +97,25 @@ async function deleteHabitacion(id) {
     }
 }
 
-module.exports = { createHabitacion, getHabitaciones, updateHabitacion, deleteHabitacion };
+
+// Obtener una habitación por su ID
+async function getHabitacionById(id) {
+    let connection;
+    try {
+        connection = await oracledb.getConnection(dbConfig);
+        const result = await connection.execute(
+            `SELECT * FROM HABITACIONES WHERE ID = :id`,
+            [id]
+        );
+        return result.rows.length ? result.rows[0] : null;
+    } catch (err) {
+        throw new Error('Error al obtener la habitación: ' + err.message);
+    } finally {
+        if (connection) {
+            await connection.close();
+        }
+    }
+}
+
+module.exports = { getHabitacionById, createHabitacion, getHabitaciones, updateHabitacion, deleteHabitacion };
+
