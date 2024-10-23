@@ -33,17 +33,18 @@ async function getUserById(id) {
 
 // Crear un nuevo usuario
 async function createUsuario(req, res) {
-    const { nombre, apellido, email, password } = req.body;
-    if (!nombre || !apellido || !email || !password) {
+    const { nombre, apellido, email, password, pais } = req.body;
+    if (!nombre || !apellido || !email || !password || !pais) {
         return res.status(400).json({ error: 'Todos los campos son requeridos' });
     }
     try {
-        const result = await usuarioModel.createUsuario(nombre, apellido, email, password);
+        const result = await usuarioModel.createUsuario(nombre, apellido, email, password, pais);
         res.status(201).json({ message: 'Usuario registrado exitosamente', result });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 }
+
 
 // Inicio de sesión
 async function loginUsuario(req, res) {
@@ -73,5 +74,20 @@ async function loginUsuario(req, res) {
     }
 }
 
-module.exports = { getUserById, createUsuario, loginUsuario };
+const { countries } = require('countries-list');
+
+// Función para obtener la lista de países
+async function getCountries(req, res) {
+    try {
+        const countryList = Object.values(countries).map(country => ({
+            name: country.name,
+            code: country.alpha2
+        }));
+        res.json(countryList);  // Envía la lista de países como JSON
+    } catch (error) {
+        res.status(500).json({ error: 'Error al obtener la lista de países' });
+    }
+}
+
+module.exports = { getUserById, createUsuario, loginUsuario, getCountries };
 

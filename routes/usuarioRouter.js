@@ -6,4 +6,8 @@ const router = express.Router();
 router.post('/register', usuarioController.createUsuario);
 router.post('/login', usuarioController.loginUsuario);
 
+
+// Nueva ruta para obtener la lista de países
+router.get('/countries', usuarioController.getCountries);
+
 module.exports = router;

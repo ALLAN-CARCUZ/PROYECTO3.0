@@ -1,3 +1,23 @@
+// Cargar lista de países al cargar la página
+window.addEventListener('DOMContentLoaded', async () => {
+    const countrySelect = document.getElementById('pais');
+
+    try {
+        const response = await fetch('/api/usuarios/countries');
+        const countries = await response.json();
+
+        // Llenar el <select> con la lista de países
+        countries.forEach(country => {
+            const option = document.createElement('option');
+            option.value = country.code;
+            option.textContent = country.name;
+            countrySelect.appendChild(option);
+        });
+    } catch (error) {
+        console.error('Error al cargar la lista de países:', error);
+    }
+});
+
 document.getElementById('usuarioForm').addEventListener('submit', async function(e) {
     e.preventDefault();
 
@@ -5,6 +25,7 @@ document.getElementById('usuarioForm').addEventListener('submit', async function
     const apellido = document.getElementById('apellido').value;
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
+    const pais = document.getElementById('pais').value; // nuevo campo
 
     try {
         const response = await fetch('/api/usuarios/register', {
@@ -12,7 +33,7 @@ document.getElementById('usuarioForm').addEventListener('submit', async function
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ nombre, apellido, email, password })
+            body: JSON.stringify({ nombre, apellido, email, password, pais })
         });
 
         const result = await response.json();
