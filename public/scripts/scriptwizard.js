@@ -5,7 +5,17 @@ let preciosServicios = {};
 let total = 0;
 let fechaEntrada = null;
 let fechaSalida = null;
+let paqueteId = null;  // Nuevo: para manejar el paquete_id
 
+
+
+// Capturar parámetros de la URL
+function getQueryParams() {
+    const params = new URLSearchParams(window.location.search);
+    return {
+        paquete_id: params.get('paquete_id')
+    };
+}
 
 async function confirmarReservacion() {
     // Obtener el token almacenado en el localStorage
@@ -24,15 +34,14 @@ async function confirmarReservacion() {
     // Crear el objeto de datos para la reservación
     const data = {
         id_usuario: id_usuario,  // Usar el ID dinámico del usuario
-        id_habitacion: selectedHabitacion.id,
-        id_paquete: null,
+        id_habitacion: paqueteId ? null : selectedHabitacion?.id,  // Omitir habitación si hay paquete
+        id_paquete: paqueteId || null,  // Usar el paquete_id si existe
         costo_total: total,
         metodo_pago: document.getElementById('metodo-pago').value,
         fecha_ingreso: fechaEntrada,
         fecha_salida: fechaSalida,
         servicios: selectedServicios
     };
-
     console.log('Datos enviados al servidor:', data);  // Verificar qué datos se están enviando
 
     // Enviar la solicitud al servidor
@@ -85,7 +94,8 @@ function showStep(step) {
 // Validar el paso actual
 function validateStep(step) {
     if (step === 1) {
-        if (!selectedHabitacion) {
+        // Si es una reservación con un paquete, no se requiere seleccionar habitación
+        if (!paqueteId && !selectedHabitacion) {
             alert("Debes seleccionar una habitación.");
             return false;
         }
@@ -233,9 +243,24 @@ function loadServicios() {
 }
 
 
-//Calcular precios
+
+// Calcular precios
 function calcularPrecioTotal() {
-    // Calcular la cantidad de noches de estadía
+    // Si se selecciona un paquete, usar el precio del paquete
+    if (paqueteId) {
+        fetch(`/api/paquetes/${paqueteId}`)
+            .then(response => response.json())
+            .then(paquete => {
+                total = paquete.precio;  // Usar el precio del paquete
+                actualizarResumenPrecio();  // Actualizar el resumen del precio en la UI
+            })
+            .catch(error => {
+                console.error("Error al obtener el precio del paquete:", error);
+            });
+        return;  // Salir de la función para no continuar con la lógica de servicios
+    }
+
+    // Si no es un paquete, seguir con el cálculo normal de habitación y servicios
     if (!fechaEntrada || !fechaSalida) {
         console.error("No se han seleccionado las fechas de entrada y salida.");
         return;
@@ -256,20 +281,20 @@ function calcularPrecioTotal() {
     });
 
     total = totalPrecio; // Actualizar el total global
+    actualizarResumenPrecio();
+}
 
-    // Verificar si el contenedor de la habitación seleccionada existe
+// Actualizar el resumen del precio en la UI
+function actualizarResumenPrecio() {
     const resumenContainer = document.getElementById('selected-habitacion-container');
     
     if (resumenContainer) {
         const priceElement = resumenContainer.querySelector('.price');
         if (priceElement) {
-            priceElement.textContent = `Total: Q${totalPrecio.toFixed(2)}`;
+            priceElement.textContent = `Total: Q${total.toFixed(2)}`;
         }
     }
 }
-
-
-
 
 
 // Alternar selección de servicios adicionales
@@ -286,6 +311,7 @@ function toggleServicio(id, costo) {
     // Recalcular el precio total
     calcularPrecioTotal();
 }
+
 
 
 // Actualizar el resumen de la reserva
@@ -341,6 +367,28 @@ function selectHabitacionPorId(id) {
             alert('No se pudo cargar la habitación seleccionada.');
         });
 }
+
+// Función para inicializar el wizard y manejar la lógica según el paquete_id
+document.addEventListener('DOMContentLoaded', () => {
+    const { paquete_id } = getQueryParams();
+    paqueteId = paquete_id;  // Asignar el paquete_id si existe
+
+    if (paqueteId) {
+        // Si es una reservación para un paquete, no pedimos seleccionar habitación
+        console.log(`Reservando con el paquete: ${paqueteId}`);
+        
+        // Omitir selección de habitación y pasar directamente a fechas y pago
+        document.getElementById('habitaciones-container').style.display = 'none';
+        cargarServicios();  // Cargar solo los servicios
+    } else {
+        // Mostrar la lógica normal de selección de habitación si no hay paquete
+        loadHabitaciones();
+        loadServicios();
+    }
+
+    setMinFechaEntrada();  // Establecer la fecha mínima en los campos de fecha
+    showStep(1);
+});
 
 
 

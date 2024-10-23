@@ -65,6 +65,28 @@
         }
 
         document.addEventListener('DOMContentLoaded', cargarReservaciones);
+    
+    // Función para obtener los parámetros de la URL
+function getQueryParams() {
+    const params = new URLSearchParams(window.location.search);
+    return {
+        paquete_id: params.get('paquete_id')
+    };
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const { paquete_id } = getQueryParams();
+
+    if (paquete_id) {
+        console.log(`Reservación para el paquete con ID: ${paquete_id}`);
+        // Aquí puedes manejar la lógica para crear la reservación usando el paquete seleccionado
+        // Por ejemplo, mostrar la fecha de ingreso, salida, y método de pago
+    } else {
+        cargarReservaciones();  // Si no hay paquete, mostrar todas las reservaciones como antes
+    }
+});
+
+    
     </script>
 
     
@@ -78,5 +100,6 @@
     <script src="scripts/scriptreservaciones.js"></script>
     <script src="scripts/scriptreservacionesauth.js"></script>
     <script src="scripts/auth.js"></script>
+    
 </body>
 </html>

@@ -13,13 +13,13 @@ const transporter = nodemailer.createTransport({
 });
 
 async function createReservacion(req, res) {
-    const { id_usuario, id_habitacion, id_paquete, costo_total, metodo_pago, fecha_ingreso, fecha_salida, servicios } = req.body;
+    const { id_usuario, id_habitacion, id_paquete, costo_total, metodo_pago, fecha_ingreso, fecha_salida, servicios = [] } = req.body;
 
     console.log("Datos recibidos:", req.body);
 
     // Validar los campos requeridos
-    if (!id_usuario || !id_habitacion || !costo_total || !metodo_pago || !fecha_ingreso || !fecha_salida) {
-        return res.status(400).json({ error: 'Todos los campos son requeridos: id_usuario, id_habitacion, costo_total, metodo_pago, fecha_ingreso y fecha_salida' });
+    if (!id_usuario || (!id_paquete && !id_habitacion) || !costo_total || !metodo_pago || !fecha_ingreso || !fecha_salida) {
+        return res.status(400).json({ error: 'Debes seleccionar una habitación o un paquete, y proporcionar todos los campos requeridos' });
     }
 
     try {
@@ -40,10 +40,10 @@ async function createReservacion(req, res) {
             to: correoCliente,
             subject: 'Confirmación de reservación - Hotel El Dodo',
             text: `Estimado/a ${usuario.nombre},\n\nSu reservación ha sido creada exitosamente. Aquí están los detalles:\n\n
-            Habitación: ${id_habitacion}\n
+            ${id_paquete ? `Paquete ID: ${id_paquete}` : `Habitación: ${id_habitacion}`}\n
             Fecha de entrada: ${fecha_ingreso}\n
             Fecha de salida: ${fecha_salida}\n
-            Servicios adicionales: ${servicios.join(', ')}\n
+            Servicios adicionales: ${servicios.length > 0 ? servicios.join(', ') : 'Ninguno'}\n
             Total: Q${costo_total.toFixed(2)}\n\n
             ¡Gracias por elegir nuestro hotel!`
         };
@@ -76,10 +76,11 @@ async function createReservacion(req, res) {
         return res.status(201).json({ message: 'Reservación creada exitosamente, y correos enviados.', id_reservacion: result.id_reservacion });
 
     } catch (error) {
-        console.error("Error al crear la reservación:", error);  // <-- Este log te ayudará a identificar la causa del error 500
+        console.error("Error al crear la reservación:", error);
         return res.status(500).json({ error: 'Error al crear la reservación: ' + error.message });
     }
 }
+
 
 
 

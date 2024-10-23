@@ -18,4 +18,8 @@ router.delete('/delete/:id', paqueteController.deletePaquete);
 // Ruta para obtener habitaciones y servicios
 router.get('/datos/formulario', paqueteController.getHabitacionesYServicios);
 
+// Nueva ruta para obtener un paquete por su ID
+router.get('/:id', paqueteController.getPaqueteById);
+
+
 module.exports = router;

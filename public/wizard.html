@@ -42,6 +42,10 @@
 
         <label for="fecha-salida">Fecha de Salida:</label>
         <input type="date" id="fecha-salida" required>
+
+        <!-- Campo oculto para ID_PAQUETE -->
+<input type="hidden" id="ID_PAQUETE" value="">
+
     </div>
 
     <button type="button" class="next-btn" onclick="nextStep()">Siguiente</button>
@@ -100,6 +104,7 @@
     </footer>
 
     <!-- Scripts -->
+     
     <script src="scripts/scriptwizard.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
     <script src="scripts/header.js"></script>

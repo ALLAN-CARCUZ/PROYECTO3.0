@@ -236,4 +236,52 @@ async function deletePaquete(id) {
     }
 }
 
-module.exports = { createPaquete, getPaquetes, updatePaquete, deletePaquete };
+// Obtener un paquete por su ID
+async function getPaqueteById(id) {
+    let connection;
+    try {
+        connection = await oracledb.getConnection(dbConfig);
+        const result = await connection.execute(
+            `SELECT p.id, p.nombre, p.descripcion, p.precio, p.imagen, p.habitacion_id, p.descuento, 
+                    h.nombre AS habitacion_nombre, h.precio AS habitacion_precio
+             FROM paquetes p
+             JOIN habitaciones h ON p.habitacion_id = h.id
+             WHERE p.id = :id`,
+            { id },
+            { outFormat: oracledb.OUT_FORMAT_OBJECT }
+        );
+
+        if (result.rows.length === 0) {
+            return null; // Si no se encuentra el paquete
+        }
+
+        const row = result.rows[0];
+        let imagenBase64 = '';
+        if (row.IMAGEN) {
+            const lob = row.IMAGEN;
+            const buffer = await lobToBuffer(lob);
+            imagenBase64 = buffer.toString('base64');
+        }
+
+        return {
+            id: row.ID,
+            nombre: row.NOMBRE,
+            descripcion: row.DESCRIPCION,
+            precio: parseFloat(row.PRECIO),
+            descuento: parseFloat(row.DESCUENTO),
+            imagen: imagenBase64,
+            habitacion_id: row.HABITACION_ID,
+            habitacion_nombre: row.HABITACION_NOMBRE,
+            habitacion_precio: parseFloat(row.HABITACION_PRECIO)
+        };
+    } catch (error) {
+        throw error;
+    } finally {
+        if (connection) {
+            await connection.close();
+        }
+    }
+}
+
+
+module.exports = { createPaquete, getPaquetes, updatePaquete, deletePaquete, getPaqueteById };

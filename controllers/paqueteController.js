@@ -70,4 +70,18 @@ async function getHabitacionesYServicios(req, res) {
     }
 }
 
-module.exports = { createPaquete, getPaquetes, updatePaquete, deletePaquete, getHabitacionesYServicios };
+// Obtener un paquete por ID
+async function getPaqueteById(req, res) {
+    const { id } = req.params;
+    try {
+        const paquete = await paqueteModel.getPaqueteById(id); // Crear una nueva función en paqueteModel
+        if (!paquete) {
+            return res.status(404).json({ error: 'Paquete no encontrado' });
+        }
+        res.json(paquete);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
+module.exports = { createPaquete, getPaquetes, getPaqueteById, updatePaquete, deletePaquete, getHabitacionesYServicios };

@@ -19,57 +19,68 @@ function closeModal(modalId) {
 document.getElementById('openRegisterModal').style.display = (rol === 'admin') ? 'block' : 'none';
 
 // Función para cargar habitaciones y servicios en el formulario de actualización
+// Función para cargar habitaciones y servicios en el formulario de actualización
 async function cargarDatosFormularioActualizacion(reservacion) {
     try {
         const response = await fetch('/api/paquetes/datos/formulario');
         const { habitaciones, servicios } = await response.json();
 
-        // Cargar habitaciones en el select
         const habitacionSelect = document.getElementById('newIdHabitacion');
-        habitacionSelect.innerHTML = '';
-
-        habitaciones.forEach(habitacion => {
-            const option = document.createElement('option');
-            option.value = habitacion.id;
-            option.textContent = `${habitacion.nombre} - $${habitacion.precio}`;
-            preciosHabitaciones[habitacion.id] = habitacion.precio;
-
-            if (habitacion.id == reservacion.id_habitacion) {
-                option.selected = true;
-            }
-
-            habitacionSelect.appendChild(option);
-        });
-
-        habitacionSelect.addEventListener('change', calcularPrecioTotal);
-
-        // Cargar servicios en los checkboxes
         const serviciosContainer = document.getElementById('serviciosContainer');
-        serviciosContainer.innerHTML = '';
 
-        servicios.forEach(servicio => {
-            const label = document.createElement('label');
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.name = 'servicios';
-            checkbox.value = servicio.id;
-            preciosServicios[servicio.id] = servicio.costo;
+        if (reservacion.id_paquete) {
+            // Si la reservación tiene un paquete, ocultar habitaciones y servicios
+            habitacionSelect.style.display = 'none';
+            serviciosContainer.style.display = 'none';
+        } else {
+            // Mostrar habitaciones y servicios si no hay paquete
+            habitacionSelect.style.display = 'block';
+            serviciosContainer.style.display = 'block';
 
-            if (reservacion.servicios.some(s => s.ID == servicio.id || s.id == servicio.id)) {
-                checkbox.checked = true;
-            }
+            // Cargar habitaciones en el select
+            habitacionSelect.innerHTML = '';
+            habitaciones.forEach(habitacion => {
+                const option = document.createElement('option');
+                option.value = habitacion.id;
+                option.textContent = `${habitacion.nombre} - $${habitacion.precio}`;
+                preciosHabitaciones[habitacion.id] = habitacion.precio;
 
-            checkbox.addEventListener('change', calcularPrecioTotal);
-            label.appendChild(checkbox);
-            label.appendChild(document.createTextNode(`${servicio.nombre} - $${servicio.costo}`));
-            serviciosContainer.appendChild(label);
-        });
+                if (habitacion.id == reservacion.id_habitacion) {
+                    option.selected = true;
+                }
+
+                habitacionSelect.appendChild(option);
+            });
+
+            habitacionSelect.addEventListener('change', calcularPrecioTotal);
+
+            // Cargar servicios en los checkboxes
+            serviciosContainer.innerHTML = '';
+            servicios.forEach(servicio => {
+                const label = document.createElement('label');
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.name = 'servicios';
+                checkbox.value = servicio.id;
+                preciosServicios[servicio.id] = servicio.costo;
+
+                if (reservacion.servicios.some(s => s.ID == servicio.id || s.id == servicio.id)) {
+                    checkbox.checked = true;
+                }
+
+                checkbox.addEventListener('change', calcularPrecioTotal);
+                label.appendChild(checkbox);
+                label.appendChild(document.createTextNode(`${servicio.nombre} - $${servicio.costo}`));
+                serviciosContainer.appendChild(label);
+            });
+        }
 
         calcularPrecioTotal();
     } catch (error) {
         console.error('Error al cargar habitaciones y servicios:', error);
     }
 }
+
 
 // Función para calcular el precio total de la reservación
 function calcularPrecioTotal() {

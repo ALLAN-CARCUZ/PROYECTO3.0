@@ -63,21 +63,35 @@ function mostrarReservaciones(reservaciones) {
         
         // Crear una lista de servicios
         let serviciosList = '';
-        if (reservacion.servicios.length > 0) {
+        if (reservacion.servicios && reservacion.servicios.length > 0) {
             serviciosList = reservacion.servicios.map(servicio => `<li>${servicio}</li>`).join('');
         } else {
             serviciosList = '<li>No hay servicios adicionales</li>';
+        }
+
+        // Mostrar información de la reservación según tenga habitación o paquete
+        let detallesReservacion = '';
+        if (reservacion.nombre_paquete) {
+            detallesReservacion = `
+                <p>Paquete: ${reservacion.nombre_paquete}</p>
+                <p>Incluye la habitación: ${reservacion.nombre_habitacion || 'Habitación no disponible'}</p>
+            `;
+        } else {
+            detallesReservacion = `
+                <p>Habitación: ${reservacion.nombre_habitacion || 'Habitación no disponible'}</p>
+            `;
         }
 
         // Botones para modificar y cancelar
         const modificarBtn = `<button onclick="modificarReservacion(${reservacion.id_reservacion})">Modificar</button>`;
         const cancelarBtn = `<button onclick="cancelarReservacion(${reservacion.id_reservacion})">Cancelar</button>`;
 
+        // Renderizar la información de la reservación en el contenedor
         reservacionElement.innerHTML = `
             <h3>Reservación ID: ${reservacion.id_reservacion}</h3>
-            <p>Habitación: ${reservacion.nombre_habitacion}</p>
             <p>Fecha de Ingreso: ${new Date(reservacion.fecha_ingreso).toLocaleDateString()}</p>
             <p>Fecha de Salida: ${new Date(reservacion.fecha_salida).toLocaleDateString()}</p>
+            ${detallesReservacion} <!-- Mostrar detalles de paquete o habitación -->
             <p>Total: Q${reservacion.costo_total.toFixed(2)}</p>
             <h4>Servicios Incluidos:</h4>
             <ul>${serviciosList}</ul>
@@ -87,6 +101,10 @@ function mostrarReservaciones(reservaciones) {
         container.appendChild(reservacionElement);
     });
 }
+
+
+
+
 
 // Función para cancelar una reservación
 async function cancelarReservacion(id_reservacion) {

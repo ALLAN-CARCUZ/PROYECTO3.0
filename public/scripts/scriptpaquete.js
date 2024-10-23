@@ -139,42 +139,48 @@ async function cargarDatosFormulario() {
     }
 }
 
+function redirigirAReservacion(idPaquete) {
+    // Redirigir a la página de reservaciones con el ID del paquete en la URL
+    window.location.href = `/wizard.html?paquete_id=${idPaquete}`;
+}
+
+
 // Función para cargar los paquetes y mostrarlos en la lista
 async function loadPaquetes() {
     try {
         const response = await fetch('/api/paquetes');
         const paquetes = await response.json();
 
-        // Limpiar la lista antes de mostrar los paquetes
         const paqueteList = document.getElementById('paqueteList');
         paqueteList.innerHTML = '';
 
-        // Recorrer los paquetes y agregarlos a la lista
-            paquetes.forEach(paquete => {
-            // Calcular el precio con descuento si aplica
+        paquetes.forEach(paquete => {
             const descuento = paquete.descuento || 0;
             const precioOriginal = paquete.precio;
             const precioConDescuento = precioOriginal - (precioOriginal * (descuento / 100));
 
             const li = document.createElement('li');
             li.innerHTML = `
-            <img src="data:image/jpeg;base64,${paquete.imagen}" alt="${paquete.nombre}">
-            <strong>${paquete.nombre}</strong>
-            <p>${paquete.descripcion}</p>
-            <p class="price">
-                ${descuento > 0 ? `<span style="text-decoration: line-through;">$${precioOriginal.toFixed(2)}</span> - $${precioConDescuento.toFixed(2)}` : `$${precioOriginal.toFixed(2)}`}
-            </p>
-            <p>Habitación: ${paquete.habitacion_nombre}</p>
-            <p>Servicios: ${paquete.servicios.map(s => s.nombre).join(', ')}</p>
-        `;
+                <img src="data:image/jpeg;base64,${paquete.imagen}" alt="${paquete.nombre}">
+                <strong>${paquete.nombre}</strong>
+                <p>${paquete.descripcion}</p>
+                <p class="price">
+                    ${descuento > 0 ? `<span style="text-decoration: line-through;">$${precioOriginal.toFixed(2)}</span> - $${precioConDescuento.toFixed(2)}` : `$${precioOriginal.toFixed(2)}`}
+                </p>
+                <p>Habitación: ${paquete.habitacion_nombre}</p>
+                <p>Servicios: ${paquete.servicios.map(s => s.nombre).join(', ')}</p>
+            `;
 
-            
-        // Si el rol es admin, mostrar los botones de actualizar y eliminar
-        if (rol === 'admin') {
-            // Botón para actualizar
-            const updateBtn = document.createElement('button');
-            updateBtn.textContent = 'Actualizar';
-            updateBtn.onclick = () => {
+            // Modificación: Agregar evento para redirigir a la página de reservación
+            li.addEventListener('click', () => {
+                redirigirAReservacion(paquete.id);
+            });
+
+            if (rol === 'admin') {
+                const updateBtn = document.createElement('button');
+                updateBtn.textContent = 'Actualizar';
+                updateBtn.onclick = () => {
+
                 // Crear el formulario de actualización
                 const updateForm = `
                     <form id="updatePaqueteForm">
