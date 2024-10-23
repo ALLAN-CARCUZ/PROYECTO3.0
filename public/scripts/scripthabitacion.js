@@ -1,4 +1,11 @@
 //scripthabitacion.js
+document.addEventListener('DOMContentLoaded', () => {
+    const rol = localStorage.getItem('rol');
+    if (rol === 'admin') {
+        document.getElementById('openRegisterModal').style.display = 'block';
+    }
+});
+
 // Función para abrir el popup (tanto registro como actualización)
 function openModal(modalId) {
     document.getElementById(modalId).style.display = 'flex';
