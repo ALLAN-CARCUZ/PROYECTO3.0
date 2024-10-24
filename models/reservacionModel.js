@@ -324,14 +324,66 @@ async function findByPk(id_reservacion) {
     }
 }
 
+async function checkDisponibilidadHabitacion(id_habitacion, fecha_ingreso, fecha_salida) {
+    let connection;
+    try {
+        connection = await oracledb.getConnection(dbConfig);
+        const query = `
+            SELECT * FROM RESERVACIONES
+            WHERE ID_HABITACION = :id_habitacion
+            AND (
+                (FECHA_INGRESO <= TO_DATE(:fecha_salida, 'YYYY-MM-DD') AND FECHA_SALIDA >= TO_DATE(:fecha_ingreso, 'YYYY-MM-DD'))
+            )
+        `;
+        const result = await connection.execute(query, { id_habitacion, fecha_ingreso, fecha_salida });
+        return result.rows;
+    } catch (error) {
+        console.error('Error al verificar la disponibilidad de la habitación:', error);
+        throw new Error('Error al verificar la disponibilidad de la habitación');
+    } finally {
+        if (connection) {
+            await connection.close();
+        }
+    }
+}
+
+// Obtener fechas reservadas para una habitación
+async function getFechasReservadasByHabitacion(id_habitacion) {
+    let connection;
+    try {
+        connection = await oracledb.getConnection(dbConfig);
+
+        // Consultar las fechas de ingreso y salida de las reservaciones de esa habitación
+        const result = await connection.execute(
+            `SELECT FECHA_INGRESO, FECHA_SALIDA 
+             FROM RESERVACIONES 
+             WHERE ID_HABITACION = :id_habitacion 
+             AND FECHA_SALIDA >= SYSDATE`,  // Solo obtenemos las fechas futuras
+            { id_habitacion }
+        );
+
+        return result.rows.map(row => ({
+            fecha_ingreso: row[0],
+            fecha_salida: row[1]
+        }));
+    } catch (error) {
+        console.error('Error al obtener las fechas reservadas de la habitación:', error);
+        throw new Error('Error al obtener las fechas reservadas');
+    } finally {
+        if (connection) {
+            await connection.close();
+        }
+    }
+}
 
 
-module.exports = { 
-    createReservacion, 
-    getReservaciones, 
-    updateReservacion, 
+module.exports = {
+    createReservacion,
+    getReservaciones,
+    updateReservacion,
     deleteReservacion,
-    getReservacionesByUsuario,  // Exportar la nueva función
-    deleteReservacionServicios,
-    findByPk
+    getReservacionesByUsuario,
+    findByPk,
+    checkDisponibilidadHabitacion,
+    getFechasReservadasByHabitacion // Exportamos la nueva función
 };

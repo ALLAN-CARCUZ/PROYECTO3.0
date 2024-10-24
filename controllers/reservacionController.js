@@ -23,10 +23,17 @@ async function createReservacion(req, res) {
     }
 
     try {
+
+
+        // Verificar si la habitación está disponible
+        if (id_habitacion) {
+            const habitacionDisponible = await isHabitacionDisponible(id_habitacion, fecha_ingreso, fecha_salida);
+            if (!habitacionDisponible) {
+                return res.status(400).json({ error: 'La habitación no está disponible para las fechas seleccionadas' });
+            }
+        }
         // Intentar crear la reservación
         const result = await reservacionModel.createReservacion(id_usuario, id_habitacion, id_paquete, costo_total, metodo_pago, fecha_ingreso, fecha_salida, servicios);
-        
-        // Obtener la información del usuario para el correo
         const usuario = await getUserById(id_usuario);
         if (!usuario) {
             return res.status(404).json({ error: 'Usuario no encontrado' });
@@ -176,15 +183,38 @@ const obtenerReservacionPorId = async (req, res) => {
 };
 
 
+async function isHabitacionDisponible(id_habitacion, fecha_ingreso, fecha_salida) {
+    try {
+        const result = await reservacionModel.checkDisponibilidadHabitacion(id_habitacion, fecha_ingreso, fecha_salida);
+        return result.length === 0;  // Si no hay resultados, la habitación está disponible
+    } catch (error) {
+        throw new Error('Error al verificar la disponibilidad de la habitación: ' + error.message);
+    }
+}
 
+// Obtener fechas reservadas para una habitación
+async function getFechasReservadas(req, res) {
+    const { id_habitacion } = req.params;
 
+    try {
+        // Obtener las fechas reservadas de la base de datos
+        const fechasReservadas = await reservacionModel.getFechasReservadasByHabitacion(id_habitacion);
+        res.status(200).json(fechasReservadas);
+    } catch (error) {
+        console.error('Error al obtener las fechas reservadas:', error);
+        res.status(500).json({ error: 'Error al obtener las fechas reservadas' });
+    }
+}
 
-module.exports = { 
-    createReservacion, 
-    getReservaciones, 
-    updateReservacion, 
+module.exports = {
+    createReservacion,
+    getReservaciones,
+    updateReservacion,
     deleteReservacion,
     getReservacionesByUsuario,
-    obtenerReservacionPorId
+    obtenerReservacionPorId,
+    isHabitacionDisponible,
+    getFechasReservadas // Agregamos el nuevo controlador
 };
+
 

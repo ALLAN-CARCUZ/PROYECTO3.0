@@ -12,6 +12,8 @@ router.put('/update/:id', authenticateToken, updateReservacion);
 router.delete('/cancel/:id_reservacion', authenticateToken, deleteReservacion);
 router.get('/:id', obtenerReservacionPorId);
 router.get('/', authenticateToken, reservacionController.getReservaciones);
+router.get('/fechas-reservadas/:id_habitacion', reservacionController.getFechasReservadas);
+
 
 
 module.exports = router;

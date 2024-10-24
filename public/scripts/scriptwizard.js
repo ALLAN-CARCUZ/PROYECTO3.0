@@ -18,7 +18,6 @@ function getQueryParams() {
 }
 
 async function confirmarReservacion() {
-    // Obtener el token almacenado en el localStorage
     const token = localStorage.getItem('token');
 
     if (!token) {
@@ -26,25 +25,29 @@ async function confirmarReservacion() {
         return;
     }
 
-    // Decodificar el token para obtener el ID del usuario
     const decoded = jwt_decode(token);
-    console.log('Token decodificado:', decoded);  // <-- Verifica el contenido del token decodificado aquí
-    const id_usuario = decoded.id || decoded.userId;  // Asegúrate de que el token contenga este campo
+    console.log('Token decodificado:', decoded);
+    const id_usuario = decoded.id || decoded.userId; // Verifica si este campo está correcto
 
-    // Crear el objeto de datos para la reservación
+    // Asegúrate de que los datos estén definidos antes de hacer la solicitud
+    console.log('Habitación seleccionada:', selectedHabitacion);
+    console.log('Paquete ID:', paqueteId);
+    console.log('Fecha de entrada:', fechaEntrada);
+    console.log('Fecha de salida:', fechaSalida);
+
     const data = {
-        id_usuario: id_usuario,  // Usar el ID dinámico del usuario
-        id_habitacion: paqueteId ? null : selectedHabitacion?.id,  // Omitir habitación si hay paquete
-        id_paquete: paqueteId || null,  // Usar el paquete_id si existe
+        id_usuario: id_usuario,
+        id_habitacion: paqueteId ? null : selectedHabitacion?.id,
+        id_paquete: paqueteId || null,
         costo_total: total,
         metodo_pago: document.getElementById('metodo-pago').value,
         fecha_ingreso: fechaEntrada,
         fecha_salida: fechaSalida,
         servicios: selectedServicios
     };
-    console.log('Datos enviados al servidor:', data);  // Verificar qué datos se están enviando
 
-    // Enviar la solicitud al servidor
+    console.log('Datos enviados al servidor:', data);
+
     const response = await fetch('http://localhost:3000/api/reservaciones/create', {
         method: 'POST',
         headers: {
@@ -54,12 +57,15 @@ async function confirmarReservacion() {
     });
 
     const result = await response.json();
-    if (response.ok && result.success) {
-        alert('Reservación creada exitosamente.');
+    if (response.ok) {
+        alert(result.message);  // Mostrar el mensaje de éxito enviado por el servidor
     } else {
-        alert('' + result.message);
+        console.error('Error al crear reservación:', result);
+        alert('Error: ' + result.message);
     }
+    
 }
+
 
 
 // Avanzar al siguiente paso
@@ -148,12 +154,52 @@ function updateStepsIndicator(step) {
     });
 }
 
-// Establecer la fecha mínima en el campo de entrada (la fecha actual)
-function setMinFechaEntrada() {
-    const fechaHoy = new Date().toISOString().split('T')[0]; // Obtener la fecha de hoy en formato YYYY-MM-DD
-    document.getElementById('fecha-entrada').setAttribute('min', fechaHoy);
-    document.getElementById('fecha-salida').setAttribute('min', fechaHoy);
+
+// Establecer la fecha mínima en el campo de entrada y deshabilitar fechas reservadas
+async function setMinFechaEntrada() {
+    const fechaHoy = new Date().toISOString().split('T')[0];  // Fecha actual en formato YYYY-MM-DD
+
+    // Verifica si la habitación está seleccionada antes de buscar las fechas reservadas
+    if (selectedHabitacion) {
+        try {
+            // Hacer una solicitud al servidor para obtener las fechas reservadas de la habitación seleccionada
+            const response = await fetch(`/api/reservaciones/fechas-reservadas/${selectedHabitacion.id}`);
+            const fechasReservadas = await response.json();
+
+            // Mapeamos las fechas reservadas para deshabilitarlas en el calendario
+            const fechasDeshabilitadas = fechasReservadas.map(f => {
+                const fechaInicio = new Date(f.fecha_ingreso).toISOString().split('T')[0];
+                const fechaFin = new Date(f.fecha_salida).toISOString().split('T')[0];
+                return { from: fechaInicio, to: fechaFin };  // Flatpickr acepta rangos de fechas
+            });
+
+            // Inicializar Flatpickr para los campos de fecha de entrada y salida
+            flatpickr("#fecha-entrada", {
+                minDate: fechaHoy,  // La fecha mínima es hoy
+                disable: fechasDeshabilitadas,  // Deshabilitar las fechas reservadas
+                onChange: function(selectedDates) {
+                    const fechaSeleccionada = selectedDates[0].toISOString().split('T')[0];
+                    // También actualiza el campo de salida para tener la misma lógica
+                    flatpickr("#fecha-salida", {
+                        minDate: fechaSeleccionada,
+                        disable: fechasDeshabilitadas
+                    });
+                }
+            });
+
+            // Flatpickr para fecha de salida, en caso de que se quiera seleccionar de inmediato
+            flatpickr("#fecha-salida", {
+                minDate: fechaHoy,
+                disable: fechasDeshabilitadas
+            });
+
+        } catch (error) {
+            console.error('Error al cargar las fechas reservadas:', error);
+        }
+    }
 }
+
+
 
 // Cargar habitaciones desde la API
 function loadHabitaciones() {
