@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gráficas de Servicios</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="css/grafica.css">
+</head>
+<body>
+    <h1>Servicios Adicionales Más Utilizados</h1>
+    <div class="chart-container" style="width: 80%; margin: 0 auto;">
+        <canvas id="serviciosChart"></canvas>
+    </div>
+
+    <script>
+        // Hacer la solicitud a la API para obtener los datos
+        fetch('/api/servicios/servicios-mas-utilizados')
+          .then(response => response.json())
+          .then(data => {
+              var ctx = document.getElementById('serviciosChart').getContext('2d');
+              var serviciosChart = new Chart(ctx, {
+                  type: 'bar',
+                  data: {
+                      labels: data.labels,  // Nombres de los servicios
+                      datasets: [{
+                          label: 'Número de veces utilizado',
+                          data: data.values,  // Número de usos de cada servicio
+                          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                          borderColor: 'rgba(75, 192, 192, 1)',
+                          borderWidth: 1
+                      }]
+                  },
+                  options: {
+                      scales: {
+                          y: {
+                              beginAtZero: true
+                          }
+                      }
+                  }
+              });
+          })
+          .catch(error => console.error('Error al obtener los datos:', error));
+    </script>
+</body>
+</html>

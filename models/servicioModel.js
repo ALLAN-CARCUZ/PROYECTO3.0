@@ -131,5 +131,32 @@ async function getServicioById(id) {
     }
 }
 
+async function getServiciosMasUtilizados() {
+    let connection;
+    
+    try {
+        connection = await oracledb.getConnection(dbConfig);
+        
+        const result = await connection.execute(`
+            SELECT S.NOMBRE, COUNT(RS.ID_RESERVACION) AS USO
+            FROM SERVICIOS S
+            JOIN RESERVACIONES_SERVICIOS RS ON S.ID = RS.ID_SERVICIO
+            GROUP BY S.NOMBRE
+            ORDER BY USO DESC
+        `);
 
-module.exports = { createServicio, getServicios, updateServicio, deleteServicio, getServicioById };
+        return result.rows;
+
+    } catch (error) {
+        throw new Error('Error al obtener los servicios más utilizados: ' + error.message);
+    } finally {
+        if (connection) {
+            await connection.close();
+        }
+    }
+}
+
+  
+
+
+module.exports = { createServicio, getServicios, updateServicio, deleteServicio, getServicioById, getServiciosMasUtilizados };

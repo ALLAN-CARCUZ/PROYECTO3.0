@@ -72,5 +72,25 @@ async function getServicioById(req, res) {
 }
 
 
+async function getServiciosMasUtilizados(req, res) {
+    try {
+      const servicios = await servicioModel.getServiciosMasUtilizados();
+      
+      const labels = [];
+      const values = [];
+  
+      servicios.forEach(row => {
+        labels.push(row[0]);  // Nombre del servicio
+        values.push(row[1]);  // Número de veces utilizado
+      });
+  
+      res.json({ labels, values });
+  
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Error al obtener los servicios más utilizados' });
+    }
+  }
 
-module.exports = { createServicio, getServicios, updateServicio, deleteServicio, getServicioById };
+
+module.exports = { createServicio, getServicios, updateServicio, deleteServicio, getServicioById, getServiciosMasUtilizados };

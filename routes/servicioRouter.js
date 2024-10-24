@@ -15,4 +15,6 @@ router.put('/update/:id', servicioController.updateServicio);
 // Ruta para eliminar un servicio
 router.delete('/delete/:id', servicioController.deleteServicio);
 
+router.get('/servicios-mas-utilizados', servicioController.getServiciosMasUtilizados);
+
 module.exports = router;
