@@ -25,73 +25,107 @@
             <span class="step">2</span>
             <span class="step">3</span>
             <span class="step">4</span>
+            <span class="step">5</span> <!-- Nuevo paso añadido -->
         </div>
 
         <!-- Step 1: Elegir Habitación -->
-<div class="step-content" id="step-1">
-    <h3>Elige tu Habitación</h3>
-    
-    <div id="habitaciones-container">
-        <!-- Las habitaciones se cargarán dinámicamente desde el script -->
-    </div>
+        <div class="step-content" id="step-1">
+            <h3>Elige tu Habitación</h3>
+            
+            <div id="habitaciones-container">
+                <!-- Las habitaciones se cargarán dinámicamente desde el script -->
+            </div>
 
-    <!-- Campos de fecha de entrada y salida -->
-    <div class="date-selection">
-        <label for="fecha-entrada">Fecha de Entrada:</label>
-        <input type="date" id="fecha-entrada" required>
+            <!-- Campos de fecha de entrada y salida -->
+            <div class="date-selection">
+                <label for="fecha-entrada">Fecha de Entrada:</label>
+                <input type="date" id="fecha-entrada" required>
 
-        <label for="fecha-salida">Fecha de Salida:</label>
-        <input type="date" id="fecha-salida" required>
+                <label for="fecha-salida">Fecha de Salida:</label>
+                <input type="date" id="fecha-salida" required>
 
-        <!-- Campo oculto para ID_PAQUETE -->
-<input type="hidden" id="ID_PAQUETE" value="">
+                <!-- Campo oculto para ID_PAQUETE -->
+                <input type="hidden" id="ID_PAQUETE" value="">
+            </div>
 
-    </div>
-
-    <button type="button" class="next-btn" onclick="nextStep()">Siguiente</button>
-</div>
-
-
-
-        <!-- Step 2: Elegir Servicios -->
-<div class="step-content" id="step-2" style="display:none;">
-    <h3>Elige Servicios Adicionales</h3>
-
-    <!-- Mostrar habitación seleccionada -->
-    <div id="selected-habitacion-container"></div> <!-- Este es el contenedor donde aparecerá la habitación seleccionada -->
-
-        <!-- Contenedor para mostrar el precio total actualizado -->
-        <div id="total-price-container">
-            <h4>Total: Q<span id="total-price">0.00</span></h4>
+            <button type="button" class="next-btn" onclick="nextStep()">Siguiente</button>
         </div>
 
-    <div id="servicios-container">
-        <!-- Los servicios se cargarán dinámicamente desde el script -->
-    </div>
+        <!-- Step 2: Elegir Servicios -->
+        <div class="step-content" id="step-2" style="display:none;">
+            <h3>Elige Servicios Adicionales</h3>
 
-    <button type="button" class="prev-btn" onclick="prevStep()">Anterior</button>
-    <button type="button" class="next-btn" onclick="nextStep()">Siguiente</button>
-</div>
+            <!-- Mostrar habitación seleccionada -->
+            <div id="selected-habitacion-container"></div> <!-- Este es el contenedor donde aparecerá la habitación seleccionada -->
 
-
-        <!-- Step 3: Método de Pago y Resumen -->
-        <div class="step-content" id="step-3" style="display:none;">
-            <h3>Resumen y Método de Pago</h3>
-            <div id="resumen-container">
-                <!-- Resumen de la habitación y servicios seleccionados -->
+            <!-- Contenedor para mostrar el precio total actualizado -->
+            <div id="total-price-container">
+                <h4>Total: Q<span id="total-price">0.00</span></h4>
             </div>
-            <h4>Selecciona el método de pago:</h4>
+
+            <div id="servicios-container">
+                <!-- Los servicios se cargarán dinámicamente desde el script -->
+            </div>
+
+            <button type="button" class="prev-btn" onclick="prevStep()">Anterior</button>
+            <button type="button" class="next-btn" onclick="nextStep()">Siguiente</button>
+        </div>
+
+        <!-- Step 3: Método de Pago -->
+        <div class="step-content" id="step-3" style="display:none;">
+            <h3>Método de Pago</h3>
             <select id="metodo-pago">
                 <option value="tarjeta">Tarjeta de crédito/débito</option>
                 <option value="recepcion">Pagar en recepción</option>
             </select>
-            <button type="button" class="prev-btn" onclick="prevStep()">Anterior</button>
-            <button type="button" class="next-btn" onclick="confirmarReservacion(); nextStep()">Siguiente</button>
 
+            <button type="button" class="prev-btn" onclick="prevStep()">Anterior</button>
+            <button type="button" class="next-btn" onclick="nextStep()">Siguiente</button>
         </div>
 
-        <!-- Step 4: Confirmación -->
-        <div class="step-content" id="step-4" style="display:none;">
+<!-- Step 4: Formulario de Tarjeta -->
+<div class="step-content" id="step-4" style="display:none;">
+    <h3>Detalles de Pago con Tarjeta</h3>
+
+    <!-- Mostrar la habitación seleccionada en el paso 4 -->
+    <div id="selected-habitacion-container-step-4"></div>
+
+    <form id="payment-form">
+        <div class="form-group">
+            <label for="card-number">Número de tarjeta:</label>
+            <input type="text" id="card-number" class="input-field" placeholder="1234 5678 9012 3456" required maxlength="19">
+        </div>
+
+        <div class="form-group">
+            <label for="card-name">Nombre en la tarjeta:</label>
+            <input type="text" id="card-name" class="input-field" placeholder="Nombre completo" required>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group half-width">
+                <label for="expiry-date">Fecha de expiración:</label>
+                <input type="text" id="expiry-date" class="input-field" placeholder="MM/AA" required maxlength="5">
+            </div>
+
+            <div class="form-group half-width">
+                <label for="cvc">CVC:</label>
+                <input type="text" id="cvc" class="input-field" placeholder="123" required maxlength="3">
+            </div>
+        </div>
+    </form>
+
+    <button type="button" class="prev-btn" onclick="prevStep()">Anterior</button>
+    <!-- Cambiar el texto del botón a "Pagar" -->
+<!-- Botón en el paso 4 (Pagar) -->
+<button type="button" class="next-btn" onclick="if (validarFormularioTarjeta()) { confirmarReservacion(); nextStep(); }">Pagar</button>
+
+
+</div>
+
+
+
+        <!-- Step 5: Confirmación -->
+        <div class="step-content" id="step-5" style="display:none;">
             <h3>Confirmación de la Reserva</h3>
             <p id="confirmacion-texto">¡Gracias por tu reserva! Nos pondremos en contacto contigo para más detalles.</p>
             <button type="button" onclick="location.href='inicio.html'">Volver al Inicio</button>
@@ -104,14 +138,11 @@
     </footer>
 
     <!-- Scripts -->
-     
     <script src="scripts/scriptwizard.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
     <script src="scripts/header.js"></script>
     <!-- Incluye Flatpickr -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </body>
 </html>

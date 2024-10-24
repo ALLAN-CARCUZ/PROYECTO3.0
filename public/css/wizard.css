@@ -86,6 +86,43 @@ body {
     font-weight: bold;
 }
 
+/* Estilo del formulario de pago */
+.form-group {
+    margin-bottom: 15px;
+}
+
+.label {
+    font-weight: bold;
+    color: #333;
+}
+
+.input-field {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 1rem;
+}
+
+.form-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.half-width {
+    width: 48%;
+}
+
+/* Estilo para los campos de entrada */
+.input-field:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 5px rgba(102, 126, 234, 0.5);
+}
+
+
 /* Botones para los pasos del wizard */
 button {
     padding: 12px 20px;

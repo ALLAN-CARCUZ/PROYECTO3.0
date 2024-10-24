@@ -26,14 +26,23 @@ async function confirmarReservacion() {
     }
 
     const decoded = jwt_decode(token);
-    console.log('Token decodificado:', decoded);
-    const id_usuario = decoded.id || decoded.userId; // Verifica si este campo está correcto
+    const id_usuario = decoded.id || decoded.userId;
 
-    // Asegúrate de que los datos estén definidos antes de hacer la solicitud
-    console.log('Habitación seleccionada:', selectedHabitacion);
-    console.log('Paquete ID:', paqueteId);
-    console.log('Fecha de entrada:', fechaEntrada);
-    console.log('Fecha de salida:', fechaSalida);
+    // Validar si todos los datos requeridos están presentes
+    if (!selectedHabitacion && !paqueteId) {
+        alert('Debes seleccionar una habitación o un paquete.');
+        return;
+    }
+
+    if (!fechaEntrada || !fechaSalida) {
+        alert('Debes seleccionar las fechas de entrada y salida.');
+        return;
+    }
+
+    if (!document.getElementById('metodo-pago').value) {
+        alert('Debes seleccionar un método de pago.');
+        return;
+    }
 
     const data = {
         id_usuario: id_usuario,
@@ -46,8 +55,7 @@ async function confirmarReservacion() {
         servicios: selectedServicios
     };
 
-    console.log('Datos enviados al servidor:', data);
-
+    // Enviar la solicitud solo si todos los datos están completos
     const response = await fetch('http://localhost:3000/api/reservaciones/create', {
         method: 'POST',
         headers: {
@@ -63,18 +71,61 @@ async function confirmarReservacion() {
         console.error('Error al crear reservación:', result);
         alert('Error: ' + result.message);
     }
-    
 }
 
 
 
+
+// Validar el formulario de pago con tarjeta
+function validarFormularioTarjeta() {
+    // Obtener los valores de los campos
+    const numeroTarjeta = document.getElementById('card-number').value;
+    const nombreTarjeta = document.getElementById('card-name').value;
+    const fechaExpiracion = document.getElementById('expiry-date').value;
+    const cvc = document.getElementById('cvc').value;
+
+    // Verificar que todos los campos estén llenos
+    if (!numeroTarjeta || !nombreTarjeta || !fechaExpiracion || !cvc) {
+        alert('Por favor, llena todos los campos del formulario de pago.');
+        return false; // Impedir que avance al siguiente paso
+    }
+
+    // Si todos los campos están llenos, permite avanzar
+    return true;
+}
+
 // Avanzar al siguiente paso
 function nextStep() {
+    if (currentStep === 3) {
+        const metodoPago = document.getElementById('metodo-pago').value;
+
+        if (metodoPago === 'recepcion') {
+            // Si se selecciona pagar en recepción, saltar al paso 5 y confirmar la reservación
+            currentStep = 5;
+            showStep(currentStep);
+            confirmarReservacion(); // Confirmar la reservación solo una vez
+            return;
+        }
+    }
+
+    if (currentStep === 4) {
+        // Validar el formulario de tarjeta en el paso 4 solo si es pago con tarjeta
+        if (!validarFormularioTarjeta()) {
+            return; // No avanzar ni confirmar la reservación si la validación falla
+        } else {
+            currentStep = 5;  // Mover al paso 5 después de confirmar
+            showStep(currentStep);
+            return;
+        }
+    }
+
     if (validateStep(currentStep)) {
         currentStep++;
         showStep(currentStep);
     }
 }
+
+
 
 // Regresar al paso anterior
 function prevStep() {
@@ -82,24 +133,45 @@ function prevStep() {
     showStep(currentStep);
 }
 
-// Mostrar el paso actual
+// Mostrar la habitación seleccionada en el paso 4, reutilizando la lógica del paso 2
+function displaySelectedHabitacionPaso4() {
+    const selectedHabitacionContainerStep4 = document.getElementById('selected-habitacion-container-step-4');
+    
+    if (selectedHabitacion) {
+        selectedHabitacionContainerStep4.innerHTML = `
+            <h4>Habitación seleccionada</h4>
+            <img src="data:image/jpeg;base64,${selectedHabitacion.imagen}" alt="${selectedHabitacion.nombre}" style="width:200px; height:auto;"/>
+            <p><strong>${selectedHabitacion.nombre}</strong></p>
+            <p>${selectedHabitacion.descripcion}</p>
+            <p>ID: ${selectedHabitacion.id}</p>
+            <p class="price">Total: Q${total.toFixed(2)}</p>
+        `;
+    } else {
+        selectedHabitacionContainerStep4.innerHTML = '<p>No has seleccionado ninguna habitación.</p>';
+    }
+}
+
+// Modificar showStep para que llame a displaySelectedHabitacionPaso4 cuando estemos en el paso 4
 function showStep(step) {
     document.querySelectorAll('.step-content').forEach((el) => {
         el.style.display = 'none';
     });
     document.querySelector(`#step-${step}`).style.display = 'block';
-    
-    // Si estamos en el paso 2, mostrar la habitación seleccionada y calcular el precio total
+
+    // Si estamos en el paso 2 o en el paso 4, mostrar la habitación seleccionada
     if (step === 2) {
         displaySelectedHabitacion();
-        calcularPrecioTotal();  // <-- Añadir esta línea
+        calcularPrecioTotal();
+    }
+    
+    if (step === 4) {
+        displaySelectedHabitacionPaso4(); // Mostrar la habitación seleccionada en el paso 4
     }
 
     updateStepsIndicator(step);
 }
 
 
-// Validar el paso actual
 // Validar el paso actual
 function validateStep(step) {
     if (step === 1) {
