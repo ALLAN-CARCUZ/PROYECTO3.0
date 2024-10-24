@@ -95,5 +95,21 @@ async function findByEmail(email) {
     }
 }
 
-module.exports = { getUserById, createUsuario, findByEmail };
+
+async function countUsuarios() {
+    let connection;
+    try {
+        connection = await oracledb.getConnection(dbConfig);
+        const result = await connection.execute(`SELECT COUNT(*) AS CANTIDAD FROM USUARIOS`);
+        return result.rows[0][0];  // Devuelve la cantidad de usuarios
+    } catch (error) {
+        throw new Error('Error al contar los usuarios: ' + error.message);
+    } finally {
+        if (connection) {
+            await connection.close();
+        }
+    }
+}
+
+module.exports = { getUserById, createUsuario, findByEmail, countUsuarios };
 

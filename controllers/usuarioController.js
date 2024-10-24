@@ -97,5 +97,15 @@ async function getCountries(req, res) {
     }
 }
 
-module.exports = { getUserById, createUsuario, loginUsuario, getCountries };
+
+async function countUsuarios(req, res) {
+    try {
+        const cantidad = await usuarioModel.countUsuarios();
+        res.json({ cantidad });
+    } catch (error) {
+        res.status(500).json({ error: 'Error al obtener la cantidad de usuarios' });
+    }
+}
+
+module.exports = { getUserById, createUsuario, loginUsuario, getCountries, countUsuarios };
 
