@@ -231,18 +231,25 @@ function updateStepsIndicator(step) {
 async function setMinFechaEntrada() {
     const fechaHoy = new Date().toISOString().split('T')[0];  // Fecha actual en formato YYYY-MM-DD
 
-    // Verifica si la habitación está seleccionada antes de buscar las fechas reservadas
-    if (selectedHabitacion) {
+    let endpoint;
+    if (paqueteId) {
+        // Si es un paquete, obtenemos las fechas reservadas para ese paquete
+        endpoint = `/api/reservaciones/fechas-reservadas-paquete/${paqueteId}`;
+    } else if (selectedHabitacion) {
+        // Si es una habitación, obtenemos las fechas reservadas de la habitación seleccionada
+        endpoint = `/api/reservaciones/fechas-reservadas/${selectedHabitacion.id}`;
+    }
+
+    if (endpoint) {
         try {
-            // Hacer una solicitud al servidor para obtener las fechas reservadas de la habitación seleccionada
-            const response = await fetch(`/api/reservaciones/fechas-reservadas/${selectedHabitacion.id}`);
+            const response = await fetch(endpoint);
             const fechasReservadas = await response.json();
 
             // Mapeamos las fechas reservadas para deshabilitarlas en el calendario
             const fechasDeshabilitadas = fechasReservadas.map(f => {
                 const fechaInicio = new Date(f.fecha_ingreso).toISOString().split('T')[0];
                 const fechaFin = new Date(f.fecha_salida).toISOString().split('T')[0];
-                return { from: fechaInicio, to: fechaFin };  // Flatpickr acepta rangos de fechas
+                return { from: fechaInicio, to: fechaFin };
             });
 
             // Inicializar Flatpickr para los campos de fecha de entrada y salida
@@ -270,6 +277,9 @@ async function setMinFechaEntrada() {
         }
     }
 }
+
+
+
 
 
 
@@ -334,15 +344,30 @@ function updateButtonsState() {
     const buttons = document.querySelectorAll('.habitacion-card button');  // Seleccionar todos los botones de habitaciones
 
     buttons.forEach(button => {
-        const habitacionId = button.getAttribute('onclick').match(/\d+/)[0];  // Extraer el ID de la habitación del atributo `onclick`
-        if (parseInt(habitacionId) === selectedHabitacion.id) {
-            button.textContent = 'Seleccionada';  // Cambiar el texto del botón
-            button.disabled = true;  // Deshabilitar el botón de la habitación seleccionada
-            button.classList.add('selected');  // Agregar la clase 'selected' al botón seleccionado
+        const onclickAttr = button.getAttribute('onclick');  // Obtener el atributo 'onclick'
+        
+        // Verificar que el atributo 'onclick' y el ID existan antes de continuar
+        if (onclickAttr) {
+            const habitacionIdMatch = onclickAttr.match(/\d+/);  // Intentar extraer el ID de la habitación del atributo `onclick`
+            
+            if (habitacionIdMatch) {
+                const habitacionId = parseInt(habitacionIdMatch[0], 10);  // Convertir a entero
+
+                // Solo continuar si `selectedHabitacion` tiene un ID válido
+                if (selectedHabitacion && selectedHabitacion.id === habitacionId) {
+                    button.textContent = 'Seleccionada';  // Cambiar el texto del botón
+                    button.disabled = true;  // Deshabilitar el botón de la habitación seleccionada
+                    button.classList.add('selected');  // Agregar la clase 'selected' al botón seleccionado
+                } else {
+                    button.textContent = 'Seleccionar';  // Cambiar de nuevo a "Seleccionar" si no es la habitación elegida
+                    button.disabled = false;  // Habilitar los otros botones
+                    button.classList.remove('selected');  // Quitar la clase 'selected' de los demás botones
+                }
+            } else {
+                console.error("No se pudo encontrar el ID de la habitación en el botón:", button);
+            }
         } else {
-            button.textContent = 'Seleccionar';  // Cambiar de nuevo a "Seleccionar" si no es la habitación elegida
-            button.disabled = false;  // Habilitar los otros botones
-            button.classList.remove('selected');  // Quitar la clase 'selected' de los demás botones
+            console.error("El botón no tiene un atributo 'onclick' válido:", button);
         }
     });
 }
@@ -396,9 +421,6 @@ function loadServicios() {
             console.error('Error al cargar los servicios:', error);
             alert('Error al cargar servicios');
         });
-
-    // Después de cargar todos los servicios, inicializamos el cálculo
-    calcularPrecioTotal();
 }
 
 
@@ -422,7 +444,7 @@ function calcularPrecioTotal() {
     // Si no es un paquete, seguir con el cálculo normal de habitación y servicios
     if (!fechaEntrada || !fechaSalida) {
         console.error("No se han seleccionado las fechas de entrada y salida.");
-        return;
+        return;  // No continuar si las fechas no están seleccionadas
     }
 
     const fecha1 = new Date(fechaEntrada);
@@ -498,8 +520,11 @@ function initWizard() {
     setMinFechaEntrada();  // Establecer la fecha mínima en los campos de fecha
     loadHabitaciones();
     loadServicios();
+    
+    // No calcular precio hasta que se seleccionen las fechas
     showStep(1);
 }
+
 
 function selectHabitacionPorId(id) {
     fetch(`/api/habitaciones/${id}`)

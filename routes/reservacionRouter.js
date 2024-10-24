@@ -13,6 +13,8 @@ router.delete('/cancel/:id_reservacion', authenticateToken, deleteReservacion);
 router.get('/:id', obtenerReservacionPorId);
 router.get('/', authenticateToken, reservacionController.getReservaciones);
 router.get('/fechas-reservadas/:id_habitacion', reservacionController.getFechasReservadas);
+router.get('/fechas-reservadas-paquete/:id_paquete', reservacionController.getFechasReservadasPaquete);
+
 
 
 

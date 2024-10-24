@@ -23,6 +23,13 @@ async function createReservacion(req, res) {
     }
 
     try {
+                // Verificar si el paquete está disponible
+                if (id_paquete) {
+                    const paqueteDisponible = await reservacionModel.checkDisponibilidadPaquete(id_paquete, fecha_ingreso, fecha_salida);
+                    if (!paqueteDisponible.length === 0) {
+                        return res.status(400).json({ error: 'El paquete no está disponible para las fechas seleccionadas' });
+                    }
+                }
 
 
         // Verificar si la habitación está disponible
@@ -206,6 +213,20 @@ async function getFechasReservadas(req, res) {
     }
 }
 
+async function getFechasReservadasPaquete(req, res) {
+    const { id_paquete } = req.params;
+
+    try {
+        // Obtener las fechas reservadas de la base de datos
+        const fechasReservadas = await reservacionModel.getFechasReservadasByPaquete(id_paquete);
+        res.status(200).json(fechasReservadas);
+    } catch (error) {
+        console.error('Error al obtener las fechas reservadas del paquete:', error);
+        res.status(500).json({ error: 'Error al obtener las fechas reservadas' });
+    }
+}
+
+
 module.exports = {
     createReservacion,
     getReservaciones,
@@ -214,7 +235,8 @@ module.exports = {
     getReservacionesByUsuario,
     obtenerReservacionPorId,
     isHabitacionDisponible,
-    getFechasReservadas // Agregamos el nuevo controlador
+    getFechasReservadas, // Agregamos el nuevo controlador
+    getFechasReservadasPaquete
 };
 
 

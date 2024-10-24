@@ -362,6 +362,7 @@ async function getFechasReservadasByHabitacion(id_habitacion) {
             { id_habitacion }
         );
 
+        // Mapear los resultados para devolver un array de objetos con las fechas
         return result.rows.map(row => ({
             fecha_ingreso: row[0],
             fecha_salida: row[1]
@@ -377,6 +378,58 @@ async function getFechasReservadasByHabitacion(id_habitacion) {
 }
 
 
+async function checkDisponibilidadPaquete(id_paquete, fecha_ingreso, fecha_salida) {
+    let connection;
+    try {
+        connection = await oracledb.getConnection(dbConfig);
+        const query = `
+            SELECT * FROM RESERVACIONES
+            WHERE ID_PAQUETE = :id_paquete
+            AND (
+                (FECHA_INGRESO <= TO_DATE(:fecha_salida, 'YYYY-MM-DD') AND FECHA_SALIDA >= TO_DATE(:fecha_ingreso, 'YYYY-MM-DD'))
+            )
+        `;
+        const result = await connection.execute(query, { id_paquete, fecha_ingreso, fecha_salida });
+        return result.rows;
+    } catch (error) {
+        console.error('Error al verificar la disponibilidad del paquete:', error);
+        throw new Error('Error al verificar la disponibilidad del paquete');
+    } finally {
+        if (connection) {
+            await connection.close();
+        }
+    }
+}
+
+async function getFechasReservadasByPaquete(id_paquete) {
+    let connection;
+    try {
+        connection = await oracledb.getConnection(dbConfig);
+
+        const result = await connection.execute(
+            `SELECT FECHA_INGRESO, FECHA_SALIDA 
+             FROM RESERVACIONES 
+             WHERE ID_PAQUETE = :id_paquete
+             AND FECHA_SALIDA >= SYSDATE`,  // Solo obtenemos las fechas futuras
+            { id_paquete }
+        );
+
+        return result.rows.map(row => ({
+            fecha_ingreso: row[0],
+            fecha_salida: row[1]
+        }));
+    } catch (error) {
+        console.error('Error al obtener las fechas reservadas del paquete:', error);
+        throw new Error('Error al obtener las fechas reservadas');
+    } finally {
+        if (connection) {
+            await connection.close();
+        }
+    }
+}
+
+
+
 module.exports = {
     createReservacion,
     getReservaciones,
@@ -385,5 +438,8 @@ module.exports = {
     getReservacionesByUsuario,
     findByPk,
     checkDisponibilidadHabitacion,
-    getFechasReservadasByHabitacion // Exportamos la nueva función
+    getFechasReservadasByHabitacion, // Exportamos la nueva función
+    deleteReservacionServicios,
+    checkDisponibilidadPaquete,
+    getFechasReservadasByPaquete
 };
