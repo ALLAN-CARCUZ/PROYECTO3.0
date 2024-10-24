@@ -5,13 +5,71 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gráficas de Servicios</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="css/general.css">
     <link rel="stylesheet" href="css/grafica.css">
+    <link rel="stylesheet" href="css/header.css">
 </head>
 <body>
+
+
+    <!-- Barra de navegación superior -->
+    <header>
+    </header>
+
+
+
     <h1>Servicios Adicionales Más Utilizados</h1>
     <div class="chart-container" style="width: 80%; margin: 0 auto;">
         <canvas id="serviciosChart"></canvas>
     </div>
+
+
+    <div class="info-box">
+        <h3>Cantidad de usuarios</h3>
+        <p id="cantidad-usuarios">Cargando...</p>
+    </div>
+
+
+    <script>
+        // Cargar la gráfica de servicios más utilizados
+        fetch('/api/servicios/servicios-mas-utilizados')
+            .then(response => response.json())
+            .then(data => {
+                var ctx = document.getElementById('serviciosChart').getContext('2d');
+                var serviciosChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            label: 'Número de veces utilizado',
+                            data: data.values,
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(error => console.error('Error al obtener los datos:', error));
+
+        // Cargar la cantidad de usuarios
+        fetch('/api/usuarios/cantidad')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('cantidad-usuarios').textContent = data.cantidad;
+            })
+            .catch(error => console.error('Error al obtener la cantidad de usuarios:', error));
+    </script>
+
+
+
 
     <script>
         // Hacer la solicitud a la API para obtener los datos
@@ -42,5 +100,15 @@
           })
           .catch(error => console.error('Error al obtener los datos:', error));
     </script>
+
+
+    <!-- Pie de página -->
+    <footer>
+        <p>© 2024 Hotel El Dodo. Todos los derechos reservados.</p>
+    </footer>
+
+    <script src="scripts/auth.js"></script>
+    <script src="scripts/header.js"></script>
+
 </body>
 </html>

@@ -10,4 +10,6 @@ router.post('/login', usuarioController.loginUsuario);
 // Nueva ruta para obtener la lista de países
 router.get('/countries', usuarioController.getCountries);
 
+router.get('/cantidad', usuarioController.countUsuarios);
+
 module.exports = router;
