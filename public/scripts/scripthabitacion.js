@@ -25,8 +25,9 @@ document.getElementById('closeRegisterModal').addEventListener('click', () => cl
 // Añadir el evento para cerrar el popup de actualización
 document.getElementById('closeUpdateModal').addEventListener('click', () => closeModal('updateModal'));
 
+
 // Función para cargar las habitaciones y mostrarlas en la lista
-// Función para cargar las habitaciones y mostrarlas en la lista
+
 async function loadHabitaciones() {
     try {
         const response = await fetch('/api/habitaciones');
