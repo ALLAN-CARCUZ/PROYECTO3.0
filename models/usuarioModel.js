@@ -111,5 +111,25 @@ async function countUsuarios() {
     }
 }
 
-module.exports = { getUserById, createUsuario, findByEmail, countUsuarios };
+async function getUsuariosPorPais() {
+    let connection;
+    try {
+        connection = await oracledb.getConnection(dbConfig);
+        const result = await connection.execute(`
+            SELECT PAIS, COUNT(*) AS CANTIDAD
+            FROM USUARIOS
+            GROUP BY PAIS
+            ORDER BY CANTIDAD DESC
+        `);
+        return result.rows;  // Devuelve los países con la cantidad de usuarios
+    } catch (error) {
+        throw new Error('Error al obtener la cantidad de usuarios por país: ' + error.message);
+    } finally {
+        if (connection) {
+            await connection.close();
+        }
+    }
+}
+
+module.exports = { getUserById, createUsuario, findByEmail, countUsuarios, getUsuariosPorPais };
 

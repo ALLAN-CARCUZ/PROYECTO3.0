@@ -17,5 +17,9 @@ router.delete('/delete/:id', habitacionController.deleteHabitacion);
 // Ruta para obtener una habitación por ID
 router.get('/:id', habitacionController.getHabitacionById);
 
+// Ruta para obtener las habitaciones más reservadas
+router.get('/reservadas/habitaciones-mas-reservadas', habitacionController.getHabitacionesMasReservadas);
+
+
 
 module.exports = router;

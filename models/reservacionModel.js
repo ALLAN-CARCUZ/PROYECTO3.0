@@ -428,6 +428,66 @@ async function getFechasReservadasByPaquete(id_paquete) {
     }
 }
 
+async function getTotalIngresos() {
+    let connection;
+    try {
+        connection = await oracledb.getConnection(dbConfig);
+        const result = await connection.execute(`SELECT SUM(COSTO_TOTAL) AS TOTAL_INGRESOS FROM RESERVACIONES`);
+        return result.rows[0][0];  // Devuelve el total de ingresos
+    } catch (error) {
+        throw new Error('Error al obtener el total de ingresos: ' + error.message);
+    } finally {
+        if (connection) {
+            await connection.close();
+        }
+    }
+}
+
+
+async function getReservacionesPorMes() {
+    let connection;
+    try {
+        connection = await oracledb.getConnection(dbConfig);
+        const result = await connection.execute(`
+            SELECT TO_CHAR(FECHA_RESERVACION, 'MM') AS MES, COUNT(*) AS CANTIDAD
+            FROM RESERVACIONES
+            WHERE TO_CHAR(FECHA_RESERVACION, 'YYYY') = '2024'
+            GROUP BY TO_CHAR(FECHA_RESERVACION, 'MM')
+            ORDER BY MES
+        `);
+        return result.rows;  // Devuelve el mes y la cantidad de reservaciones
+    } catch (error) {
+        throw new Error('Error al obtener las reservaciones por mes: ' + error.message);
+    } finally {
+        if (connection) {
+            await connection.close();
+        }
+    }
+}
+
+
+
+
+// Función para calcular el promedio de días de estadía
+async function getPromedioDiasReservacion() {
+    let connection;
+    try {
+        connection = await oracledb.getConnection(dbConfig);
+        const result = await connection.execute(`
+            SELECT AVG(FECHA_SALIDA - FECHA_INGRESO) AS PROMEDIO_DIAS
+            FROM RESERVACIONES
+        `);
+        
+        return result.rows[0][0]; // Retorna el valor del promedio de días
+    } catch (error) {
+        throw new Error('Error al calcular el promedio de días de estadía: ' + error.message);
+    } finally {
+        if (connection) {
+            await connection.close();
+        }
+    }
+}
+
 
 
 module.exports = {
@@ -441,5 +501,8 @@ module.exports = {
     getFechasReservadasByHabitacion, // Exportamos la nueva función
     deleteReservacionServicios,
     checkDisponibilidadPaquete,
-    getFechasReservadasByPaquete
+    getFechasReservadasByPaquete,
+    getTotalIngresos,
+    getReservacionesPorMes,
+    getPromedioDiasReservacion
 };

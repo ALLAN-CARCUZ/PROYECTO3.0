@@ -72,11 +72,30 @@ async function getHabitacionById(req, res) {
     }
 }
 
+
+async function getHabitacionesMasReservadas(req, res) {
+    try {
+        const habitaciones = await habitacionModel.getHabitacionesMasReservadas();
+        const labels = [];
+        const values = [];
+
+        habitaciones.forEach(row => {
+            labels.push(row[0]);  // Nombres de las habitaciones
+            values.push(row[1]);  // Número de reservaciones
+        });
+
+        res.json({ labels, values });
+    } catch (error) {
+        res.status(500).json({ error: 'Error al obtener las habitaciones más reservadas' });
+    }
+}
+
 module.exports = { 
     createHabitacion, 
     getHabitaciones, 
     updateHabitacion, 
     deleteHabitacion, 
-    getHabitacionById  // Añadir este método a las exportaciones
+    getHabitacionById,
+    getHabitacionesMasReservadas  // Añadir este método a las exportaciones
 };
 

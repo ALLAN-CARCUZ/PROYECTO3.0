@@ -14,6 +14,12 @@ router.get('/:id', obtenerReservacionPorId);
 router.get('/', authenticateToken, reservacionController.getReservaciones);
 router.get('/fechas-reservadas/:id_habitacion', reservacionController.getFechasReservadas);
 router.get('/fechas-reservadas-paquete/:id_paquete', reservacionController.getFechasReservadasPaquete);
+// Ruta para obtener el total de ingresos
+router.get('/ingreso/ingresos-total', reservacionController.getTotalIngresos);
+// Ruta para obtener el total de reservaciones por mes
+router.get('/mensuales/reservaciones-por-mes', reservacionController.getReservacionesPorMes);
+router.get('/promedio/promedio-dias', reservacionController.getPromedioDiasReservacion);
+
 
 
 

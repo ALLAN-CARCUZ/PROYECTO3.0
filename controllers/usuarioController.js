@@ -107,5 +107,23 @@ async function countUsuarios(req, res) {
     }
 }
 
-module.exports = { getUserById, createUsuario, loginUsuario, getCountries, countUsuarios };
+
+async function getUsuariosPorPais(req, res) {
+    try {
+        const usuarios = await usuarioModel.getUsuariosPorPais();
+        const labels = [];
+        const values = [];
+
+        usuarios.forEach(row => {
+            labels.push(row[0]);  // Nombre del país
+            values.push(row[1]);  // Cantidad de usuarios
+        });
+
+        res.json({ labels, values });
+    } catch (error) {
+        res.status(500).json({ error: 'Error al obtener la cantidad de usuarios por país' });
+    }
+}
+
+module.exports = { getUserById, createUsuario, loginUsuario, getCountries, countUsuarios, getUsuariosPorPais };
 
