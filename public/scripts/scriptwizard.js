@@ -6,6 +6,7 @@ let total = 0;
 let fechaEntrada = null;
 let fechaSalida = null;
 let paqueteId = null;  // Nuevo: para manejar el paquete_id
+let stripeInitialized = false;  // Para asegurarnos de que solo inicializamos Stripe una vez
 
 
 
@@ -151,25 +152,127 @@ function displaySelectedHabitacionPaso4() {
     }
 }
 
+// Validar el formulario de pago con tarjeta
+function validarFormularioTarjeta() {
+    // Obtener los valores de los campos
+    const numeroTarjeta = document.getElementById('card-number').value;
+    const nombreTarjeta = document.getElementById('card-name').value;
+    const fechaExpiracion = document.getElementById('expiry-date').value;
+    const cvc = document.getElementById('cvc').value;
+    const metodoPago = document.getElementById('metodo-pago').value;  // Validar el método de pago
+    const fechaIngreso = document.getElementById('fecha-entrada').value;
+    const fechaSalida = document.getElementById('fecha-salida').value;
+
+    // Verificar que todos los campos estén llenos
+    if (!numeroTarjeta || !nombreTarjeta || !fechaExpiracion || !cvc || !metodoPago || !fechaIngreso || !fechaSalida) {
+        alert('Por favor, llena todos los campos del formulario de pago.');
+        return false; // Impedir que avance al siguiente paso
+    }
+
+    // Si todos los campos están llenos, permite avanzar
+    return true;
+}
+
 // Modificar showStep para que llame a displaySelectedHabitacionPaso4 cuando estemos en el paso 4
 function showStep(step) {
+    // Ocultar todos los pasos
     document.querySelectorAll('.step-content').forEach((el) => {
         el.style.display = 'none';
     });
+    // Mostrar el paso actual
     document.querySelector(`#step-${step}`).style.display = 'block';
 
-    // Si estamos en el paso 2 o en el paso 4, mostrar la habitación seleccionada
-    if (step === 2) {
-        displaySelectedHabitacion();
-        calcularPrecioTotal();
-    }
-    
-    if (step === 4) {
-        displaySelectedHabitacionPaso4(); // Mostrar la habitación seleccionada en el paso 4
+    // Lógica para los botones
+    const prevBtn = document.querySelector('.prev-btn');
+    const nextBtn = document.querySelector('.next-btn');
+    const pagarBtn = document.querySelector('.next-btn.pagar-btn');
+
+    // Mostrar/ocultar el botón "Anterior"
+    if (step === 1) {
+        prevBtn.style.display = 'none';  // Ocultar en el primer paso
+    } else {
+        prevBtn.style.display = 'inline-block';  // Mostrar en los otros pasos
     }
 
+    // Mostrar/ocultar el botón "Siguiente" o "Pagar"
+    if (step === 4) {
+        nextBtn.style.display = 'none';  // Ocultar el botón "Siguiente" en el paso 4
+        pagarBtn.style.display = 'inline-block';  // Mostrar el botón "Pagar" solo en el paso 4
+
+        // Solo inicializar Stripe la primera vez que se llegue al paso 4
+        if (!stripeInitialized) {
+            // Inicializar Stripe
+            const stripe = Stripe('pk_test_51Q9a2gRqSLao4U6DhgfZrCYHn3JFpiGlbm2HD2IzfK8VO6ZkgEqwh4fRVsAzEkc6iSgxW9D7PqpEcIeHIKZs4u1I00fx9gWTuE'); // Reemplaza con tu clave pública de Stripe
+            const elements = stripe.elements();
+
+            // Crear un componente de tarjeta
+            const cardElement = elements.create('card');
+            cardElement.mount('#card-element');  // Montar el formulario en el div #card-element
+
+
+// Manejar el envío del formulario de pago en el frontend
+const form = document.getElementById('payment-form');
+form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    // Verificar que los campos de tarjeta están completos
+    const { paymentMethod, error } = await stripe.createPaymentMethod({
+        type: 'card',
+        card: cardElement,
+        billing_details: {
+            name: document.getElementById('card-name').value,  // Nombre en la tarjeta
+        },
+    });
+
+    if (error) {
+        document.getElementById('card-errors').textContent = error.message;
+    } else {
+        // Enviar el método de pago al backend
+        const response = await fetch('http://localhost:3000/api/pagos/create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                payment_method_id: paymentMethod.id,
+                id_usuario: 'USER_ID',  // Asegúrate de enviar el ID del usuario real
+                costo_total: total * 100  // Stripe requiere el monto en centavos
+            })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            alert('Pago procesado exitosamente');
+            confirmarReservacion(); // Llamar a la función de confirmación de la reservación
+            nextStep();  // Avanzar al siguiente paso después del pago exitoso
+        } else {
+            alert('Error al procesar el pago: ' + result.error);
+        }
+    }
+});
+
+
+
+
+
+
+            // Marcar que Stripe ya fue inicializado
+            stripeInitialized = true;
+        }
+    } else {
+        nextBtn.style.display = 'inline-block';  // Mostrar el botón "Siguiente" en todos los pasos excepto el último
+        pagarBtn.style.display = 'none';  // Ocultar el botón "Pagar" en los otros pasos
+    }
+
+    // Si estamos en el paso 4, mostrar la habitación seleccionada
+    if (step === 4) {
+        displaySelectedHabitacionPaso4();
+    }
+
+    // Actualizar los indicadores de pasos
     updateStepsIndicator(step);
 }
+
 
 
 // Validar el paso actual

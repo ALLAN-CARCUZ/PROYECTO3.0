@@ -3,11 +3,12 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const oracledb = require('oracledb');
 const path = require('path');
-const habitacionRouter = require('./routes/habitacionRouter');  // Cambiar al enrutador de habitaciones
-const servicioRouter = require('./routes/servicioRouter');  // Enrutador de servicios
-const paqueteRouter = require('./routes/paqueteRouter')
-const usuarioRouter = require('./routes/usuarioRouter');  // Enrutador de usuarios
+const habitacionRouter = require('./routes/habitacionRouter');
+const servicioRouter = require('./routes/servicioRouter');
+const paqueteRouter = require('./routes/paqueteRouter');
+const usuarioRouter = require('./routes/usuarioRouter');
 const reservacionRouter = require('./routes/reservacionRouter');
+const paymentRouter = require('./routes/paymentRouter');  // Importar el enrutador de pagos
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -16,7 +17,7 @@ const dbConfig = {
     user: process.env.ORACLE_USER,
     password: process.env.ORACLE_PASSWORD,
     connectString: process.env.ORACLE_CONNECTION,
-    externalAuth: false // Si no estás usando autenticación externa
+    externalAuth: false
 };
 
 if (process.env.TNS_ADMIN) {
@@ -26,16 +27,17 @@ if (process.env.TNS_ADMIN) {
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
-// Usar el enrutador de habitaciones
-app.use('/api/habitaciones', habitacionRouter);  // Actualizar la ruta para habitaciones
-app.use('/api/servicios', servicioRouter);  // Nueva ruta para servicios
+// Usar los enrutadores para las distintas rutas
+app.use('/api/habitaciones', habitacionRouter);
+app.use('/api/servicios', servicioRouter);
 app.use('/api/paquetes', paqueteRouter);
 app.use('/api/usuarios', usuarioRouter);
 app.use('/api/reservaciones', reservacionRouter);
+app.use('/api/pagos', paymentRouter);  // Usar el enrutador para pagos
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Ejemplo de conexión a la base de datos Oracle (aquí puedes incluir otras operaciones si las necesitas)
+// Ejemplo de conexión a la base de datos Oracle
 async function connectToDatabase() {
     let connection;
     try {
@@ -60,7 +62,6 @@ connectToDatabase();
 app.listen(port, () => {
     console.log(`Servidor corriendo en el puerto ${port}`);
 });
-
 
 
 //ORACLE_USER=ADMIN
