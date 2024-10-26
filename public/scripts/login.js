@@ -25,10 +25,12 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
             // Decodificar el token para obtener el rol del usuario y el tiempo de expiración
             const decodedToken = parseJwt(result.token);
             localStorage.setItem('rol', decodedToken.rol);  // Guardamos el rol en localStorage
+            localStorage.setItem('userId', decodedToken.id || decodedToken.userId); // Guardamos el userId en localStorage
 
             // Depuración: verificar si se almacenan correctamente
             console.log("Token guardado en localStorage: ", result.token);
             console.log("Rol guardado en localStorage: ", decodedToken.rol);
+            console.log("userId guardado en localStorage:", decodedToken.id || decodedToken.userId);
 
             // Calcular el tiempo de expiración en milisegundos
             const expirationTime = decodedToken.exp * 1000 - Date.now();
@@ -66,5 +68,6 @@ function logoutUser() {
     localStorage.removeItem('token');
     localStorage.removeItem('username');
     localStorage.removeItem('rol');
+    localStorage.removeItem('userId'); // Asegurarse de eliminar el userId en el cierre de sesión
     window.location.href = 'login.html';
 }

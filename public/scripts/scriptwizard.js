@@ -54,6 +54,8 @@ async function procesarPagoStripe() {
 
         if (result.success) {
             alert(result.message);  // Confirmación de pago
+            // Llamar a confirmarReservacion para crear la reserva
+            confirmarReservacion();
             currentStep = 5;  // Avanzar al paso 5
             showStep(currentStep);  // Mostrar el paso de confirmación
         } else {
