@@ -227,6 +227,56 @@ async function getFechasReservadasPaquete(req, res) {
 }
 
 
+async function getTotalIngresos(req, res) {
+    try {
+        const totalIngresos = await reservacionModel.getTotalIngresos();
+        res.json({ totalIngresos });
+    } catch (error) {
+        res.status(500).json({ error: 'Error al obtener el total de ingresos' });
+    }
+}
+
+
+async function getReservacionesPorMes(req, res) {
+    try {
+        const reservaciones = await reservacionModel.getReservacionesPorMes();
+        const labels = [];
+        const values = [];
+
+        // Configurar los meses en un arreglo para ordenar de enero a diciembre
+        const meses = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
+        const dataPorMes = meses.map(mes => ({ mes, cantidad: 0 }));
+
+        reservaciones.forEach(row => {
+            const mesIndex = dataPorMes.findIndex(d => d.mes === row[0]);
+            if (mesIndex !== -1) {
+                dataPorMes[mesIndex].cantidad = row[1];
+            }
+        });
+
+        dataPorMes.forEach(d => {
+            labels.push(d.mes);
+            values.push(d.cantidad);
+        });
+
+        res.json({ labels, values });
+    } catch (error) {
+        res.status(500).json({ error: 'Error al obtener las reservaciones por mes' });
+    }
+}
+
+
+
+async function getPromedioDiasReservacion(req, res) {
+    try {
+        const promedio = await reservacionModel.getPromedioDiasReservacion();
+        res.json({ promedio });
+    } catch (error) {
+        res.status(500).json({ error: 'Error al obtener el promedio de días de estadía' });
+    }
+}
+
+
 module.exports = {
     createReservacion,
     getReservaciones,
@@ -236,7 +286,10 @@ module.exports = {
     obtenerReservacionPorId,
     isHabitacionDisponible,
     getFechasReservadas, // Agregamos el nuevo controlador
-    getFechasReservadasPaquete
+    getFechasReservadasPaquete,
+    getTotalIngresos,
+    getReservacionesPorMes,
+    getPromedioDiasReservacion
 };
 
 

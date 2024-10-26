@@ -117,5 +117,27 @@ async function getHabitacionById(id) {
     }
 }
 
-module.exports = { getHabitacionById, createHabitacion, getHabitaciones, updateHabitacion, deleteHabitacion };
+
+async function getHabitacionesMasReservadas() {
+    let connection;
+    try {
+        connection = await oracledb.getConnection(dbConfig);
+        const result = await connection.execute(`
+            SELECT H.NOMBRE, COUNT(R.ID_HABITACION) AS RESERVAS
+            FROM HABITACIONES H
+            JOIN RESERVACIONES R ON H.ID = R.ID_HABITACION
+            GROUP BY H.NOMBRE
+            ORDER BY RESERVAS DESC
+        `);
+        return result.rows;  // Devuelve las habitaciones con sus reservas
+    } catch (error) {
+        throw new Error('Error al obtener las habitaciones más reservadas: ' + error.message);
+    } finally {
+        if (connection) {
+            await connection.close();
+        }
+    }
+}
+
+module.exports = { getHabitacionById, createHabitacion, getHabitaciones, updateHabitacion, deleteHabitacion, getHabitacionesMasReservadas };
 

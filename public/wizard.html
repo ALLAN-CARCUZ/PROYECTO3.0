@@ -14,6 +14,7 @@
     <header>
     </header>
     
+
     <!-- Wizard de Reservación -->
     <div class="wizard-container">
         <h2>Reserva tu habitación</h2>
@@ -82,27 +83,46 @@
             <button type="button" class="next-btn" onclick="nextStep()">Siguiente</button>
         </div>
 
-        <!-- Step 4: Formulario de Tarjeta -->
-        <div class="step-content" id="step-4" style="display:none;">
-            <h3>Detalles de Pago con Tarjeta</h3>
+<!-- Step 4: Formulario de Tarjeta -->
+<div class="step-content" id="step-4" style="display:none;">
+    <h3>Detalles de Pago con Tarjeta</h3>
 
-            <!-- Mostrar la habitación seleccionada en el paso 4 -->
-            <div id="selected-habitacion-container-step-4"></div>
+    <!-- Mostrar la habitación seleccionada en el paso 4 -->
+    <div id="selected-habitacion-container-step-4"></div>
 
-            <!-- Formulario de Stripe -->
-            <form id="payment-form">
-                <div id="card-element">
-                    <!-- Stripe colocará su formulario aquí -->
-                </div>
-
-                <!-- Mostrar errores de validación de Stripe -->
-                <div id="card-errors" role="alert"></div>
-                <button type="submit" id="submit-payment-btn">Pagar</button>
-            </form>
-
-            <button type="button" class="prev-btn" onclick="prevStep()">Anterior</button>
-
+    <form id="payment-form">
+        <div class="form-group">
+            <label for="card-number">Número de tarjeta:</label>
+            <input type="text" id="card-number" class="input-field" placeholder="1234 5678 9012 3456" required maxlength="19">
         </div>
+
+        <div class="form-group">
+            <label for="card-name">Nombre en la tarjeta:</label>
+            <input type="text" id="card-name" class="input-field" placeholder="Nombre completo" required>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group half-width">
+                <label for="expiry-date">Fecha de expiración:</label>
+                <input type="text" id="expiry-date" class="input-field" placeholder="MM/AA" required maxlength="5">
+            </div>
+
+            <div class="form-group half-width">
+                <label for="cvc">CVC:</label>
+                <input type="text" id="cvc" class="input-field" placeholder="123" required maxlength="3">
+            </div>
+        </div>
+    </form>
+
+    <button type="button" class="prev-btn" onclick="prevStep()">Anterior</button>
+    <!-- Cambiar el texto del botón a "Pagar" -->
+<!-- Botón en el paso 4 (Pagar) -->
+<button type="button" class="next-btn" onclick="if (validarFormularioTarjeta()) { confirmarReservacion(); nextStep(); }">Pagar</button>
+
+
+</div>
+
+
 
         <!-- Step 5: Confirmación -->
         <div class="step-content" id="step-5" style="display:none;">
@@ -124,7 +144,5 @@
     <!-- Incluye Flatpickr -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://js.stripe.com/v3/"></script>
-
 </body>
 </html>
