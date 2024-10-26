@@ -329,63 +329,6 @@ function updateStepsIndicator(step) {
     });
 }
 
-
-// Establecer la fecha mínima en el campo de entrada y deshabilitar fechas reservadas
-async function setMinFechaEntrada() {
-    const fechaHoy = new Date().toISOString().split('T')[0];  // Fecha actual en formato YYYY-MM-DD
-
-    let endpoint;
-    if (paqueteId) {
-        // Si es un paquete, obtenemos las fechas reservadas para ese paquete
-        endpoint = `/api/reservaciones/fechas-reservadas-paquete/${paqueteId}`;
-    } else if (selectedHabitacion) {
-        // Si es una habitación, obtenemos las fechas reservadas de la habitación seleccionada
-        endpoint = `/api/reservaciones/fechas-reservadas/${selectedHabitacion.id}`;
-    }
-
-    if (endpoint) {
-        try {
-            const response = await fetch(endpoint);
-            const fechasReservadas = await response.json();
-
-            // Mapeamos las fechas reservadas para deshabilitarlas en el calendario
-            const fechasDeshabilitadas = fechasReservadas.map(f => {
-                const fechaInicio = new Date(f.fecha_ingreso).toISOString().split('T')[0];
-                const fechaFin = new Date(f.fecha_salida).toISOString().split('T')[0];
-                return { from: fechaInicio, to: fechaFin };
-            });
-
-            // Inicializar Flatpickr para los campos de fecha de entrada y salida
-            flatpickr("#fecha-entrada", {
-                minDate: fechaHoy,  // La fecha mínima es hoy
-                disable: fechasDeshabilitadas,  // Deshabilitar las fechas reservadas
-                onChange: function(selectedDates) {
-                    const fechaSeleccionada = selectedDates[0].toISOString().split('T')[0];
-                    // También actualiza el campo de salida para tener la misma lógica
-                    flatpickr("#fecha-salida", {
-                        minDate: fechaSeleccionada,
-                        disable: fechasDeshabilitadas
-                    });
-                }
-            });
-
-            // Flatpickr para fecha de salida, en caso de que se quiera seleccionar de inmediato
-            flatpickr("#fecha-salida", {
-                minDate: fechaHoy,
-                disable: fechasDeshabilitadas
-            });
-
-        } catch (error) {
-            console.error('Error al cargar las fechas reservadas:', error);
-        }
-    }
-}
-
-
-
-
-
-
 // Cargar habitaciones desde la API
 function loadHabitaciones() {
     fetch('/api/habitaciones')
@@ -436,6 +379,9 @@ function selectHabitacion(id, nombre, descripcion, imagen, precio) {
 
     selectedHabitacion = { id, nombre, descripcion, imagen, precio };  // Almacenar todos los detalles de la habitación seleccionada
     total = precio;
+
+     // Ahora que la habitación está seleccionada, invocamos setMinFechaEntrada()
+     setMinFechaEntrada();
 
     // Actualizar los botones
     updateButtonsState();
@@ -495,7 +441,59 @@ function displaySelectedHabitacion() {
     }
 }
 
+// Establecer la fecha mínima en el campo de entrada y deshabilitar fechas reservadas
+async function setMinFechaEntrada() {
+    const fechaHoy = new Date().toISOString().split('T')[0];  // Fecha actual en formato YYYY-MM-DD
 
+    let endpoint;
+    if (paqueteId) {
+        // Si es un paquete, obtenemos las fechas reservadas para ese paquete
+        endpoint = `/api/reservaciones/fechas-reservadas-paquete/${paqueteId}`;
+    } else if (selectedHabitacion && selectedHabitacion.id) {
+        // Si es una habitación, obtenemos las fechas reservadas de la habitación seleccionada
+        endpoint = `/api/reservaciones/fechas-reservadas/${selectedHabitacion.id}`;
+    } else {
+        console.error("No se ha seleccionado una habitación o paquete.");
+        return;
+    }
+
+    if (endpoint) {
+        try {
+            const response = await fetch(endpoint);
+            const fechasReservadas = await response.json();
+
+            // Mapeamos las fechas reservadas para deshabilitarlas en el calendario
+            const fechasDeshabilitadas = fechasReservadas.map(f => {
+                const fechaInicio = new Date(f.fecha_ingreso).toISOString().split('T')[0];
+                const fechaFin = new Date(f.fecha_salida).toISOString().split('T')[0];
+                return { from: fechaInicio, to: fechaFin };
+            });
+
+            // Inicializar Flatpickr para los campos de fecha de entrada y salida
+            flatpickr("#fecha-entrada", {
+                minDate: fechaHoy,  // La fecha mínima es hoy
+                disable: fechasDeshabilitadas,  // Deshabilitar las fechas reservadas
+                onChange: function(selectedDates) {
+                    const fechaSeleccionada = selectedDates[0].toISOString().split('T')[0];
+                    // También actualiza el campo de salida para tener la misma lógica
+                    flatpickr("#fecha-salida", {
+                        minDate: fechaSeleccionada,
+                        disable: fechasDeshabilitadas
+                    });
+                }
+            });
+
+            // Flatpickr para fecha de salida, en caso de que se quiera seleccionar de inmediato
+            flatpickr("#fecha-salida", {
+                minDate: fechaHoy,
+                disable: fechasDeshabilitadas
+            });
+
+        } catch (error) {
+            console.error('Error al cargar las fechas reservadas:', error);
+        }
+    }
+}
 
 // Cargar servicios desde la API
 function loadServicios() {
