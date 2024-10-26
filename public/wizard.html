@@ -75,54 +75,22 @@
         <div class="step-content" id="step-3" style="display:none;">
             <h3>Método de Pago</h3>
             <select id="metodo-pago">
-                <option value="tarjeta">Tarjeta de crédito/débito</option>
-                <option value="recepcion">Pagar en recepción</option>
+                <option value="">Selecciona un método de pago</option>
+                <option value="tarjeta">Pago con tarjeta</option>
+                <option value="recepcion">Pago en recepción</option>
             </select>
 
             <button type="button" class="prev-btn" onclick="prevStep()">Anterior</button>
             <button type="button" class="next-btn" onclick="nextStep()">Siguiente</button>
         </div>
 
-<!-- Step 4: Formulario de Tarjeta -->
-<div class="step-content" id="step-4" style="display:none;">
-    <h3>Detalles de Pago con Tarjeta</h3>
-
-    <!-- Mostrar la habitación seleccionada en el paso 4 -->
-    <div id="selected-habitacion-container-step-4"></div>
-
-    <form id="payment-form">
-        <div class="form-group">
-            <label for="card-number">Número de tarjeta:</label>
-            <input type="text" id="card-number" class="input-field" placeholder="1234 5678 9012 3456" required maxlength="19">
+        <!-- Paso 4: Formulario de Stripe Elements -->
+        <div class="step-content" id="step-4" style="display:none;">
+            <h3>Detalles de Pago con Tarjeta</h3>
+            <div id="card-element"></div> <!-- Aquí se montará Stripe Elements -->
+            <div id="card-errors" role="alert"></div>
+            <button type="button" class="next-btn" onclick="procesarPagoStripe()">Pagar</button>
         </div>
-
-        <div class="form-group">
-            <label for="card-name">Nombre en la tarjeta:</label>
-            <input type="text" id="card-name" class="input-field" placeholder="Nombre completo" required>
-        </div>
-
-        <div class="form-row">
-            <div class="form-group half-width">
-                <label for="expiry-date">Fecha de expiración:</label>
-                <input type="text" id="expiry-date" class="input-field" placeholder="MM/AA" required maxlength="5">
-            </div>
-
-            <div class="form-group half-width">
-                <label for="cvc">CVC:</label>
-                <input type="text" id="cvc" class="input-field" placeholder="123" required maxlength="3">
-            </div>
-        </div>
-    </form>
-
-    <button type="button" class="prev-btn" onclick="prevStep()">Anterior</button>
-    <!-- Cambiar el texto del botón a "Pagar" -->
-<!-- Botón en el paso 4 (Pagar) -->
-<button type="button" class="next-btn" onclick="if (validarFormularioTarjeta()) { confirmarReservacion(); nextStep(); }">Pagar</button>
-
-
-</div>
-
-
 
         <!-- Step 5: Confirmación -->
         <div class="step-content" id="step-5" style="display:none;">
@@ -144,5 +112,7 @@
     <!-- Incluye Flatpickr -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://js.stripe.com/v3/"></script>
+
 </body>
 </html>

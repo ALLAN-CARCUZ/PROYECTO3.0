@@ -7,6 +7,61 @@ let fechaEntrada = null;
 let fechaSalida = null;
 let paqueteId = null;  // Nuevo: para manejar el paquete_id
 
+let stripe, elements, cardElement;
+
+// Inicializar Stripe Elements
+function initializeStripeElements() {
+    if (!stripe) {  // Evitar inicializar varias veces
+        console.log("Inicializando Stripe Elements");
+        stripe = Stripe('pk_test_51Q9a2gRqSLao4U6DhgfZrCYHn3JFpiGlbm2HD2IzfK8VO6ZkgEqwh4fRVsAzEkc6iSgxW9D7PqpEcIeHIKZs4u1I00fx9gWTuE');
+        console.log("Stripe:", stripe); // Verificar si Stripe se ha inicializado correctamente
+        elements = stripe.elements();
+        cardElement = elements.create('card');
+        cardElement.mount('#card-element');
+
+        cardElement.on('change', (event) => {
+            const displayError = document.getElementById('card-errors');
+            displayError.textContent = event.error ? event.error.message : '';
+        });
+    }
+}
+
+
+
+async function procesarPagoStripe() {
+    const { paymentMethod, error } = await stripe.createPaymentMethod({
+        type: 'card',
+        card: cardElement,
+    });
+
+    if (error) {
+        document.getElementById('card-errors').textContent = error.message;
+    } else {
+        const userId = localStorage.getItem('userId');
+        console.log("ID de usuario:", userId);  // Verificar que el userId existe en localStorage
+
+        const response = await fetch('/api/pagos/create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                payment_method_id: paymentMethod.id,
+                costo_total: total * 100,  // Stripe usa centavos
+                id_usuario: userId  // O usa el ID del usuario desde el token
+            })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            alert(result.message);  // Confirmación de pago
+            currentStep = 5;  // Avanzar al paso 5
+            showStep(currentStep);  // Mostrar el paso de confirmación
+        } else {
+            alert(`Error en el pago: ${result.error}`);
+        }
+    }
+}
+
 
 
 // Capturar parámetros de la URL
@@ -99,22 +154,16 @@ function nextStep() {
     if (currentStep === 3) {
         const metodoPago = document.getElementById('metodo-pago').value;
 
-        if (metodoPago === 'recepcion') {
+        if (metodoPago === 'tarjeta') {
+            // Avanza al paso 4 para mostrar el formulario de pago con tarjeta
+            currentStep = 4;
+            showStep(currentStep);
+            return;
+        } else if (metodoPago === 'recepcion') {
             // Si se selecciona pagar en recepción, saltar al paso 5 y confirmar la reservación
             currentStep = 5;
             showStep(currentStep);
             confirmarReservacion(); // Confirmar la reservación solo una vez
-            return;
-        }
-    }
-
-    if (currentStep === 4) {
-        // Validar el formulario de tarjeta en el paso 4 solo si es pago con tarjeta
-        if (!validarFormularioTarjeta()) {
-            return; // No avanzar ni confirmar la reservación si la validación falla
-        } else {
-            currentStep = 5;  // Mover al paso 5 después de confirmar
-            showStep(currentStep);
             return;
         }
     }
@@ -165,7 +214,8 @@ function showStep(step) {
     }
     
     if (step === 4) {
-        displaySelectedHabitacionPaso4(); // Mostrar la habitación seleccionada en el paso 4
+        displaySelectedHabitacion(); // Mostrar la habitación seleccionada en el paso 4
+        initializeStripeElements(); // Inicializar Stripe Elements en el paso 4
     }
 
     updateStepsIndicator(step);
