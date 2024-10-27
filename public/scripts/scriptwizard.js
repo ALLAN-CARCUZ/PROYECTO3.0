@@ -210,7 +210,7 @@ function displaySelectedHabitacionPaso4() {
             <p><strong>${selectedHabitacion.nombre}</strong></p>
             <p>${selectedHabitacion.descripcion}</p>
             <p>ID: ${selectedHabitacion.id}</p>
-            <p class="price">Total: Q${total.toFixed(2)}</p>
+            <p class="price">Total: $ ${total.toFixed(2)}</p>
         `;
     } else {
         selectedHabitacionContainerStep4.innerHTML = '<p>No has seleccionado ninguna habitación.</p>';
@@ -307,7 +307,7 @@ function loadHabitaciones() {
                     <img src="data:image/jpeg;base64,${habitacion.imagen}" alt="${habitacion.nombre}" />
                     <h4>${habitacion.nombre}</h4>
                     <p>${habitacion.descripcion}</p>
-                    <p class="price">Precio: Q${habitacion.precio}</p>
+                    <p class="price">Precio: $ ${habitacion.precio}</p>
                     <button onclick="selectHabitacion(${habitacion.id}, '${habitacion.nombre}', '${habitacion.descripcion}', '${habitacion.imagen}', ${habitacion.precio})">Seleccionar</button>
                 `;
                 container.appendChild(habitacionCard);
@@ -398,7 +398,7 @@ function displaySelectedHabitacion() {
             <p><strong>${selectedHabitacion.nombre}</strong></p>
             <p>${selectedHabitacion.descripcion}</p>
             <p>ID: ${selectedHabitacion.id}</p>
-            <p class="price">Total: Q${selectedHabitacion.precio.toFixed(2)}</p> <!-- Asegúrate de que la clase 'price' esté presente -->
+            <p class="price">Total: $ ${selectedHabitacion.precio.toFixed(2)}</p> <!-- Asegúrate de que la clase 'price' esté presente -->
         `;
     } else {
         selectedHabitacionContainer.innerHTML = '<p>No has seleccionado ninguna habitación.</p>';
@@ -491,57 +491,63 @@ function loadServicios() {
 
 
 // Calcular precios
+// Calcular precios con desglose detallado
 function calcularPrecioTotal() {
-    // Si se selecciona un paquete, usar el precio del paquete
-    if (paqueteId) {
-        fetch(`/api/paquetes/${paqueteId}`)
-            .then(response => response.json())
-            .then(paquete => {
-                total = paquete.precio;  // Usar el precio del paquete
-                actualizarResumenPrecio();  // Actualizar el resumen del precio en la UI
-            })
-            .catch(error => {
-                console.error("Error al obtener el precio del paquete:", error);
-            });
-        return;  // Salir de la función para no continuar con la lógica de servicios
-    }
-
-    // Si no es un paquete, seguir con el cálculo normal de habitación y servicios
     if (!fechaEntrada || !fechaSalida) {
         console.error("No se han seleccionado las fechas de entrada y salida.");
-        return;  // No continuar si las fechas no están seleccionadas
+        return;
     }
 
     const fecha1 = new Date(fechaEntrada);
     const fecha2 = new Date(fechaSalida);
-    const diferenciaTiempo = fecha2.getTime() - fecha1.getTime();
-    const cantidadNoches = Math.ceil(diferenciaTiempo / (1000 * 3600 * 24)); // Convertir a días
+    const cantidadNoches = Math.ceil((fecha2.getTime() - fecha1.getTime()) / (1000 * 3600 * 24));
 
-    let totalPrecio = selectedHabitacion ? selectedHabitacion.precio * cantidadNoches : 0;
+    // Cálculo del costo de la habitación
+    let costoBaseHabitacion = selectedHabitacion ? selectedHabitacion.precio : 0;
+    let totalHabitacion = costoBaseHabitacion * cantidadNoches;
 
-    // Sumar los precios de los servicios seleccionados (si los hay)
+    // Definir el porcentaje adicional por noche para los servicios
+    const porcentajeAdicionalPorNoche = 0.1;
+
+    // Cálculo de los costos de los servicios
+    let costoServiciosBase = 0;
+    let totalServicios = 0;
+
     selectedServicios.forEach(servicioId => {
         if (preciosServicios[servicioId]) {
-            totalPrecio += preciosServicios[servicioId];
+            const costoBase = preciosServicios[servicioId];
+            const costoServicioConExtra = costoBase + (costoBase * porcentajeAdicionalPorNoche * cantidadNoches);
+            costoServiciosBase += costoBase;
+            totalServicios += costoServicioConExtra;
         }
     });
 
-    total = totalPrecio; // Actualizar el total global
-    actualizarResumenPrecio();
-}
-
-
-// Actualizar el resumen del precio en la UI
-function actualizarResumenPrecio() {
-    const resumenContainer = document.getElementById('selected-habitacion-container');
-    
-    if (resumenContainer) {
-        const priceElement = resumenContainer.querySelector('.price');
-        if (priceElement) {
-            priceElement.textContent = `Total: Q${total.toFixed(2)}`;
-        }
+    if (paqueteId) {
+        fetch(`/api/paquetes/${paqueteId}`)
+            .then(response => response.json())
+            .then(paquete => {
+                total = (paquete.precio * cantidadNoches) + totalServicios;
+                actualizarResumenPrecio(costoBaseHabitacion, cantidadNoches, totalHabitacion, costoServiciosBase, totalServicios);
+            })
+            .catch(error => {
+                console.error("Error al obtener el precio del paquete:", error);
+            });
+    } else {
+        total = totalHabitacion + totalServicios;
+        actualizarResumenPrecio(costoBaseHabitacion, cantidadNoches, totalHabitacion, costoServiciosBase, totalServicios);
     }
 }
+
+// Función para actualizar el desglose del precio en la UI
+function actualizarResumenPrecio(costoBaseHabitacion, cantidadNoches, totalHabitacion, costoServiciosBase, totalServicios) {
+    document.getElementById("costo-base-habitacion").textContent = `$${costoBaseHabitacion.toFixed(2)}`;
+    document.getElementById("cantidad-noches").textContent = cantidadNoches;
+    document.getElementById("total-habitacion").textContent = `$${totalHabitacion.toFixed(2)}`;
+    document.getElementById("costo-servicios-base").textContent = `$${costoServiciosBase.toFixed(2)}`;
+    document.getElementById("total-servicios").textContent = `$${totalServicios.toFixed(2)}`;
+    document.getElementById("total-price").textContent = `$${(totalHabitacion + totalServicios).toFixed(2)}`;
+}
+
 
 
 // Alternar selección de servicios adicionales
@@ -565,8 +571,8 @@ function toggleServicio(id, costo) {
 function updateResumen() {
     const resumenContainer = document.getElementById('resumen-container');
     resumenContainer.innerHTML = `
-        <p>Habitación seleccionada: Q${selectedHabitacion.precio}</p>
-        <p>Servicios adicionales: Q${selectedServicios.reduce((acc, servicio) => acc + servicio.costo, 0)}</p>
+        <p>Habitación seleccionada: $ ${selectedHabitacion.precio}</p>
+        <p>Servicios adicionales: $ ${selectedServicios.reduce((acc, servicio) => acc + servicio.costo, 0)}</p>
         <p>Total: Q${total}</p>
     `;
 }

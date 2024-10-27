@@ -59,9 +59,17 @@
             <div id="selected-habitacion-container"></div> <!-- Este es el contenedor donde aparecerá la habitación seleccionada -->
 
             <!-- Contenedor para mostrar el precio total actualizado -->
-            <div id="total-price-container">
-                <h4>Total: Q<span id="total-price">0.00</span></h4>
-            </div>
+           <!-- Contenedor para mostrar el desglose del precio total actualizado -->
+<div id="desglose-precio">
+    <h4>Detalles de la Reserva:</h4>
+    <p><strong>Costo base por habitación:</strong> <span id="costo-base-habitacion">0.00</span></p>
+    <p><strong>Número de noches a reservar:</strong> <span id="cantidad-noches">0</span></p>
+    <p><strong>Total de la habitación:</strong> <span id="total-habitacion">0.00</span></p>
+    <p><strong>Precio base de servicios:</strong> <span id="costo-servicios-base">0.00</span></p>
+    <p><strong>Total de servicios por reserva (con extra):</strong> <span id="total-servicios">0.00</span></p>
+    <h4>Total general: <span id="total-price">0.00</span></h4>
+</div>
+
 
             <div id="servicios-container">
                 <!-- Los servicios se cargarán dinámicamente desde el script -->
