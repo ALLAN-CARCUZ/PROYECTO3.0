@@ -84,13 +84,43 @@
             <button type="button" class="next-btn" onclick="nextStep()">Siguiente</button>
         </div>
 
-        <!-- Paso 4: Formulario de Stripe Elements -->
-        <div class="step-content" id="step-4" style="display:none;">
-            <h3>Detalles de Pago con Tarjeta</h3>
-            <div id="card-element"></div> <!-- Aquí se montará Stripe Elements -->
-            <div id="card-errors" role="alert"></div>
-            <button type="button" class="next-btn" onclick="procesarPagoStripe()">Pagar</button>
+<!-- Paso 4: Formulario de Stripe Elements -->
+<div class="step-content" id="step-4" style="display:none;">
+    <h3>Detalles de Pago con Tarjeta</h3>
+
+    <!-- Campo de Nombre en la Tarjeta -->
+    <label for="cardholder-name">Nombre en la tarjeta</label>
+    <input type="text" id="cardholder-name" placeholder="Nombre completo" required>
+
+    <!-- Contenedor de Número de Tarjeta -->
+    <label for="card-number">Número de tarjeta</label>
+    <div id="card-number" class="input-field"></div>
+
+    <!-- Contenedor de Fecha de Expiración -->
+    <div class="form-row">
+        <div class="half-width">
+            <label for="card-expiry">Fecha de Expiración</label>
+            <div id="card-expiry" class="input-field"></div>
         </div>
+
+        <!-- Contenedor de CVC -->
+        <div class="half-width">
+            <label for="card-cvc">CVC</label>
+            <div id="card-cvc" class="input-field"></div>
+        </div>
+    </div>
+
+    <!-- Contenedor de Código Postal -->
+    <label for="card-zip">Código Postal</label>
+    <div id="card-zip" class="input-field"></div>
+
+    <!-- Mensaje de Error -->
+    <div id="card-errors" role="alert"></div>
+
+    <!-- Botón de Pago -->
+    <button type="button" class="next-btn" onclick="procesarPagoStripe()">Pagar</button>
+</div>
+
 
         <!-- Step 5: Confirmación -->
         <div class="step-content" id="step-5" style="display:none;">

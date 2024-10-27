@@ -227,6 +227,121 @@ button.selected:hover {
     margin: 10px;
 }
 
+/* Estilo del formulario de pago */
+#step-4 {
+    background-color: #f4f4f9; /* Fondo claro */
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#step-4 h3 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+}
+
+/* Campo de Nombre en la Tarjeta */
+#cardholder-name {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+#cardholder-name:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 5px rgba(102, 126, 234, 0.5);
+}
+
+/* Contenedor de Stripe Elements */
+#card-element {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-top: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    background-color: white;
+}
+
+/* Estilo de los contenedores individuales */
+#card-number, #card-expiry, #card-cvc, #card-zip {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-top: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    background-color: white;
+}
+
+/* Mensajes de error */
+#card-errors {
+    color: #e74c3c;
+    margin-top: 10px;
+    font-size: 0.9rem;
+    text-align: left;
+}
+
+/* Botón de pago */
+#step-4 .next-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 1.1rem;
+    background-color: #667eea;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    margin-top: 20px;
+}
+
+#step-4 .next-btn:hover {
+    background-color: #764ba2;
+}
+
+/* Mejora para el campo de Nombre */
+label[for="cardholder-name"] {
+    font-weight: bold;
+    font-size: 1rem;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+/* Estilo para el contenedor de pago */
+#payment-summary {
+    width: 100%;
+    text-align: left;
+    font-size: 1rem;
+    margin-top: 15px;
+    color: #333;
+}
+
+#payment-summary p {
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    color: #555;
+}
+
+#total-amount {
+    font-size: 1.2rem;
+    color: #e74c3c;
+    font-weight: bold;
+    text-align: right;
+}
+
+
 /* Opcional: para ajustar el diseño en pantallas más pequeñas */
 @media (max-width: 1200px) {
     .habitacion-card {

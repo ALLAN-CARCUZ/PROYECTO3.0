@@ -11,42 +11,57 @@ let stripe, elements, cardElement;
 
 // Inicializar Stripe Elements
 function initializeStripeElements() {
-    if (!stripe) {  // Evitar inicializar varias veces
+    if (!stripe) {
         console.log("Inicializando Stripe Elements");
         stripe = Stripe('pk_test_51Q9a2gRqSLao4U6DhgfZrCYHn3JFpiGlbm2HD2IzfK8VO6ZkgEqwh4fRVsAzEkc6iSgxW9D7PqpEcIeHIKZs4u1I00fx9gWTuE');
-        console.log("Stripe:", stripe); // Verificar si Stripe se ha inicializado correctamente
         elements = stripe.elements();
-        cardElement = elements.create('card');
-        cardElement.mount('#card-element');
 
-        cardElement.on('change', (event) => {
-            const displayError = document.getElementById('card-errors');
-            displayError.textContent = event.error ? event.error.message : '';
-        });
+        // Crear cada uno de los elementos de Stripe
+        cardNumber = elements.create('cardNumber');
+        cardExpiry = elements.create('cardExpiry');
+        cardCvc = elements.create('cardCvc');
+        cardZip = elements.create('postalCode');
+
+        // Montar los elementos en sus respectivos contenedores
+        cardNumber.mount('#card-number');
+        cardExpiry.mount('#card-expiry');
+        cardCvc.mount('#card-cvc');
+        cardZip.mount('#card-zip');
+
+        // Mostrar errores en tiempo real
+        cardNumber.on('change', handleCardInput);
+        cardExpiry.on('change', handleCardInput);
+        cardCvc.on('change', handleCardInput);
+        cardZip.on('change', handleCardInput);
     }
 }
 
-
+function handleCardInput(event) {
+    const displayError = document.getElementById('card-errors');
+    displayError.textContent = event.error ? event.error.message : '';
+}
 
 async function procesarPagoStripe() {
+    const cardholderName = document.getElementById('cardholder-name').value;
     const { paymentMethod, error } = await stripe.createPaymentMethod({
         type: 'card',
-        card: cardElement,
+        card: cardNumber,
+        billing_details: {
+            name: cardholderName,
+        },
     });
 
     if (error) {
         document.getElementById('card-errors').textContent = error.message;
     } else {
-        const userId = localStorage.getItem('userId');
-        console.log("ID de usuario:", userId);  // Verificar que el userId existe en localStorage
-
+        // Enviar el ID del método de pago al backend
         const response = await fetch('/api/pagos/create', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 payment_method_id: paymentMethod.id,
                 costo_total: total * 100,  // Stripe usa centavos
-                id_usuario: userId  // O usa el ID del usuario desde el token
+                id_usuario: localStorage.getItem('userId')
             })
         });
 

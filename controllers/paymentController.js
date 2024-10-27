@@ -16,6 +16,7 @@ exports.createPayment = async (req, res) => {
             currency: 'usd',
             payment_method: payment_method_id,
             confirm: true,
+            setup_future_usage: 'off_session',  // Esto guardará el método de pago
             automatic_payment_methods: {
                 enabled: true,
                 allow_redirects: 'never'
