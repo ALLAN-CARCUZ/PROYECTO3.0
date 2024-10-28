@@ -1,7 +1,9 @@
-// Variables globales para almacenar los precios de habitaciones y servicios
+// Constante base para la API
+const API_BASE_URL = 'http://localhost:3000/api';
+
+// Variables para almacenar los precios de habitaciones y servicios
 let preciosHabitaciones = {};
 let preciosServicios = {};
-
 
 document.addEventListener('DOMContentLoaded', async () => {
     const token = localStorage.getItem('token');
@@ -15,38 +17,39 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     try {
         let response;
-        // Si el rol es "admin", cargar todas las reservaciones, si no, solo las del usuario
-        if (rol === 'admin') {
-            response = await fetch('http://localhost:3000/api/reservaciones', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-        } else {
-            response = await fetch('http://localhost:3000/api/reservaciones/usuario', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-        }
+        const reservacionesUrl = rol === 'admin' 
+            ? `${API_BASE_URL}/reservaciones` 
+            : `${API_BASE_URL}/reservaciones/usuario`;
+
+        response = await fetch(reservacionesUrl, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
 
         const reservaciones = await response.json();
 
-        if (response.ok) {
+        if (response.ok && Array.isArray(reservaciones)) {
             mostrarReservaciones(reservaciones);
         } else {
-            alert('Error al cargar reservaciones: ' + reservaciones.message);
+            console.error('La respuesta no es un array o hubo un error:', reservaciones);
+            alert('Error al cargar reservaciones: ' + (reservaciones.message || 'Datos no válidos.'));
         }
     } catch (error) {
         console.error('Error al obtener las reservaciones:', error);
         alert('Error al obtener las reservaciones.');
     }
-});
 
+    // Configurar el botón de cerrar modal
+    const closeModalButton = document.getElementById('closeUpdateModal');
+    if (closeModalButton) {
+        closeModalButton.addEventListener('click', () => closeModal('updateModal'));
+    } else {
+        console.error('No se encontró el botón de cerrar del modal');
+    }
+});
 
 function mostrarReservaciones(reservaciones) {
     const container = document.getElementById('reservacionesContainer');
@@ -59,51 +62,37 @@ function mostrarReservaciones(reservaciones) {
 
     reservaciones.forEach(reservacion => {
         const reservacionElement = document.createElement('div');
-        reservacionElement.classList.add('reservacion-item');
+        reservacionElement.classList.add('reservacion-card');
         
-        // Crear una lista de servicios
-        let serviciosList = '';
-        if (reservacion.servicios && reservacion.servicios.length > 0) {
-            serviciosList = reservacion.servicios.map(servicio => `<li>${servicio}</li>`).join('');
-        } else {
-            serviciosList = '<li>No hay servicios adicionales</li>';
-        }
+        let serviciosList = reservacion.servicios && reservacion.servicios.length > 0
+            ? reservacion.servicios.map(servicio => `<li>${servicio}</li>`).join('')
+            : '<li>No hay servicios adicionales</li>';
+        
+        let detallesReservacion = reservacion.nombre_paquete
+            ? `<p><strong>Paquete:</strong> ${reservacion.nombre_paquete}</p><p><strong>Incluye:</strong> ${reservacion.nombre_habitacion || 'Habitación no disponible'}</p>`
+            : `<p><strong>Habitación:</strong> ${reservacion.nombre_habitacion || 'Habitación no disponible'}</p>`;
 
-        // Mostrar información de la reservación según tenga habitación o paquete
-        let detallesReservacion = '';
-        if (reservacion.nombre_paquete) {
-            detallesReservacion = `
-                <p>Paquete: ${reservacion.nombre_paquete}</p>
-                <p>Incluye la habitación: ${reservacion.nombre_habitacion || 'Habitación no disponible'}</p>
-            `;
-        } else {
-            detallesReservacion = `
-                <p>Habitación: ${reservacion.nombre_habitacion || 'Habitación no disponible'}</p>
-            `;
-        }
-
-        // Botones para modificar y cancelar
-        const modificarBtn = `<button onclick="modificarReservacion(${reservacion.id_reservacion})">Modificar</button>`;
-        const cancelarBtn = `<button onclick="cancelarReservacion(${reservacion.id_reservacion})">Cancelar</button>`;
-
-        // Renderizar la información de la reservación en el contenedor
         reservacionElement.innerHTML = `
-            <h3>Reservación ID: ${reservacion.id_reservacion}</h3>
-            <p>Fecha de Ingreso: ${new Date(reservacion.fecha_ingreso).toLocaleDateString()}</p>
-            <p>Fecha de Salida: ${new Date(reservacion.fecha_salida).toLocaleDateString()}</p>
-            ${detallesReservacion} <!-- Mostrar detalles de paquete o habitación -->
-            <p>Total: Q${reservacion.costo_total.toFixed(2)}</p>
-            <h4>Servicios Incluidos:</h4>
-            <ul>${serviciosList}</ul>
-            ${modificarBtn}
-            ${cancelarBtn}
+            <div class="reservacion-header">
+                <h3>Reservación ID: ${reservacion.id_reservacion}</h3>
+            </div>
+            <div class="reservacion-body">
+                <p><strong>Usuario:</strong> ${reservacion.nombre_usuario || 'No disponible'}</p> <!-- Aquí debe mostrar el nombre del usuario -->
+                ${detallesReservacion}
+                <p><strong>Fecha de Ingreso:</strong> ${new Date(reservacion.fecha_ingreso).toLocaleDateString()}</p>
+                <p><strong>Fecha de Salida:</strong> ${new Date(reservacion.fecha_salida).toLocaleDateString()}</p>
+                <p><strong>Total:</strong> Q${reservacion.costo_total.toFixed(2)}</p>
+                <h4>Servicios Incluidos:</h4>
+                <ul>${serviciosList}</ul>
+            </div>
+            <div class="reservacion-footer">
+                <button class="btn modificar" onclick="modificarReservacion(${reservacion.id_reservacion})">Modificar</button>
+                <button class="btn cancelar" onclick="cancelarReservacion(${reservacion.id_reservacion})">Cancelar</button>
+            </div>
         `;
         container.appendChild(reservacionElement);
     });
 }
-
-
-
 
 
 // Función para cancelar una reservación
@@ -112,7 +101,7 @@ async function cancelarReservacion(id_reservacion) {
     
     if (confirm('¿Estás seguro de que deseas cancelar esta reservación?')) {
         try {
-            const response = await fetch(`http://localhost:3000/api/reservaciones/cancel/${id_reservacion}`, {
+            const response = await fetch(`${API_BASE_URL}/reservaciones/cancel/${id_reservacion}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -134,82 +123,92 @@ async function cancelarReservacion(id_reservacion) {
     }
 }
 
-
 // Función para modificar una reservación (ahora abre el popup)
 async function modificarReservacion(id_reservacion) {
-    // Obtener los datos de la reservación específica desde la API
-    const response = await fetch(`http://localhost:3000/api/reservaciones/${id_reservacion}`);
-    const reservacion = await response.json();
-
-    const updateForm = `
-        <label for="newIdHabitacion">Nueva habitación:</label>
-        <select id="newIdHabitacion" name="newIdHabitacion"></select><br>
-
-        <label for="serviciosContainer">Servicios:</label>
-        <div id="serviciosContainer"></div><br>
-
-        <label for="newCostoTotal">Nuevo costo total:</label>
-        <input type="text" id="newCostoTotal" readonly><br>
-
-        <label for="newMetodoPago">Nuevo método de pago:</label>
-        <input type="text" id="newMetodoPago" value="${reservacion.metodo_pago}"><br>
-
-        <label for="newFechaIngreso">Nueva fecha de ingreso:</label>
-        <input type="date" id="newFechaIngreso" value="${new Date(reservacion.fecha_ingreso).toISOString().split('T')[0]}"><br>
-
-        <label for="newFechaSalida">Nueva fecha de salida:</label>
-        <input type="date" id="newFechaSalida" value="${new Date(reservacion.fecha_salida).toISOString().split('T')[0]}"><br>
-
-        <button id="saveChanges">Guardar cambios</button>
-    `;
-
-    document.getElementById('updateFormContainer').innerHTML = updateForm;
-
-    // Cargar los datos de habitaciones y servicios, y abrir el popup
-    await cargarDatosFormularioActualizacion(reservacion);
-
-    // Cargar y deshabilitar las fechas ocupadas para la habitación seleccionada
-    if (reservacion.id_habitacion) {
-        const fechasOcupadas = await cargarFechasOcupadas(reservacion.id_habitacion);
-
-        flatpickr("#newFechaIngreso", {
-            minDate: "today",
-            disable: fechasOcupadas,
-            onChange: function(selectedDates) {
-                const fechaSeleccionada = selectedDates[0].toISOString().split('T')[0];
-                flatpickr("#newFechaSalida", {
-                    minDate: fechaSeleccionada,
-                    disable: fechasOcupadas
-                });
+    try {
+        const response = await fetch(`${API_BASE_URL}/reservaciones/${id_reservacion}`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
         });
+        const reservacion = await response.json();
 
-        flatpickr("#newFechaSalida", {
-            minDate: "today",
-            disable: fechasOcupadas
-        });
+        const updateForm = `
+            <label for="newIdHabitacion">Nueva habitación:</label>
+            <select id="newIdHabitacion" name="newIdHabitacion"></select><br>
+
+            <label for="serviciosContainer">Servicios:</label>
+            <div id="serviciosContainer"></div><br>
+
+            <label for="newCostoTotal">Nuevo costo total:</label>
+            <input type="text" id="newCostoTotal" readonly><br>
+
+            <label for="newMetodoPago">Nuevo método de pago:</label>
+            <input type="text" id="newMetodoPago" value="${reservacion.metodo_pago}"><br>
+
+            <label for="newFechaIngreso">Nueva fecha de ingreso:</label>
+            <input type="date" id="newFechaIngreso" value="${new Date(reservacion.fecha_ingreso).toISOString().split('T')[0]}"><br>
+
+            <label for="newFechaSalida">Nueva fecha de salida:</label>
+            <input type="date" id="newFechaSalida" value="${new Date(reservacion.fecha_salida).toISOString().split('T')[0]}"><br>
+
+            <button id="saveChanges">Guardar cambios</button>
+        `;
+
+        document.getElementById('updateFormContainer').innerHTML = updateForm;
+
+        // Cargar los datos de habitaciones y servicios, y abrir el popup
+        await cargarDatosFormularioActualizacion(reservacion);
+
+        // Cargar y deshabilitar las fechas ocupadas para la habitación seleccionada
+        if (reservacion.id_habitacion) {
+            const fechasOcupadas = await cargarFechasOcupadas(reservacion.id_habitacion);
+
+            flatpickr("#newFechaIngreso", {
+                minDate: "today",
+                disable: fechasOcupadas,
+                onChange: function(selectedDates) {
+                    const fechaSeleccionada = selectedDates[0].toISOString().split('T')[0];
+                    flatpickr("#newFechaSalida", {
+                        minDate: fechaSeleccionada,
+                        disable: fechasOcupadas
+                    });
+                }
+            });
+
+            flatpickr("#newFechaSalida", {
+                minDate: "today",
+                disable: fechasOcupadas
+            });
+        }
+
+        openModal('updateModal');
+
+        // Añadir evento al botón para guardar cambios
+        document.getElementById('saveChanges').onclick = async () => {
+            const newIdHabitacion = document.getElementById('newIdHabitacion').value;
+            const newServicios = Array.from(document.querySelectorAll('input[name="servicios"]:checked')).map(cb => cb.value);
+            const newCostoTotal = parseFloat(document.getElementById('newCostoTotal').value.replace('Q', ''));
+            const newMetodoPago = document.getElementById('newMetodoPago').value;
+            const newFechaIngreso = document.getElementById('newFechaIngreso').value;
+            const newFechaSalida = document.getElementById('newFechaSalida').value;
+
+            await updateReservacion(id_reservacion, newIdHabitacion, newServicios.length > 0 ? newServicios : [], newCostoTotal, newMetodoPago, newFechaIngreso, newFechaSalida);
+        };
+    } catch (error) {
+        console.error('Error al obtener la reservación para modificar:', error);
+        alert('Error al obtener la reservación.');
     }
-
-    openModal('updateModal');
-
-    // Añadir evento al botón para guardar cambios
-    document.getElementById('saveChanges').onclick = async () => {
-        const newIdHabitacion = document.getElementById('newIdHabitacion').value;
-        const newServicios = Array.from(document.querySelectorAll('input[name="servicios"]:checked')).map(cb => cb.value);
-        const newCostoTotal = parseFloat(document.getElementById('newCostoTotal').value.replace('Q', ''));
-        const newMetodoPago = document.getElementById('newMetodoPago').value;
-        const newFechaIngreso = document.getElementById('newFechaIngreso').value;
-        const newFechaSalida = document.getElementById('newFechaSalida').value;
-
-        await updateReservacion(id_reservacion, newIdHabitacion, newServicios.length > 0 ? newServicios : [], newCostoTotal, newMetodoPago, newFechaIngreso, newFechaSalida);
-    };
 }
-
 
 // Función para cargar habitaciones y servicios en el formulario de actualización
 async function cargarDatosFormularioActualizacion(reservacion) {
     try {
-        const response = await fetch('/api/paquetes/datos/formulario');
+        const response = await fetch(`${API_BASE_URL}/paquetes/datos/formulario`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
         const { habitaciones, servicios } = await response.json();
 
         // Cargar habitaciones en el select
@@ -219,7 +218,7 @@ async function cargarDatosFormularioActualizacion(reservacion) {
         habitaciones.forEach(habitacion => {
             const option = document.createElement('option');
             option.value = habitacion.id;
-            option.textContent = `${habitacion.nombre} - $${habitacion.precio}`;
+            option.textContent = `${habitacion.nombre} - Q${habitacion.precio}`;
             preciosHabitaciones[habitacion.id] = habitacion.precio;
 
             if (habitacion.id == reservacion.id_habitacion) {
@@ -250,7 +249,7 @@ async function cargarDatosFormularioActualizacion(reservacion) {
 
             checkbox.addEventListener('change', calcularPrecioTotal);
             label.appendChild(checkbox);
-            label.appendChild(document.createTextNode(`${servicio.nombre} - $${servicio.costo}`));
+            label.appendChild(document.createTextNode(`${servicio.nombre} - Q${servicio.costo}`));
             serviciosContainer.appendChild(label);
         });
 
@@ -259,8 +258,6 @@ async function cargarDatosFormularioActualizacion(reservacion) {
         console.error('Error al cargar habitaciones y servicios:', error);
     }
 }
-
-
 
 // Función para calcular el precio total de la reservación
 function calcularPrecioTotal() {
@@ -283,7 +280,6 @@ function calcularPrecioTotal() {
 }
 
 // Función para abrir un modal
-// Función para abrir el modal
 function openModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
@@ -303,33 +299,12 @@ function closeModal(modalId) {
     }
 }
 
-// Evento para el botón de cerrar modal
-document.addEventListener('DOMContentLoaded', () => {
-    const closeModalButton = document.getElementById('closeUpdateModal');
-    if (closeModalButton) {
-        closeModalButton.addEventListener('click', () => closeModal('updateModal'));
-    } else {
-        console.error('No se encontró el botón de cerrar del modal');
-    }
-});
-
-// Evento para el botón de cerrar modal
-document.addEventListener('DOMContentLoaded', () => {
-    const closeModalButton = document.getElementById('closeUpdateModal');
-    if (closeModalButton) {
-        closeModalButton.addEventListener('click', () => closeModal('updateModal'));
-    } else {
-        console.error('No se encontró el botón de cerrar del modal');
-    }
-});
-
-
 // Función para actualizar una reservación
 async function updateReservacion(id_reservacion, newIdHabitacion, newServicios, newCostoTotal, newMetodoPago, newFechaIngreso, newFechaSalida) {
     const token = localStorage.getItem('token');
     
     try {
-        const response = await fetch(`http://localhost:3000/api/reservaciones/update/${id_reservacion}`, {
+        const response = await fetch(`${API_BASE_URL}/reservaciones/update/${id_reservacion}`, {
             method: 'PUT',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -359,104 +334,21 @@ async function updateReservacion(id_reservacion, newIdHabitacion, newServicios, 
     }
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
-    const token = localStorage.getItem('token');
-    const rol = localStorage.getItem('rol');
-
-    if (!token) {
-        alert('Debes iniciar sesión para ver tus reservaciones.');
-        window.location.href = 'login.html';
-        return;
-    }
-
-    try {
-        let response;
-        // Si el rol es "admin", cargar todas las reservaciones, si no, solo las del usuario
-        if (rol === 'admin') {
-            response = await fetch('http://localhost:3000/api/reservaciones', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-        } else {
-            response = await fetch('http://localhost:3000/api/reservaciones/usuario', {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-        }
-
-        const reservaciones = await response.json();
-
-        // Agregar una verificación para asegurarse de que la respuesta sea un array
-        if (response.ok && Array.isArray(reservaciones)) {
-            mostrarReservaciones(reservaciones);
-        } else {
-            console.error('La respuesta no es un array o hubo un error:', reservaciones);
-            alert('Error al cargar reservaciones: ' + (reservaciones.message || 'Datos no válidos.'));
-        }
-    } catch (error) {
-        console.error('Error al obtener las reservaciones:', error);
-        alert('Error al obtener las reservaciones.');
-    }
-});
-
-function mostrarReservaciones(reservaciones) {
-    const container = document.getElementById('reservacionesContainer');
-    container.innerHTML = '';
-
-    // Verificación adicional antes de intentar recorrer el array
-    if (!Array.isArray(reservaciones) || reservaciones.length === 0) {
-        container.innerHTML = '<p>No tienes reservaciones aún.</p>';
-        return;
-    }
-
-    reservaciones.forEach(reservacion => {
-        console.log('Datos de la reservación:', reservacion); // Para ver la estructura de la reservación en la consola
-    
-        const reservacionElement = document.createElement('div');
-        reservacionElement.classList.add('reservacion-item');
-        
-        // Crear una lista de servicios
-        let serviciosList = '';
-        if (reservacion.servicios && reservacion.servicios.length > 0) {
-            serviciosList = reservacion.servicios.map(servicio => `<li>${servicio}</li>`).join('');
-        } else {
-            serviciosList = '<li>No hay servicios adicionales</li>';
-        }
-    
-        // Botones para modificar y cancelar
-        const modificarBtn = `<button onclick="modificarReservacion(${reservacion.id_reservacion})">Modificar</button>`;
-        const cancelarBtn = `<button onclick="cancelarReservacion(${reservacion.id_reservacion})">Cancelar</button>`;
-    
-        // Agregar el nombre del usuario en la interfaz
-        reservacionElement.innerHTML = `
-            <h3>Reservación ID: ${reservacion.id_reservacion}</h3>
-            <p>Usuario: ${reservacion.nombre_usuario || 'Usuario no disponible'}</p>  <!-- Mostrar el nombre del usuario -->
-            <p>Habitación: ${reservacion.nombre_habitacion || 'Nombre de la habitación no disponible'}</p>
-            <p>Fecha de Ingreso: ${new Date(reservacion.fecha_ingreso).toLocaleDateString()}</p>
-            <p>Fecha de Salida: ${new Date(reservacion.fecha_salida).toLocaleDateString()}</p>
-            <p>Total: Q${reservacion.costo_total.toFixed(2)}</p>
-            <h4>Servicios Incluidos:</h4>
-            <ul>${serviciosList}</ul>
-            ${modificarBtn}
-            ${cancelarBtn}
-        `;
-        container.appendChild(reservacionElement);
-    });
-}
-
-
 async function cargarFechasOcupadas(habitacionId) {
-    const response = await fetch(`/api/reservaciones/fechas-reservadas/${habitacionId}`);
-    const fechasReservadas = await response.json();
+    try {
+        const response = await fetch(`${API_BASE_URL}/reservaciones/fechas-reservadas/${habitacionId}`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        const fechasReservadas = await response.json();
 
-    return fechasReservadas.map(f => ({
-        from: new Date(f.fecha_ingreso).toISOString().split('T')[0],
-        to: new Date(f.fecha_salida).toISOString().split('T')[0]
-    }));
+        return fechasReservadas.map(f => ({
+            from: new Date(f.fecha_ingreso).toISOString().split('T')[0],
+            to: new Date(f.fecha_salida).toISOString().split('T')[0]
+        }));
+    } catch (error) {
+        console.error('Error al cargar fechas ocupadas:', error);
+        return [];
+    }
 }

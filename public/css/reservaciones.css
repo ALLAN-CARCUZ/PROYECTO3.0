@@ -58,7 +58,6 @@ td {
     border-bottom: 1px solid #ddd;
 }
 
-/* Filas alternas y hover */
 tr:nth-child(even) td {
     background-color: #f9f9f9;
 }
@@ -76,11 +75,11 @@ td:nth-child(5) {
 
 /* Estilos del modal */
 .modal {
-    display: none;
+    display: none; /* Oculto por defecto */
     position: fixed;
     z-index: 1;
-    left: 0;
     top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
@@ -136,42 +135,8 @@ td:nth-child(5) {
 
     .modal-content {
         width: 90%;
+        max-width: 500px;
     }
-}
-
-
-/* Estilos de los botones del modal */
-.modal-buttons {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
-}
-
-.modal-buttons button {
-    padding: 10px 20px;
-    font-size: 1rem;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-#modifyReservation {
-    background-color: #667eea;
-    color: white;
-}
-
-#modifyReservation:hover {
-    background-color: #5663ce;
-}
-
-#deleteReservation {
-    background-color: #e74c3c;
-    color: white;
-}
-
-#deleteReservation:hover {
-    background-color: #c0392b;
 }
 
 /* Footer */
@@ -184,30 +149,94 @@ footer {
     width: 100%;
 }
 
-.modal {
-    display: none; /* Oculto por defecto */
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+/* Estilos de las tarjetas de reservaciones */
+#reservacionesContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
     justify-content: center;
-    align-items: center;
 }
 
-.modal-content {
-    background-color: white;
-    padding: 20px;
-    border-radius: 5px;
-    width: 80%;
-    max-width: 500px;
+.reservacion-card {
+    width: 300px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    text-align: left;
+    transition: transform 0.3s ease;
+    padding: 15px;
 }
 
-.close {
-    position: absolute;
-    top: 10px;
-    right: 20px;
-    font-size: 24px;
+.reservacion-card:hover {
+    transform: translateY(-5px);
+}
+
+.reservacion-header {
+    background: #f5f5f5;
+    padding: 15px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.reservacion-body {
+    padding: 15px;
+}
+
+.reservacion-body p {
+    margin: 10px 0;
+    color: #555;
+}
+
+.reservacion-body ul {
+    padding-left: 20px;
+    margin: 10px 0;
+}
+
+.reservacion-footer {
+    display: flex;
+    justify-content: space-around;
+    padding: 10px;
+    background: #f5f5f5;
+}
+
+/* Botones */
+.btn {
+    padding: 10px 20px;
+    color: white;
+    border: none;
+    border-radius: 4px;
     cursor: pointer;
+    transition: background-color 0.3s ease, opacity 0.3s ease;
+}
+
+.btn-modificar {
+    background-color: #28a745; /* Verde para modificar */
+}
+
+.btn-modificar:hover {
+    background-color: #218838;
+}
+
+.btn-cancelar {
+    background-color: #dc3545; /* Rojo para cancelar */
+}
+
+.btn-cancelar:hover {
+    background-color: #c82333;
+}
+
+.button-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+
+.reservacion-imagen {
+    width: 100%;
+    max-width: 200px; /* Ajusta el tamaño máximo según sea necesario */
+    height: auto;
+    margin-bottom: 15px;
+    border-radius: 5px;
 }

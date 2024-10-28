@@ -97,17 +97,57 @@ async function deleteHabitacion(id) {
     }
 }
 
+// Función auxiliar para convertir LOB a Buffer
+function lobToBuffer(lob) {
+    return new Promise((resolve, reject) => {
+        let chunks = [];
+        lob.on('data', chunk => {
+            chunks.push(chunk);
+        });
+        lob.on('end', () => {
+            resolve(Buffer.concat(chunks));
+        });
+        lob.on('error', err => {
+            reject(err);
+        });
+    });
+}
 
-// Obtener una habitación por su ID
 async function getHabitacionById(id) {
     let connection;
     try {
         connection = await oracledb.getConnection(dbConfig);
         const result = await connection.execute(
-            `SELECT * FROM HABITACIONES WHERE ID = :id`,
-            [id]
+            `SELECT id, nombre, descripcion, precio, imagen FROM habitaciones WHERE id = :id`,
+            { id },
+            {
+                outFormat: oracledb.OUT_FORMAT_OBJECT,
+                resultSet: true
+            }
         );
-        return result.rows.length ? result.rows[0] : null;
+
+        const rs = result.resultSet;
+        const row = await rs.getRow();
+
+        if (!row) {
+            return null;
+        }
+
+        let imagenBase64 = '';
+        if (row.IMAGEN) {
+            const buffer = await lobToBuffer(row.IMAGEN);
+            imagenBase64 = buffer.toString('base64');
+        }
+
+        await rs.close();
+
+        return {
+            id: row.ID,
+            nombre: row.NOMBRE,
+            descripcion: row.DESCRIPCION,
+            precio: row.PRECIO,
+            imagen: imagenBase64
+        };
     } catch (err) {
         throw new Error('Error al obtener la habitación: ' + err.message);
     } finally {
@@ -116,6 +156,7 @@ async function getHabitacionById(id) {
         }
     }
 }
+
 
 
 async function getHabitacionesMasReservadas() {

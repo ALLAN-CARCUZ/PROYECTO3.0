@@ -106,15 +106,16 @@ async function getReservaciones() {
             let reservacion = reservaciones.find(r => r.id_reservacion === id_reservacion);
 
             if (!reservacion) {
-                const imagenHabitacionBase64 = imagen_habitacion ? (await imagen_habitacion.getData()).toString('base64') : null;
-                const imagenPaqueteBase64 = imagen_paquete ? (await imagen_paquete.getData()).toString('base64') : null;
+                // Convierte la imagen a base64 solo si no es nula y es un BLOB
+                const imagenHabitacionBase64 = imagen_habitacion && imagen_habitacion instanceof Buffer ? imagen_habitacion.toString('base64') : null;
+                const imagenPaqueteBase64 = imagen_paquete && imagen_paquete instanceof Buffer ? imagen_paquete.toString('base64') : null;
 
                 reservacion = {
                     id_reservacion,
                     nombre_habitacion,
-                    imagen_habitacion: imagenHabitacionBase64,  // Aquí debería aparecer la imagen en base64
+                    imagen_habitacion: imagenHabitacionBase64,
                     nombre_paquete,
-                    imagen_paquete: imagenPaqueteBase64,         // Aquí debería aparecer la imagen en base64
+                    imagen_paquete: imagenPaqueteBase64,
                     fecha_ingreso,
                     fecha_salida,
                     costo_total,
@@ -137,6 +138,9 @@ async function getReservaciones() {
         }
     }
 }
+
+
+
 
 
 async function updateReservacion(id_reservacion, id_habitacion, id_paquete, costo_total, metodo_pago, fecha_ingreso, fecha_salida, servicios) {
@@ -235,15 +239,17 @@ async function getReservacionesByUsuario(id_usuario) {
     try {
         connection = await oracledb.getConnection(dbConfig);
         
-        // Modificar la consulta para incluir paquetes y habitaciones
+        // Modificar la consulta para incluir el nombre del usuario
         const result = await connection.execute(
             `SELECT r.ID_RESERVACION, h.NOMBRE AS NOMBRE_HABITACION, p.NOMBRE AS NOMBRE_PAQUETE, 
-                    r.FECHA_INGRESO, r.FECHA_SALIDA, r.COSTO_TOTAL, s.NOMBRE AS NOMBRE_SERVICIO
+                    r.FECHA_INGRESO, r.FECHA_SALIDA, r.COSTO_TOTAL, s.NOMBRE AS NOMBRE_SERVICIO, 
+                    u.NOMBRE AS NOMBRE_USUARIO  -- Aquí obtenemos el nombre del usuario
              FROM RESERVACIONES r
              LEFT JOIN HABITACIONES h ON r.ID_HABITACION = h.ID
              LEFT JOIN PAQUETES p ON r.ID_PAQUETE = p.ID
              LEFT JOIN RESERVACIONES_SERVICIOS rs ON r.ID_RESERVACION = rs.ID_RESERVACION
              LEFT JOIN SERVICIOS s ON rs.ID_SERVICIO = s.ID
+             JOIN USUARIOS u ON r.ID_USUARIO = u.ID  -- Unir con la tabla de usuarios para obtener el nombre
              WHERE r.ID_USUARIO = :id_usuario
              ORDER BY r.FECHA_INGRESO DESC`,
             [id_usuario]
@@ -252,7 +258,7 @@ async function getReservacionesByUsuario(id_usuario) {
         const reservaciones = [];
 
         result.rows.forEach(row => {
-            const [id_reservacion, nombre_habitacion, nombre_paquete, fecha_ingreso, fecha_salida, costo_total, nombre_servicio] = row;
+            const [id_reservacion, nombre_habitacion, nombre_paquete, fecha_ingreso, fecha_salida, costo_total, nombre_servicio, nombre_usuario] = row;
 
             let reservacion = reservaciones.find(r => r.id_reservacion === id_reservacion);
 
@@ -260,10 +266,11 @@ async function getReservacionesByUsuario(id_usuario) {
                 reservacion = {
                     id_reservacion,
                     nombre_habitacion,
-                    nombre_paquete,  // Ahora también mostramos el nombre del paquete
+                    nombre_paquete,  // Nombre del paquete
                     fecha_ingreso,
                     fecha_salida,
                     costo_total,
+                    nombre_usuario,  // Nombre del usuario
                     servicios: []
                 };
                 reservaciones.push(reservacion);
@@ -285,6 +292,7 @@ async function getReservacionesByUsuario(id_usuario) {
         }
     }
 }
+
 
 
 // Obtener una reservación por ID

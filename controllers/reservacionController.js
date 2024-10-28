@@ -101,16 +101,18 @@ async function createReservacion(req, res) {
 
 // Función para obtener las reservaciones del usuario autenticado
 async function getReservacionesByUsuario(req, res) {
-    const id_usuario = req.user.id;  // El id del usuario autenticado viene del token decodificado por el middleware
+    const id_usuario = req.user.id;
 
     try {
         const reservaciones = await reservacionModel.getReservacionesByUsuario(id_usuario);
         res.status(200).json(reservaciones);
     } catch (error) {
-        console.error('Error al obtener las reservaciones del usuario:', error);  // <-- Agregar este log
+        console.error('Error al obtener las reservaciones del usuario:', error);
         res.status(500).json({ error: error.message });
     }
 }
+
+
 
 // Obtener todas las reservaciones (GET)
 async function getReservaciones(req, res) {
