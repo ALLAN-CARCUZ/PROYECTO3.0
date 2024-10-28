@@ -226,12 +226,12 @@ function showStep(step) {
 
     // Si estamos en el paso 2 o en el paso 4, mostrar la habitación seleccionada
     if (step === 2) {
-        displaySelectedHabitacion();
+        displaySelectedHabitacion(); // Asegúrate de que la función se llame en el paso 2
         calcularPrecioTotal();
     }
     
     if (step === 4) {
-        displaySelectedHabitacion(); // Mostrar la habitación seleccionada en el paso 4
+        displaySelectedHabitacionPaso4(); // Llamada a la función de paso 4 específica
         initializeStripeElements(); // Inicializar Stripe Elements en el paso 4
     }
 
@@ -390,7 +390,7 @@ function updateButtonsState() {
 // Mostrar la habitación seleccionada en el paso 2
 function displaySelectedHabitacion() {
     const selectedHabitacionContainer = document.getElementById('selected-habitacion-container');
-    
+
     if (selectedHabitacion) {
         selectedHabitacionContainer.innerHTML = `
             <h4>Habitación seleccionada</h4>
@@ -398,12 +398,13 @@ function displaySelectedHabitacion() {
             <p><strong>${selectedHabitacion.nombre}</strong></p>
             <p>${selectedHabitacion.descripcion}</p>
             <p>ID: ${selectedHabitacion.id}</p>
-            <p class="price">Total: $ ${selectedHabitacion.precio.toFixed(2)}</p> <!-- Asegúrate de que la clase 'price' esté presente -->
+            <p class="price">Total: $ ${selectedHabitacion.precio.toFixed(2)}</p>
         `;
     } else {
         selectedHabitacionContainer.innerHTML = '<p>No has seleccionado ninguna habitación.</p>';
     }
 }
+
 
 // Establecer la fecha mínima en el campo de entrada y deshabilitar fechas reservadas
 async function setMinFechaEntrada() {

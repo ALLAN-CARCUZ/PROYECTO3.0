@@ -172,9 +172,13 @@ async function loadPaquetes() {
             `;
 
             // Modificación: Agregar evento para redirigir a la página de reservación
-            li.addEventListener('click', () => {
-                redirigirAReservacion(paquete.id);
+            li.addEventListener('click', (event) => {
+                // Solo redirige si el clic no fue en un botón
+                if (event.target.tagName !== 'BUTTON') {
+                    redirigirAReservacion(paquete.id);
+                }
             });
+            
 
             if (rol === 'admin') {
                 const updateBtn = document.createElement('button');
