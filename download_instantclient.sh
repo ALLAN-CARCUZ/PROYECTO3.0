@@ -19,5 +19,3 @@ download_from_drive "18O1O1CTIduJENAxISNCoVIzDH0lh9vW8" "libclntsh.so.21.1"
 # Asegurar permisos de ejecución en las bibliotecas descargadas
 chmod 755 instantclient/instantclient_21_16/*.so
 
-# Crear enlace simbólico para la biblioteca principal
-ln -s instantclient/instantclient_21_16/libclntsh.so.21.1 instantclient/instantclient_21_16/libclntsh.so
