@@ -37,6 +37,9 @@ app.use('/api/pagos', paymentRouter);  // Usar el enrutador para pagos
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+console.log("LD_LIBRARY_PATH:", process.env.LD_LIBRARY_PATH);
+
+
 // Ejemplo de conexión a la base de datos Oracle
 async function connectToDatabase() {
     let connection;

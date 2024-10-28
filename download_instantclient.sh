@@ -16,3 +16,4 @@ download_from_drive "1YNB1immIYWep2QORD7gyNdFsOS0qXT2G" "libociei.so"
 download_from_drive "13ME6YksV0fDPZ8Zj2dHFEjRTPQ9TDp5D" "libnnz21.so"
 
 ls -l instantclient/instantclient_21_16
+chmod 755 instantclient/instantclient_21_16/*
