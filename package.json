@@ -28,6 +28,9 @@
     "sequelize-oracle": "^3.3.2-0.0",
     "stripe": "^17.2.1"
   },
+  "engines": {
+    "node": "14.x"
+  },
   "devDependencies": {
     "sequelize-cli": "^6.6.2"
   }
