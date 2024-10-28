@@ -18,3 +18,7 @@ ln -s instantclient/instantclient_21_16/libclntsh.so.21.1 instantclient/instantc
 echo "Contenido de instantclient/instantclient_21_16:"
 ls -l instantclient/instantclient_21_16
 echo "LD_LIBRARY_PATH es $LD_LIBRARY_PATH"
+
+ln -s /opt/render/project/src/instantclient/instantclient_21_16/libclntsh.so /usr/lib/libclntsh.so
+ln -s /opt/render/project/src/instantclient/instantclient_21_16/libociei.so /usr/lib/libociei.so
+ln -s /opt/render/project/src/instantclient/instantclient_21_16/libnnz21.so /usr/lib/libnnz21.so
