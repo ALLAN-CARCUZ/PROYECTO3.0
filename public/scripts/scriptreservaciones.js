@@ -229,3 +229,8 @@ async function deleteReservacion(id) {
 
 // Cargar las reservaciones al cargar la página
 document.addEventListener('DOMContentLoaded', cargarReservaciones);
+
+// Asignar evento al botón de cerrar modal
+document.getElementById('closeUpdateModal').addEventListener('click', () => {
+    closeModal('updateModal');
+});

@@ -84,48 +84,50 @@ async function getReservaciones() {
     try {
         connection = await oracledb.getConnection(dbConfig);
         
-        // Consulta para obtener reservaciones tanto de habitaciones como de paquetes
         const result = await connection.execute(
-            `SELECT r.ID_RESERVACION, h.NOMBRE AS NOMBRE_HABITACION, p.NOMBRE AS NOMBRE_PAQUETE, 
-                    r.FECHA_INGRESO, r.FECHA_SALIDA, r.COSTO_TOTAL, s.NOMBRE AS NOMBRE_SERVICIO, 
-                    u.NOMBRE AS NOMBRE_USUARIO
+            `SELECT r.ID_RESERVACION, h.NOMBRE AS NOMBRE_HABITACION, h.IMAGEN AS IMAGEN_HABITACION, 
+                    p.NOMBRE AS NOMBRE_PAQUETE, p.IMAGEN AS IMAGEN_PAQUETE, 
+                    r.FECHA_INGRESO, r.FECHA_SALIDA, r.COSTO_TOTAL, 
+                    s.NOMBRE AS NOMBRE_SERVICIO, u.NOMBRE AS NOMBRE_USUARIO
              FROM RESERVACIONES r
              LEFT JOIN HABITACIONES h ON r.ID_HABITACION = h.ID
              LEFT JOIN PAQUETES p ON r.ID_PAQUETE = p.ID
              LEFT JOIN RESERVACIONES_SERVICIOS rs ON r.ID_RESERVACION = rs.ID_RESERVACION
              LEFT JOIN SERVICIOS s ON rs.ID_SERVICIO = s.ID
-             JOIN USUARIOS u ON r.ID_USUARIO = u.ID  -- Unir con la tabla de usuarios
+             JOIN USUARIOS u ON r.ID_USUARIO = u.ID
              ORDER BY r.FECHA_INGRESO DESC`
         );
 
         const reservaciones = [];
 
-        result.rows.forEach(row => {
-            const [id_reservacion, nombre_habitacion, nombre_paquete, fecha_ingreso, fecha_salida, costo_total, nombre_servicio, nombre_usuario] = row;
+        for (const row of result.rows) {
+            const [id_reservacion, nombre_habitacion, imagen_habitacion, nombre_paquete, imagen_paquete, fecha_ingreso, fecha_salida, costo_total, nombre_servicio, nombre_usuario] = row;
 
-            // Buscar si la reservación ya está en el array
             let reservacion = reservaciones.find(r => r.id_reservacion === id_reservacion);
 
             if (!reservacion) {
-                // Si la reservación no está, agregarla al array
+                const imagenHabitacionBase64 = imagen_habitacion ? (await imagen_habitacion.getData()).toString('base64') : null;
+                const imagenPaqueteBase64 = imagen_paquete ? (await imagen_paquete.getData()).toString('base64') : null;
+
                 reservacion = {
                     id_reservacion,
                     nombre_habitacion,
-                    nombre_paquete,  // Ahora también mostramos el nombre del paquete
+                    imagen_habitacion: imagenHabitacionBase64,  // Aquí debería aparecer la imagen en base64
+                    nombre_paquete,
+                    imagen_paquete: imagenPaqueteBase64,         // Aquí debería aparecer la imagen en base64
                     fecha_ingreso,
                     fecha_salida,
                     costo_total,
-                    nombre_usuario,  // Agregar el nombre del usuario
-                    servicios: [] // Inicializar un array de servicios
+                    nombre_usuario,
+                    servicios: []
                 };
                 reservaciones.push(reservacion);
             }
 
-            // Si hay un servicio asociado, agregarlo
             if (nombre_servicio) {
                 reservacion.servicios.push(nombre_servicio);
             }
-        });
+        }
 
         return reservaciones;
 
@@ -135,9 +137,6 @@ async function getReservaciones() {
         }
     }
 }
-
-
-
 
 
 async function updateReservacion(id_reservacion, id_habitacion, id_paquete, costo_total, metodo_pago, fecha_ingreso, fecha_salida, servicios) {

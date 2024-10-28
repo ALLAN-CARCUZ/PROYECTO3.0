@@ -136,57 +136,75 @@ async function cancelarReservacion(id_reservacion) {
 
 
 // Función para modificar una reservación (ahora abre el popup)
-function modificarReservacion(id_reservacion) {
+async function modificarReservacion(id_reservacion) {
     // Obtener los datos de la reservación específica desde la API
-    fetch(`http://localhost:3000/api/reservaciones/${id_reservacion}`)
-        .then(response => response.json())
-        .then(reservacion => {
-            // Cargar el formulario de actualización en el popup
-            const updateForm = `
-                <label for="newIdHabitacion">Nueva habitación:</label>
-                <select id="newIdHabitacion" name="newIdHabitacion"></select><br>
+    const response = await fetch(`http://localhost:3000/api/reservaciones/${id_reservacion}`);
+    const reservacion = await response.json();
 
-                <label for="serviciosContainer">Servicios:</label>
-                <div id="serviciosContainer"></div><br>
+    const updateForm = `
+        <label for="newIdHabitacion">Nueva habitación:</label>
+        <select id="newIdHabitacion" name="newIdHabitacion"></select><br>
 
-                <label for="newCostoTotal">Nuevo costo total:</label>
-                <input type="text" id="newCostoTotal" readonly><br>
+        <label for="serviciosContainer">Servicios:</label>
+        <div id="serviciosContainer"></div><br>
 
-                <label for="newMetodoPago">Nuevo método de pago:</label>
-                <input type="text" id="newMetodoPago" value="${reservacion.metodo_pago}"><br>
+        <label for="newCostoTotal">Nuevo costo total:</label>
+        <input type="text" id="newCostoTotal" readonly><br>
 
-                <label for="newFechaIngreso">Nueva fecha de ingreso:</label>
-                <input type="date" id="newFechaIngreso" value="${new Date(reservacion.fecha_ingreso).toISOString().split('T')[0]}"><br>
+        <label for="newMetodoPago">Nuevo método de pago:</label>
+        <input type="text" id="newMetodoPago" value="${reservacion.metodo_pago}"><br>
 
-                <label for="newFechaSalida">Nueva fecha de salida:</label>
-                <input type="date" id="newFechaSalida" value="${new Date(reservacion.fecha_salida).toISOString().split('T')[0]}"><br>
+        <label for="newFechaIngreso">Nueva fecha de ingreso:</label>
+        <input type="date" id="newFechaIngreso" value="${new Date(reservacion.fecha_ingreso).toISOString().split('T')[0]}"><br>
 
-                <button id="saveChanges">Guardar cambios</button>
-            `;
+        <label for="newFechaSalida">Nueva fecha de salida:</label>
+        <input type="date" id="newFechaSalida" value="${new Date(reservacion.fecha_salida).toISOString().split('T')[0]}"><br>
 
-            document.getElementById('updateFormContainer').innerHTML = updateForm;
+        <button id="saveChanges">Guardar cambios</button>
+    `;
 
-            // Cargar los datos de habitaciones y servicios, y abrir el popup
-            cargarDatosFormularioActualizacion(reservacion);
-            openModal('updateModal'); // Abrir el modal
+    document.getElementById('updateFormContainer').innerHTML = updateForm;
 
-            // Añadir evento al botón para guardar cambios
-            document.getElementById('saveChanges').onclick = async () => {
-                const newIdHabitacion = document.getElementById('newIdHabitacion').value;
-                const newServicios = Array.from(document.querySelectorAll('input[name="servicios"]:checked')).map(cb => cb.value); // Array de servicios
-                const newCostoTotal = parseFloat(document.getElementById('newCostoTotal').value.replace('Q', ''));
-                const newMetodoPago = document.getElementById('newMetodoPago').value;
-                const newFechaIngreso = document.getElementById('newFechaIngreso').value;
-                const newFechaSalida = document.getElementById('newFechaSalida').value;
-            
-                // Asegurarse de que se envíe un array para 'servicios'
-                await updateReservacion(id_reservacion, newIdHabitacion, newServicios.length > 0 ? newServicios : [], newCostoTotal, newMetodoPago, newFechaIngreso, newFechaSalida);
-            };            
-        })
-        .catch(error => {
-            console.error('Error al cargar los datos de la reservación:', error);
+    // Cargar los datos de habitaciones y servicios, y abrir el popup
+    await cargarDatosFormularioActualizacion(reservacion);
+
+    // Cargar y deshabilitar las fechas ocupadas para la habitación seleccionada
+    if (reservacion.id_habitacion) {
+        const fechasOcupadas = await cargarFechasOcupadas(reservacion.id_habitacion);
+
+        flatpickr("#newFechaIngreso", {
+            minDate: "today",
+            disable: fechasOcupadas,
+            onChange: function(selectedDates) {
+                const fechaSeleccionada = selectedDates[0].toISOString().split('T')[0];
+                flatpickr("#newFechaSalida", {
+                    minDate: fechaSeleccionada,
+                    disable: fechasOcupadas
+                });
+            }
         });
+
+        flatpickr("#newFechaSalida", {
+            minDate: "today",
+            disable: fechasOcupadas
+        });
+    }
+
+    openModal('updateModal');
+
+    // Añadir evento al botón para guardar cambios
+    document.getElementById('saveChanges').onclick = async () => {
+        const newIdHabitacion = document.getElementById('newIdHabitacion').value;
+        const newServicios = Array.from(document.querySelectorAll('input[name="servicios"]:checked')).map(cb => cb.value);
+        const newCostoTotal = parseFloat(document.getElementById('newCostoTotal').value.replace('Q', ''));
+        const newMetodoPago = document.getElementById('newMetodoPago').value;
+        const newFechaIngreso = document.getElementById('newFechaIngreso').value;
+        const newFechaSalida = document.getElementById('newFechaSalida').value;
+
+        await updateReservacion(id_reservacion, newIdHabitacion, newServicios.length > 0 ? newServicios : [], newCostoTotal, newMetodoPago, newFechaIngreso, newFechaSalida);
+    };
 }
+
 
 // Función para cargar habitaciones y servicios en el formulario de actualización
 async function cargarDatosFormularioActualizacion(reservacion) {
@@ -225,10 +243,10 @@ async function cargarDatosFormularioActualizacion(reservacion) {
             checkbox.value = servicio.id;
             preciosServicios[servicio.id] = servicio.costo;
 
-            if (Array.isArray(reservacion.servicios) && reservacion.servicios.some(s => s.ID == servicio.id || s.id == servicio.id)) {
+            // Marcar el checkbox si el servicio ya estaba seleccionado en la reservación
+            if (Array.isArray(reservacion.servicios) && reservacion.servicios.some(s => s.id == servicio.id || s.ID == servicio.id)) {
                 checkbox.checked = true;
             }
-            
 
             checkbox.addEventListener('change', calcularPrecioTotal);
             label.appendChild(checkbox);
@@ -241,6 +259,8 @@ async function cargarDatosFormularioActualizacion(reservacion) {
         console.error('Error al cargar habitaciones y servicios:', error);
     }
 }
+
+
 
 // Función para calcular el precio total de la reservación
 function calcularPrecioTotal() {
@@ -263,10 +283,11 @@ function calcularPrecioTotal() {
 }
 
 // Función para abrir un modal
+// Función para abrir el modal
 function openModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
-        modal.style.display = 'block'; // Cambia la visibilidad del modal
+        modal.style.display = 'flex'; // Mostrar el modal
     } else {
         console.error('No se encontró el modal con el ID:', modalId);
     }
@@ -276,11 +297,32 @@ function openModal(modalId) {
 function closeModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
-        modal.style.display = 'none';
+        modal.style.display = 'none'; // Ocultar el modal
     } else {
         console.error('No se encontró el modal con el ID:', modalId);
     }
 }
+
+// Evento para el botón de cerrar modal
+document.addEventListener('DOMContentLoaded', () => {
+    const closeModalButton = document.getElementById('closeUpdateModal');
+    if (closeModalButton) {
+        closeModalButton.addEventListener('click', () => closeModal('updateModal'));
+    } else {
+        console.error('No se encontró el botón de cerrar del modal');
+    }
+});
+
+// Evento para el botón de cerrar modal
+document.addEventListener('DOMContentLoaded', () => {
+    const closeModalButton = document.getElementById('closeUpdateModal');
+    if (closeModalButton) {
+        closeModalButton.addEventListener('click', () => closeModal('updateModal'));
+    } else {
+        console.error('No se encontró el botón de cerrar del modal');
+    }
+});
+
 
 // Función para actualizar una reservación
 async function updateReservacion(id_reservacion, newIdHabitacion, newServicios, newCostoTotal, newMetodoPago, newFechaIngreso, newFechaSalida) {
@@ -406,4 +448,15 @@ function mostrarReservaciones(reservaciones) {
         `;
         container.appendChild(reservacionElement);
     });
+}
+
+
+async function cargarFechasOcupadas(habitacionId) {
+    const response = await fetch(`/api/reservaciones/fechas-reservadas/${habitacionId}`);
+    const fechasReservadas = await response.json();
+
+    return fechasReservadas.map(f => ({
+        from: new Date(f.fecha_ingreso).toISOString().split('T')[0],
+        to: new Date(f.fecha_salida).toISOString().split('T')[0]
+    }));
 }
