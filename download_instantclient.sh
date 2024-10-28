@@ -11,9 +11,13 @@ download_from_drive() {
 }
 
 # Descarga de los archivos necesarios
-download_from_drive "1u_vgyWY3mO_FfouL1LOICzdFNhWObE9K" "libclntsh.so.21.1"
+download_from_drive "1u_vgyWY3mO_FfouL1LOICzdFNhWObE9K" "libclntsh.so"
 download_from_drive "1YNB1immIYWep2QORD7gyNdFsOS0qXT2G" "libociei.so"
 download_from_drive "13ME6YksV0fDPZ8Zj2dHFEjRTPQ9TDp5D" "libnnz21.so"
+download_from_drive "18O1O1CTIduJENAxISNCoVIzDH0lh9vW8" "libclntsh.so.21.1"  
 
-ls -l instantclient/instantclient_21_16
-chmod 755 instantclient/instantclient_21_16/*
+# Asegurar permisos de ejecución en las bibliotecas descargadas
+chmod 755 instantclient/instantclient_21_16/*.so
+
+# Crear enlace simbólico para la biblioteca principal
+ln -s instantclient/instantclient_21_16/libclntsh.so.21.1 instantclient/instantclient_21_16/libclntsh.so
