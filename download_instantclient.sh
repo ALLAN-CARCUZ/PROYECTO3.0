@@ -19,3 +19,5 @@ download_from_drive "18O1O1CTIduJENAxISNCoVIzDH0lh9vW8" "libclntsh.so.21.1"
 # Asegurar permisos de ejecución en las bibliotecas descargadas
 chmod 755 instantclient/instantclient_21_16/*.so
 
+# Listar el contenido del directorio instantclient para verificar la existencia de archivos
+ls -l instantclient/instantclient_21_16
