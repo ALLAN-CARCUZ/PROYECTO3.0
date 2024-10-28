@@ -231,7 +231,7 @@ function showStep(step) {
     }
     
     if (step === 4) {
-        displaySelectedHabitacionPaso4(); // Llamada a la función de paso 4 específica
+        displaySelectedHabitacion(); // Llamada a la función de paso 4 específica
         initializeStripeElements(); // Inicializar Stripe Elements en el paso 4
     }
 
@@ -341,7 +341,7 @@ function selectHabitacion(id, nombre, descripcion, imagen, precio) {
         return;
     }
 
-    selectedHabitacion = { id, nombre, descripcion, imagen, precio };  // Almacenar todos los detalles de la habitación seleccionada
+    selectedHabitacion = { id, nombre, descripcion, precio };  // Almacenar todos los detalles de la habitación seleccionada
     total = precio;
 
      // Ahora que la habitación está seleccionada, invocamos setMinFechaEntrada()
@@ -599,31 +599,32 @@ function initWizard() {
 
 
 function selectHabitacionPorId(id) {
-    fetch(`/api/habitaciones/${id}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Error al obtener la habitación: ${response.statusText}`);
-            }
-            return response.json();
-        })
-        .then(habitacion => {
-            console.log('Habitación obtenida:', habitacion);  // Verificar cómo se reciben los datos
+fetch(`/api/habitaciones/${id}`)
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Error al obtener la habitación: ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(habitacion => {
+        console.log('Habitación obtenida:', habitacion);  // Verificar cómo se reciben los datos
 
-            // Asegúrate de que habitacion sea un arreglo con los valores correctos
-            if (habitacion && habitacion.length > 3) {
-                // Desestructuramos el arreglo para obtener los datos
-                const [id, nombre, descripcion, precio] = habitacion;
-                selectHabitacion(id, nombre, descripcion, '', precio);  // Asigna los valores correctos
-            } else {
-                console.error('Datos incompletos de la habitación:', habitacion);
-                alert('Los datos de la habitación están incompletos.');
-            }
-        })
-        .catch(error => {
-            console.error('Error al seleccionar la habitación:', error);
-            alert('No se pudo cargar la habitación seleccionada.');
-        });
+        // Verificar que las propiedades necesarias existan
+        if (habitacion && habitacion.id && habitacion.nombre && habitacion.descripcion && habitacion.precio) {
+            // Desestructurar el objeto para obtener los datos
+            const { id, nombre, descripcion, precio } = habitacion;
+            selectHabitacion(id, nombre, descripcion, null, precio);  // Pasamos null para la imagen
+        } else {
+            console.error('Datos incompletos de la habitación:', habitacion);
+            alert('Los datos de la habitación están incompletos.');
+        }
+    })
+    .catch(error => {
+        console.error('Error al seleccionar la habitación:', error);
+        alert('No se pudo cargar la habitación seleccionada.');
+    });
 }
+
 
 // Función para inicializar el wizard y manejar la lógica según el paquete_id
 document.addEventListener('DOMContentLoaded', () => {
