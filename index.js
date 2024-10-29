@@ -74,3 +74,8 @@ app.listen(port, () => {
 //ORACLE_USER=DODO3
 //ORACLE_PASSWORD=1234
 //ORACLE_CONNECTION=localhost/XE
+
+//oracle 2
+//ORACLE_USER=ADMIN
+//ORACLE_PASSWORD=123456789Umg
+//ORACLE_CONNECTION=(description= (retry_count=20)(retry_delay=3)(address=(protocol=tcps)(port=1521)(host=adb.mx-queretaro-1.oraclecloud.com))(connect_data=(service_name=gc3648625d63b6c_hotel2_high.adb.oraclecloud.com))(security=(ssl_server_dn_match=yes)))

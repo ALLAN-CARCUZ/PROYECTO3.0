@@ -1,3 +1,6 @@
+const API_BASE_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : 'https://proyecto3-0.onrender.com/api';
+
+
 // Variables para almacenar los precios de habitaciones y servicios
 let preciosHabitaciones = {};
 let preciosServicios = {};

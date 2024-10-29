@@ -1,3 +1,5 @@
+const API_BASE_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : 'https://proyecto3-0.onrender.com/api';
+
 let currentStep = 1;
 let selectedHabitacion = null;
 let selectedServicios = [];
@@ -128,7 +130,9 @@ async function confirmarReservacion() {
     };
 
     // Enviar la solicitud solo si todos los datos están completos
-    const response = await fetch('http://localhost:3000/api/reservaciones/create', {
+    const response = await fetch(`${API_BASE_URL}/reservaciones/create`,  {
+        
+
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
