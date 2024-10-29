@@ -171,132 +171,120 @@ async function loadPaquetes() {
                 <p>Servicios: ${paquete.servicios.map(s => s.nombre).join(', ')}</p>
             `;
 
-            // Modificación: Agregar evento para redirigir a la página de reservación
+            // Redirigir a la página de reservación
             li.addEventListener('click', (event) => {
-                // Solo redirige si el clic no fue en un botón
                 if (event.target.tagName !== 'BUTTON') {
                     redirigirAReservacion(paquete.id);
                 }
             });
             
-
             if (rol === 'admin') {
                 const updateBtn = document.createElement('button');
                 updateBtn.textContent = 'Actualizar';
                 updateBtn.onclick = () => {
+                    // Crear el formulario de actualización
+                    const updateForm = `
+                        <form id="updatePaqueteForm">
+                            <label for="updateNombre">Nombre:</label>
+                            <input type="text" id="updateNombre" name="updateNombre" value="${paquete.nombre}" required><br>
 
-                // Crear el formulario de actualización
-                const updateForm = `
-                    <form id="updatePaqueteForm">
-                    <label for="updateNombre">Nombre:</label>
-                    <input type="text" id="updateNombre" name="updateNombre" value="${paquete.nombre}" required><br>
+                            <label for="updateDescripcion">Descripción:</label>
+                            <textarea id="updateDescripcion" name="updateDescripcion" required>${paquete.descripcion}</textarea><br>
 
-                    <label for="updateDescripcion">Descripción:</label>
-                    <textarea id="updateDescripcion" name="updateDescripcion" required>${paquete.descripcion}</textarea><br>
+                            <label for="updatePrecio">Precio Total:</label>
+                            <input type="text" id="updatePrecio" name="updatePrecio" readonly><br>
 
-                    <label for="updatePrecio">Precio Total:</label>
-                    <input type="text" id="updatePrecio" name="updatePrecio" readonly><br>
+                            <label for="updateDescuento">Descuento (%):</label>
+                            <input type="number" id="updateDescuento" name="updateDescuento" min="0" max="100" value="${paquete.descuento || 0}"><br>
 
-                    <!-- Agrega el campo de descuento aquí -->
-                    <label for="updateDescuento">Descuento (%):</label>
-                    <input type="number" id="updateDescuento" name="updateDescuento" min="0" max="100" value="${paquete.descuento || 0}"><br>
+                            <label for="updateHabitacion_id">Habitación:</label>
+                            <select id="updateHabitacion_id" name="updateHabitacion_id" required>
+                                <!-- Las opciones de habitaciones se cargarán aquí -->
+                            </select><br>
 
-                    <label for="updatePrecio">Precio Total:</label>
-                    <input type="text" id="updatePrecio" name="updatePrecio" readonly><br>
+                            <label>Servicios:</label>
+                            <div id="updateServiciosContainer">
+                                <!-- Los checkboxes de servicios se cargarán aquí -->
+                            </div>
 
-                    <label for="updateHabitacion_id">Habitación:</label>
-                    <select id="updateHabitacion_id" name="updateHabitacion_id" required>
-                    <!-- Las opciones de habitaciones se cargarán aquí -->
-                    </select><br>
+                            <label for="currentImagen">Imagen actual:</label><br>
+                            <img id="currentImagen" src="data:image/jpeg;base64,${paquete.imagen}" width="100"><br><br>
 
-                    <label>Servicios:</label>
-                    <div id="updateServiciosContainer">
-                    <!-- Los checkboxes de servicios se cargarán aquí -->
-                    </div>
+                            <label for="newImagen">Nueva imagen (opcional):</label>
+                            <input type="file" id="newImagen" name="newImagen" accept="image/*"><br><br>
 
-                    <label for="currentImagen">Imagen actual:</label><br>
-                    <img id="currentImagen" src="data:image/jpeg;base64,${paquete.imagen}" width="100"><br><br>
-
-                    <label for="newImagen">Nueva imagen (opcional):</label>
-                    <input type="file" id="newImagen" name="newImagen" accept="image/*"><br><br>
-
-                    <button type="submit">Guardar cambios</button>
-                    </form>
+                            <button type="submit">Guardar cambios</button>
+                        </form>
                     `;
 
-                // Cargar el formulario en el contenedor del popup
-                document.getElementById('updateFormContainer').innerHTML = updateForm;
+                    document.getElementById('updateFormContainer').innerHTML = updateForm;
 
-                // Cargar habitaciones y servicios en el formulario de actualización
-                cargarDatosFormularioActualizacion(paquete);
+                    // Cargar habitaciones y servicios en el formulario de actualización
+                    cargarDatosFormularioActualizacion(paquete);
 
-                openModal('updateModal'); // Mostrar el popup
+                    openModal('updateModal'); // Mostrar el popup
 
-                // Manejar el envío del formulario de actualización
-                document.getElementById('updatePaqueteForm').onsubmit = async function(e) {
-                    // Obtener el descuento ingresado
-                const descuento = parseFloat(document.getElementById('updateDescuento').value) || 0;
+                    // Manejar el envío del formulario de actualización
+                    document.getElementById('updatePaqueteForm').onsubmit = async function(e) {
+                        e.preventDefault();
 
-                    e.preventDefault();
+                        // Obtener los nuevos valores del formulario
+                        const newNombre = document.getElementById('updateNombre').value;
+                        const newDescripcion = document.getElementById('updateDescripcion').value;
+                        const precioTotalStr = document.getElementById('updatePrecio').value;
+                        const newHabitacion_id = document.getElementById('updateHabitacion_id').value;
+                        const newServicios = Array.from(document.querySelectorAll('#updateServiciosContainer input[name="updateServicios"]:checked')).map(cb => cb.value);
+                        const descuento = parseFloat(document.getElementById('updateDescuento').value) || 0;
+                        
+                        // Procesar el precio sin el símbolo de dólar
+                        const newPrecio = parseFloat(precioTotalStr.replace('$', '').trim());
 
-                    // Obtener los nuevos valores del formulario
-                    const newNombre = document.getElementById('updateNombre').value;
-                    const newDescripcion = document.getElementById('updateDescripcion').value;
+                        // Validación de campos
+                        if (!newNombre || isNaN(newPrecio) || !newHabitacion_id || newServicios.length === 0) {
+                            alert('Por favor, completa todos los campos requeridos y selecciona al menos un servicio.');
+                            return;
+                        }
 
-                    // Limpiar el valor del precio para eliminar el símbolo de dólar
-                    const precioTotalStr = document.getElementById('updatePrecio').value;
-                    
+                        const newImagenInput = document.getElementById('newImagen').files[0];
+                        let imagenBase64 = paquete.imagen;
 
-                    const newHabitacion_id = document.getElementById('updateHabitacion_id').value;
-                    const newServicios = Array.from(document.querySelectorAll('#updateServiciosContainer input[name="updateServicios"]:checked')).map(cb => cb.value);
-                    const newImagenInput = document.getElementById('newImagen').files[0];
-                    const newPrecio = parseFloat(precioTotalStr.replace('$', '').trim());
-                    if (!newNombre || isNaN(newPrecio) || !newHabitacion_id || newServicios.length === 0) {
-                    alert('Por favor, completa todos los campos requeridos y selecciona al menos un servicio.');
-                    return;
-                    }
-
-
-                    let imagenBase64 = paquete.imagen; // Mantener la imagen actual si no se selecciona una nueva
-
-                    // Si se selecciona una nueva imagen, convertirla a Base64
-                    if (newImagenInput) {
-                        const reader = new FileReader();
-                        reader.readAsDataURL(newImagenInput);
-                        reader.onload = async function () {
-                            imagenBase64 = reader.result.split(',')[1];  // Extraer solo la parte en base64
+                        if (newImagenInput) {
+                            const reader = new FileReader();
+                            reader.readAsDataURL(newImagenInput);
+                            reader.onload = async function () {
+                                imagenBase64 = reader.result.split(',')[1]; // Tomar solo la parte Base64
+                                await updatePaquete(paquete.id, newNombre, newDescripcion, newPrecio, imagenBase64, newHabitacion_id, newServicios, descuento);
+                                closeModal('updateModal'); // Cerrar el popup después de actualizar
+                            };
+                            reader.onerror = function (error) {
+                                console.error('Error al leer la nueva imagen:', error);
+                            };
+                        } else {
                             await updatePaquete(paquete.id, newNombre, newDescripcion, newPrecio, imagenBase64, newHabitacion_id, newServicios, descuento);
                             closeModal('updateModal'); // Cerrar el popup después de actualizar
-                        };
-                        reader.onerror = function (error) {
-                            console.error('Error al leer la nueva imagen:', error);
-                        };
-                    } else {
-                        // Si no se seleccionó ninguna nueva imagen, actualizar sin cambiar la imagen
-                        await updatePaquete(paquete.id, newNombre, newDescripcion, newPrecio, imagenBase64, newHabitacion_id, newServicios, descuento);
-                        closeModal('updateModal'); // Cerrar el popup después de actualizar
+                        }
+                    };
+                };
+                li.appendChild(updateBtn);
+
+                // Botón para eliminar
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = 'Eliminar';
+                deleteBtn.classList.add('delete');
+                deleteBtn.onclick = () => {
+                    if (confirm('¿Estás seguro de que deseas eliminar este paquete?')) {
+                        deletePaquete(paquete.id);
                     }
                 };
-            };
-            li.appendChild(updateBtn);
-
-            // Botón para eliminar
-            const deleteBtn = document.createElement('button');
-            deleteBtn.textContent = 'Eliminar';
-            deleteBtn.classList.add('delete');
-            deleteBtn.onclick = () => {
-                if (confirm('¿Estás seguro de que deseas eliminar este paquete?')) {
-                    deletePaquete(paquete.id);
-                }
-            };
-            li.appendChild(deleteBtn);
-        }
+                li.appendChild(deleteBtn);
+            }
             paqueteList.appendChild(li);
         });
     } catch (error) {
         console.error('Error al cargar los paquetes:', error);
     }
 }
+
 
 // Función para cargar habitaciones y servicios en el formulario de actualización
 async function cargarDatosFormularioActualizacion(paquete) {
