@@ -354,7 +354,7 @@ function selectHabitacion(id, nombre, descripcion, imagen, precio) {
     // Actualizar los botones
     updateButtonsState();
 
-    alert(`Has seleccionado la habitación con ID: ${id}, Precio: Q${precio}`);
+    alert(`Has seleccionado la habitación con ID: ${id}, Precio: $${precio}`);
 }
 
 function updateButtonsState() {
@@ -481,7 +481,7 @@ function loadServicios() {
                 servicioCard.innerHTML = `
                     <img src="data:image/jpeg;base64,${servicio.imagen}" alt="${servicio.nombre}" />
                     <h4>${servicio.nombre}</h4>
-                    <p class="price">Precio: Q${servicio.costo}</p>
+                    <p class="price">Precio: $${servicio.costo}</p>
                     <input type="checkbox" value="${servicio.id}" data-costo="${servicio.costo}" onchange="toggleServicio(${servicio.id}, ${servicio.costo})">
                 `;
                 container.appendChild(servicioCard);
@@ -578,7 +578,7 @@ function updateResumen() {
     resumenContainer.innerHTML = `
         <p>Habitación seleccionada: $ ${selectedHabitacion.precio}</p>
         <p>Servicios adicionales: $ ${selectedServicios.reduce((acc, servicio) => acc + servicio.costo, 0)}</p>
-        <p>Total: Q${total}</p>
+        <p>Total: $${total}</p>
     `;
 }
 

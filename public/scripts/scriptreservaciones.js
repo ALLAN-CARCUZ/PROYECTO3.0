@@ -102,7 +102,7 @@ function calcularPrecioTotal() {
         }
     });
 
-    document.getElementById('newCostoTotal').value = `Q${precioTotal.toFixed(2)}`;
+    document.getElementById('newCostoTotal').value = `$${precioTotal.toFixed(2)}`;
 }
 
 // Función para actualizar una reservación
@@ -144,7 +144,7 @@ async function cargarReservaciones() {
                 <td>${reservacion.id_reservacion}</td>
                 <td>${reservacion.id_usuario}</td>
                 <td>${reservacion.id_habitacion}</td>
-                <td>Q${reservacion.costo_total.toFixed(2)}</td>
+                <td>$${reservacion.costo_total.toFixed(2)}</td>
                 <td>${reservacion.metodo_pago}</td>
                 <td>${new Date(reservacion.fecha_ingreso).toLocaleDateString()}</td>
                 <td>${new Date(reservacion.fecha_salida).toLocaleDateString()}</td>

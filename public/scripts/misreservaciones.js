@@ -1,5 +1,5 @@
 // Constante base para la API
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : 'https://proyecto3-0.onrender.com/api';
 
 // Variables para almacenar los precios de habitaciones y servicios
 let preciosHabitaciones = {};
@@ -81,7 +81,7 @@ function mostrarReservaciones(reservaciones) {
                 ${detallesReservacion}
                 <p><strong>Fecha de Ingreso:</strong> ${new Date(reservacion.fecha_ingreso).toLocaleDateString()}</p>
                 <p><strong>Fecha de Salida:</strong> ${new Date(reservacion.fecha_salida).toLocaleDateString()}</p>
-                <p><strong>Total:</strong> Q${reservacion.costo_total.toFixed(2)}</p>
+                <p><strong>Total:</strong> $${reservacion.costo_total.toFixed(2)}</p>
                 <h4>Servicios Incluidos:</h4>
                 <ul>${serviciosList}</ul>
             </div>
@@ -218,7 +218,7 @@ async function cargarDatosFormularioActualizacion(reservacion) {
         habitaciones.forEach(habitacion => {
             const option = document.createElement('option');
             option.value = habitacion.id;
-            option.textContent = `${habitacion.nombre} - Q${habitacion.precio}`;
+            option.textContent = `${habitacion.nombre} - $${habitacion.precio}`;
             preciosHabitaciones[habitacion.id] = habitacion.precio;
 
             if (habitacion.id == reservacion.id_habitacion) {
@@ -249,7 +249,7 @@ async function cargarDatosFormularioActualizacion(reservacion) {
 
             checkbox.addEventListener('change', calcularPrecioTotal);
             label.appendChild(checkbox);
-            label.appendChild(document.createTextNode(`${servicio.nombre} - Q${servicio.costo}`));
+            label.appendChild(document.createTextNode(`${servicio.nombre} - $${servicio.costo}`));
             serviciosContainer.appendChild(label);
         });
 
@@ -276,7 +276,7 @@ function calcularPrecioTotal() {
         }
     });
 
-    document.getElementById('newCostoTotal').value = `Q${precioTotal.toFixed(2)}`;
+    document.getElementById('newCostoTotal').value = `$${precioTotal.toFixed(2)}`;
 }
 
 // Función para abrir un modal

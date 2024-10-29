@@ -58,7 +58,7 @@ async function createReservacion(req, res) {
             Fecha de entrada: ${fecha_ingreso}\n
             Fecha de salida: ${fecha_salida}\n
             Servicios adicionales: ${servicios.length > 0 ? servicios.join(', ') : 'Ninguno'}\n
-            Total: Q${costo_total.toFixed(2)}\n\n
+            Total: $${costo_total.toFixed(2)}\n\n
             ¡Gracias por elegir nuestro hotel!`
         };
 
