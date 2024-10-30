@@ -5,8 +5,9 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             document.querySelector('header').innerHTML = data;
 
-            // Ejecutar el script para manejar la autenticación
+            // Obtener elementos del header
             const username = localStorage.getItem('username');
+            const rolUsuario = localStorage.getItem('rol'); // Asume que el rol está almacenado en localStorage
             const authMenu = document.getElementById('authMenu');
             const registerBtn = document.getElementById('registerBtn');
             const loginBtn = document.getElementById('loginBtn');
@@ -14,6 +15,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const userDropdown = document.getElementById('userDropdown');
             const dropdownMenu = document.getElementById('dropdownMenu');
             const logoutLink = document.getElementById('logoutLink');
+            const graficaTab = document.querySelector('a[href="grafica.html"]'); // Selector para la pestaña de Gráficas
+
+            // Mostrar/ocultar la pestaña de Gráficas basado en el rol
+            if (rolUsuario !== 'admin' && graficaTab) {
+                graficaTab.style.display = 'none'; // Oculta "Gráficas" si el usuario no es admin
+            }
 
             if (username) {
                 authMenu.style.display = 'inline-block';
