@@ -21,15 +21,17 @@ body {
 
 /* Estilos para la columna del logo */
 .logo-container {
-    flex: 0 0 45%; /* Ajuste para darle más espacio al logo */
+    flex: 0 0 45%;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
+    justify-content: center;
 }
 
 .logo-container img {
-    width: 350px; /* Tamaño ajustado del logo */
+    width: 350px;
     height: auto;
+    margin-bottom: 15px; /* Espacio entre el logo y el texto */
 }
 
 /* Estilos para la columna del formulario */
@@ -129,7 +131,7 @@ form#loginForm button[type="submit"]:hover {
 /* Estilos para el texto de redirección a registro */
 .account-prompt {
     text-align: center;
-    margin-top: 20px;
+    margin-top: 10px; /* Ajusta el margen para separar del logo */
     font-size: 1rem;
     color: #333;
 }

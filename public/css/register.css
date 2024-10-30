@@ -27,25 +27,35 @@ h1 {
 .form-container {
     display: flex;
     align-items: center;
-    justify-content: space-around;
+    justify-content: center;
     background-color: #fff;
     padding: 20px;
     border-radius: 12px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
     max-width: 800px;
     width: 100%;
-    margin-top: 10px; /* Ajuste para acercar el contenedor al título */
+    margin-top: 10px;
 }
 
-/* Estilos del logo agrandado */
+.form-logo {
+    margin-right: 20px; /* Espacio entre el logo y el formulario */
+}
+
 .form-logo img {
-    height: 200px; /* Tamaño aumentado para el logo */
+    height: 400px;
     width: auto;
+}
+
+.form-content {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 /* Estilos para el formulario de registro */
 form#usuarioForm {
-    width: 60%;
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -63,9 +73,9 @@ form#usuarioForm input[type="text"],
 form#usuarioForm input[type="email"],
 form#usuarioForm input[type="password"],
 form#usuarioForm select {
-    width: 100%;
+    width: 90%;
     padding: 12px;
-    margin-bottom: 15px;
+    margin-bottom: 12px;
     border: 1px solid #ccc;
     border-radius: 8px;
     font-size: 1rem;
@@ -100,19 +110,21 @@ form#usuarioForm button[type="submit"]:hover {
 }
 
 /* Enlace para iniciar sesión */
+
 .login-link {
     text-align: center;
-    margin-top: 20px; /* Ajusta el margen para que quede más separado del botón */
+    margin-top: 20px;
     font-size: 1rem;
+    color: #333;
 }
 
 .login-link a {
     color: #667eea;
     text-decoration: none;
     font-weight: bold;
-    transition: color 0.3s ease;
 }
 
 .login-link a:hover {
     color: #764ba2;
+    text-decoration: underline;
 }
