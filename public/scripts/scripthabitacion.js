@@ -231,7 +231,6 @@ document.getElementById('habitacionForm').addEventListener('submit', async funct
 
 async function registrarHabitacion(nombre, descripcion, precio, imagenBase64) {
     try {
-        // Enviar los datos a la API
         const response = await fetch('/api/habitaciones/create', {
             method: 'POST',
             headers: {
@@ -250,6 +249,7 @@ async function registrarHabitacion(nombre, descripcion, precio, imagenBase64) {
             // Aquí cerramos el modal de registro automáticamente
             closeModal('registerModal');
         } else {
+            console.error(`Error en la respuesta: ${result.error}`);
             alert(`Error: ${result.error}`);
         }
 
@@ -260,5 +260,9 @@ async function registrarHabitacion(nombre, descripcion, precio, imagenBase64) {
 }
 
 
+
 // Cargar las habitaciones cuando se cargue la página
 loadHabitaciones();
+
+
+//:v

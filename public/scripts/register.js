@@ -31,3 +31,5 @@ document.getElementById('usuarioForm').addEventListener('submit', async function
         console.error('Error al registrar el usuario:', error);
     }
 });
+
+//:v

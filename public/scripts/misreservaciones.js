@@ -81,7 +81,7 @@ function mostrarReservaciones(reservaciones) {
                 ${detallesReservacion}
                 <p><strong>Fecha de Ingreso:</strong> ${new Date(reservacion.fecha_ingreso).toLocaleDateString()}</p>
                 <p><strong>Fecha de Salida:</strong> ${new Date(reservacion.fecha_salida).toLocaleDateString()}</p>
-                <p><strong>Total:</strong> $${reservacion.costo_total.toFixed(2)}</p>
+                <p><strong>Total:</strong> $${Number(reservacion.costo_total).toFixed(2)}</p>
                 <h4>Servicios Incluidos:</h4>
                 <ul>${serviciosList}</ul>
             </div>
@@ -93,7 +93,6 @@ function mostrarReservaciones(reservaciones) {
         container.appendChild(reservacionElement);
     });
 }
-
 
 // Función para cancelar una reservación
 async function cancelarReservacion(id_reservacion) {
@@ -264,20 +263,22 @@ function calcularPrecioTotal() {
     let precioTotal = 0;
 
     const habitacionId = document.getElementById('newIdHabitacion').value;
-    if (habitacionId && preciosHabitaciones[habitacionId]) {
-        precioTotal += preciosHabitaciones[habitacionId];
+    if (habitacionId && preciosHabitaciones[habitacionId] != null) {
+        precioTotal += Number(preciosHabitaciones[habitacionId]);
     }
 
     const serviciosSeleccionados = Array.from(document.querySelectorAll('input[name="servicios"]:checked'));
     serviciosSeleccionados.forEach(servicio => {
         const servicioId = servicio.value;
-        if (preciosServicios[servicioId]) {
-            precioTotal += preciosServicios[servicioId];
+        if (preciosServicios[servicioId] != null) {
+            precioTotal += Number(preciosServicios[servicioId]);
         }
     });
 
-    document.getElementById('newCostoTotal').value = `$${precioTotal.toFixed(2)}`;
+    document.getElementById('newCostoTotal').value = precioTotal.toFixed(2);
 }
+
+
 
 // Función para abrir un modal
 function openModal(modalId) {
@@ -303,6 +304,13 @@ function closeModal(modalId) {
 async function updateReservacion(id_reservacion, newIdHabitacion, newServicios, newCostoTotal, newMetodoPago, newFechaIngreso, newFechaSalida) {
     const token = localStorage.getItem('token');
     
+    console.log('Datos a enviar:', { id_habitacion: newIdHabitacion, servicios: newServicios, costo_total: newCostoTotal, metodo_pago: newMetodoPago, fecha_ingreso: newFechaIngreso, fecha_salida: newFechaSalida });
+
+    if (!newIdHabitacion || !newServicios || isNaN(newCostoTotal) || !newMetodoPago || !newFechaIngreso || !newFechaSalida) {
+        alert('Todos los campos deben estar completos y correctos.');
+        return;
+    }
+
     try {
         const response = await fetch(`${API_BASE_URL}/reservaciones/update/${id_reservacion}`, {
             method: 'PUT',
@@ -319,12 +327,12 @@ async function updateReservacion(id_reservacion, newIdHabitacion, newServicios, 
                 fecha_salida: newFechaSalida
             })
         });
-        
+
         const result = await response.json();
 
         if (response.ok) {
             alert('Reservación actualizada exitosamente');
-            window.location.reload(); // Recargar la página después de la actualización
+            window.location.reload();
         } else {
             alert('Error al actualizar la reservación: ' + result.message);
         }
@@ -333,6 +341,7 @@ async function updateReservacion(id_reservacion, newIdHabitacion, newServicios, 
         alert('Error al actualizar la reservación.');
     }
 }
+
 
 async function cargarFechasOcupadas(habitacionId) {
     try {

@@ -1,11 +1,10 @@
-// habitacionController.js
 const habitacionModel = require('../models/habitacionModel');
 
 // Crear una nueva habitación
 async function createHabitacion(req, res) {
     const { nombre, descripcion, precio, imagen } = req.body;
-    if (!nombre || !precio || !imagen) {
-        return res.status(400).json({ error: 'Nombre, precio e imagen son requeridos' });
+    if (!nombre || !precio) {
+        return res.status(400).json({ error: 'Nombre y precio son requeridos' });
     }
     try {
         const result = await habitacionModel.createHabitacion(nombre, descripcion, precio, imagen);
@@ -29,12 +28,12 @@ async function getHabitaciones(req, res) {
 async function updateHabitacion(req, res) {
     const { id } = req.params;
     const { nombre, descripcion, precio, imagen } = req.body;
-    if (!nombre || !precio || !imagen) {
-        return res.status(400).json({ error: 'Nombre, precio e imagen son requeridos' });
+    if (!nombre || !precio) {
+        return res.status(400).json({ error: 'Nombre y precio son requeridos' });
     }
     try {
         const result = await habitacionModel.updateHabitacion(id, nombre, descripcion, precio, imagen);
-        if (result.rowsAffected === 0) {
+        if (result.rowCount === 0) {
             return res.status(404).json({ error: 'Habitación no encontrada' });
         }
         res.status(200).json({ message: 'Habitación actualizada exitosamente' });
@@ -48,7 +47,7 @@ async function deleteHabitacion(req, res) {
     const { id } = req.params;
     try {
         const result = await habitacionModel.deleteHabitacion(id);
-        if (result.rowsAffected === 0) {
+        if (result.rowCount === 0) {
             return res.status(404).json({ error: 'Habitación no encontrada' });
         }
         res.status(200).json({ message: 'Habitación eliminada exitosamente' });
@@ -56,7 +55,6 @@ async function deleteHabitacion(req, res) {
         res.status(500).json({ error: error.message });
     }
 }
-
 
 // Obtener una habitación por ID
 async function getHabitacionById(req, res) {
@@ -72,18 +70,12 @@ async function getHabitacionById(req, res) {
     }
 }
 
-
+// Obtener las habitaciones más reservadas
 async function getHabitacionesMasReservadas(req, res) {
     try {
         const habitaciones = await habitacionModel.getHabitacionesMasReservadas();
-        const labels = [];
-        const values = [];
-
-        habitaciones.forEach(row => {
-            labels.push(row[0]);  // Nombres de las habitaciones
-            values.push(row[1]);  // Número de reservaciones
-        });
-
+        const labels = habitaciones.map(row => row.nombre);
+        const values = habitaciones.map(row => row.reservas);
         res.json({ labels, values });
     } catch (error) {
         res.status(500).json({ error: 'Error al obtener las habitaciones más reservadas' });
@@ -96,6 +88,5 @@ module.exports = {
     updateHabitacion, 
     deleteHabitacion, 
     getHabitacionById,
-    getHabitacionesMasReservadas  // Añadir este método a las exportaciones
+    getHabitacionesMasReservadas
 };
-

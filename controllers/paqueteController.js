@@ -11,7 +11,7 @@ async function createPaquete(req, res) {
     }
     try {
         const result = await paqueteModel.createPaquete(nombre, descripcion, precio, imagen, habitacion_id, servicios, descuento);
-        res.status(201).json({ message: 'Paquete creado exitosamente', result });
+        res.status(201).json({ message: 'Paquete creado exitosamente', id: result.id });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -36,7 +36,7 @@ async function updatePaquete(req, res) {
     }
     try {
         const result = await paqueteModel.updatePaquete(id, nombre, descripcion, precio, imagen, habitacion_id, servicios, descuento);
-        if (result.rowsAffected === 0) {
+        if (result.rowCount === 0) {
             return res.status(404).json({ error: 'Paquete no encontrado' });
         }
         res.status(200).json({ message: 'Paquete actualizado exitosamente' });
@@ -50,7 +50,7 @@ async function deletePaquete(req, res) {
     const { id } = req.params;
     try {
         const result = await paqueteModel.deletePaquete(id);
-        if (result.rowsAffected === 0) {
+        if (result.rowCount === 0) {
             return res.status(404).json({ error: 'Paquete no encontrado' });
         }
         res.status(200).json({ message: 'Paquete eliminado exitosamente' });
@@ -74,7 +74,7 @@ async function getHabitacionesYServicios(req, res) {
 async function getPaqueteById(req, res) {
     const { id } = req.params;
     try {
-        const paquete = await paqueteModel.getPaqueteById(id); // Crear una nueva función en paqueteModel
+        const paquete = await paqueteModel.getPaqueteById(id);
         if (!paquete) {
             return res.status(404).json({ error: 'Paquete no encontrado' });
         }

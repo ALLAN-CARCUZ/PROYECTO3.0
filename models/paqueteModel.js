@@ -1,254 +1,170 @@
 // paqueteModel.js
-const oracledb = require('oracledb');
-const dbConfig = {
-    user: process.env.ORACLE_USER,
-    password: process.env.ORACLE_PASSWORD,
-    connectString: process.env.ORACLE_CONNECTION
-};
+const pool = require('../dbConfig'); // Importa el pool desde dbConfig.js
 
 // Crear un nuevo paquete
 async function createPaquete(nombre, descripcion, precio, imagen, habitacion_id, servicios, descuento) {
-    let connection;
+    const client = await pool.connect();
     try {
-        connection = await oracledb.getConnection(dbConfig);
+        await client.query('BEGIN');
 
         // Insertar en la tabla 'paquetes'
-        const paqueteResult = await connection.execute(
-            `INSERT INTO paquetes (id, nombre, descripcion, precio, imagen, habitacion_id, descuento)
-             VALUES (paquetes_seq.NEXTVAL, :nombre, :descripcion, :precio, :imagen, :habitacion_id, :descuento)
-             RETURNING id INTO :id`,
-            {
-                nombre,
-                descripcion,
-                precio,
-                imagen: imagen ? Buffer.from(imagen, 'base64') : null,
-                habitacion_id,
-                descuento,  // Incluimos el descuento
-                id: { type: oracledb.NUMBER, dir: oracledb.BIND_OUT }
-            },
-            { autoCommit: false }
+        const paqueteResult = await client.query(
+            `INSERT INTO paquetes (nombre, descripcion, precio, imagen, habitacion_id, descuento)
+             VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
+            [nombre, descripcion, precio, imagen ? Buffer.from(imagen, 'base64') : null, habitacion_id, descuento]
         );
 
-        const paqueteId = paqueteResult.outBinds.id[0];
+        const paqueteId = paqueteResult.rows[0].id;
 
         // Insertar en la tabla 'paquetes_servicios'
         for (const servicioId of servicios) {
-            await connection.execute(
+            await client.query(
                 `INSERT INTO paquetes_servicios (paquete_id, servicio_id)
-                 VALUES (:paquete_id, :servicio_id)`,
-                { paquete_id: paqueteId, servicio_id: servicioId },
-                { autoCommit: false }
+                 VALUES ($1, $2)`,
+                [paqueteId, servicioId]
             );
         }
 
-        await connection.commit();
-        return paqueteResult;
+        await client.query('COMMIT');
+        return { id: paqueteId };
     } catch (error) {
-        if (connection) await connection.rollback();
+        await client.query('ROLLBACK');
         throw error;
     } finally {
-        if (connection) {
-            await connection.close();
-        }
+        client.release();
     }
-}
-
-
-// Función auxiliar para convertir LOB a Buffer
-function lobToBuffer(lob) {
-    return new Promise((resolve, reject) => {
-        let chunks = [];
-        lob.on('data', chunk => {
-            chunks.push(chunk);
-        });
-        lob.on('end', () => {
-            resolve(Buffer.concat(chunks));
-        });
-        lob.on('error', err => {
-            reject(err);
-        });
-    });
 }
 
 // Obtener todos los paquetes
 async function getPaquetes() {
-    let connection;
+    const client = await pool.connect();
     try {
-        connection = await oracledb.getConnection(dbConfig);
-
-        // Utilizar resultSet para manejar LOBs
-        const result = await connection.execute(
+        const result = await client.query(
             `SELECT p.id, p.nombre, p.descripcion, p.precio, p.imagen, p.habitacion_id, p.descuento,
                     h.nombre AS habitacion_nombre, h.precio AS habitacion_precio
              FROM paquetes p
-             JOIN habitaciones h ON p.habitacion_id = h.id`,
-            [],
-            {
-                outFormat: oracledb.OUT_FORMAT_OBJECT,
-                resultSet: true
-            }
+             JOIN habitaciones h ON p.habitacion_id = h.id`
         );
 
         const paquetes = [];
-        const rs = result.resultSet;
-        let row;
 
-        while ((row = await rs.getRow())) {
+        for (const row of result.rows) {
             // Obtener servicios para cada paquete
-            const serviciosResult = await connection.execute(
+            const serviciosResult = await client.query(
                 `SELECT s.id, s.nombre, s.costo
                  FROM servicios s
                  JOIN paquetes_servicios ps ON s.id = ps.servicio_id
-                 WHERE ps.paquete_id = :paquete_id`,
-                { paquete_id: row.ID },
-                { outFormat: oracledb.OUT_FORMAT_OBJECT }
+                 WHERE ps.paquete_id = $1`,
+                [row.id]
             );
 
             let imagenBase64 = '';
-            if (row.IMAGEN) {
-                // Leer el LOB y convertirlo a Buffer
-                const lob = row.IMAGEN;
-                const buffer = await lobToBuffer(lob);
-                imagenBase64 = buffer.toString('base64');
+            if (row.imagen) {
+                imagenBase64 = row.imagen.toString('base64');
             }
 
             paquetes.push({
-                id: row.ID,
-                nombre: row.NOMBRE,
-                descripcion: row.DESCRIPCION,
-                precio: parseFloat(row.PRECIO),
-                descuento: parseFloat(row.DESCUENTO),  // Añadimos el descuento
+                id: row.id,
+                nombre: row.nombre,
+                descripcion: row.descripcion,
+                precio: parseFloat(row.precio),
+                descuento: parseFloat(row.descuento),
                 imagen: imagenBase64,
-                habitacion_id: row.HABITACION_ID,
-                habitacion_nombre: row.HABITACION_NOMBRE,
-                habitacion_precio: parseFloat(row.HABITACION_PRECIO),
+                habitacion_id: row.habitacion_id,
+                habitacion_nombre: row.habitacion_nombre,
+                habitacion_precio: parseFloat(row.habitacion_precio),
                 servicios: serviciosResult.rows.map(servicio => ({
-                    id: servicio.ID,
-                    nombre: servicio.NOMBRE,
-                    costo: parseFloat(servicio.COSTO)
+                    id: servicio.id,
+                    nombre: servicio.nombre,
+                    costo: parseFloat(servicio.costo)
                 }))
             });
         }
-
-        await rs.close();
 
         return paquetes;
     } catch (error) {
         throw error;
     } finally {
-        if (connection) {
-            await connection.close();
-        }
+        client.release();
     }
 }
 
-
-
 // Actualizar un paquete
 async function updatePaquete(id, nombre, descripcion, precio, imagen, habitacion_id, servicios, descuento) {
-    let connection;
+    const client = await pool.connect();
     try {
-        connection = await oracledb.getConnection(dbConfig);
-
-        // Bloquear el paquete que se va a actualizar para evitar modificaciones concurrentes
-        await connection.execute(
-            `SELECT /*+ NO_PARALLEL */ id FROM paquetes WHERE id = :id FOR UPDATE`,
-            { id }
-        );
+        await client.query('BEGIN');
 
         // Actualizar la tabla 'paquetes'
-        const result = await connection.execute(
-            `UPDATE paquetes SET nombre = :nombre, descripcion = :descripcion,
-             precio = :precio, imagen = :imagen, habitacion_id = :habitacion_id, descuento = :descuento
-             WHERE id = :id`,
-            {
-                nombre,
-                descripcion,
-                precio,
-                imagen: imagen ? Buffer.from(imagen, 'base64') : null,
-                habitacion_id,
-                descuento,
-                id
-            },
-            { autoCommit: false }
+        const result = await client.query(
+            `UPDATE paquetes SET nombre = $1, descripcion = $2, precio = $3, imagen = $4, habitacion_id = $5, descuento = $6
+             WHERE id = $7`,
+            [nombre, descripcion, precio, imagen ? Buffer.from(imagen, 'base64') : null, habitacion_id, descuento, id]
         );
 
+        if (result.rowCount === 0) {
+            await client.query('ROLLBACK');
+            return { rowCount: 0 };
+        }
+
         // Eliminar servicios actuales
-        await connection.execute(
-            `DELETE FROM paquetes_servicios WHERE paquete_id = :paquete_id`,
-            { paquete_id: id },
-            { autoCommit: false }
+        await client.query(
+            `DELETE FROM paquetes_servicios WHERE paquete_id = $1`,
+            [id]
         );
 
         // Insertar servicios actualizados
         for (const servicioId of servicios) {
-            await connection.execute(
+            await client.query(
                 `INSERT INTO paquetes_servicios (paquete_id, servicio_id)
-                 VALUES (:paquete_id, :servicio_id)`,
-                { paquete_id: id, servicio_id: servicioId },
-                { autoCommit: false }
+                 VALUES ($1, $2)`,
+                [id, servicioId]
             );
         }
 
-        await connection.commit();
-        return result;
+        await client.query('COMMIT');
+        return { rowCount: result.rowCount };
     } catch (error) {
-        if (connection) await connection.rollback();
+        await client.query('ROLLBACK');
         throw error;
     } finally {
-        if (connection) {
-            await connection.close();
-        }
+        client.release();
     }
 }
 
-
-
 // Eliminar un paquete
 async function deletePaquete(id) {
-    let connection;
+    const client = await pool.connect();
     try {
-        connection = await oracledb.getConnection(dbConfig);
-
-        // Eliminar de 'paquetes_servicios' primero por la clave foránea
-        await connection.execute(
-            `DELETE FROM paquetes_servicios WHERE paquete_id = :paquete_id`,
-            { paquete_id: id },
-            { autoCommit: false }
-        );
+        await client.query('BEGIN');
 
         // Eliminar de 'paquetes'
-        const result = await connection.execute(
-            `DELETE FROM paquetes WHERE id = :id`,
-            { id },
-            { autoCommit: false }
+        const result = await client.query(
+            `DELETE FROM paquetes WHERE id = $1`,
+            [id]
         );
 
-        await connection.commit();
-        return result;
+        await client.query('COMMIT');
+        return { rowCount: result.rowCount };
     } catch (error) {
-        if (connection) await connection.rollback();
+        await client.query('ROLLBACK');
         throw error;
     } finally {
-        if (connection) {
-            await connection.close();
-        }
+        client.release();
     }
 }
 
 // Obtener un paquete por su ID
 async function getPaqueteById(id) {
-    let connection;
+    const client = await pool.connect();
     try {
-        connection = await oracledb.getConnection(dbConfig);
-        const result = await connection.execute(
+        const result = await client.query(
             `SELECT p.id, p.nombre, p.descripcion, p.precio, p.imagen, p.habitacion_id, p.descuento, 
                     h.nombre AS habitacion_nombre, h.precio AS habitacion_precio
              FROM paquetes p
              JOIN habitaciones h ON p.habitacion_id = h.id
-             WHERE p.id = :id`,
-            { id },
-            { outFormat: oracledb.OUT_FORMAT_OBJECT }
+             WHERE p.id = $1`,
+            [id]
         );
 
         if (result.rows.length === 0) {
@@ -257,31 +173,46 @@ async function getPaqueteById(id) {
 
         const row = result.rows[0];
         let imagenBase64 = '';
-        if (row.IMAGEN) {
-            const lob = row.IMAGEN;
-            const buffer = await lobToBuffer(lob);
-            imagenBase64 = buffer.toString('base64');
+        if (row.imagen) {
+            imagenBase64 = row.imagen.toString('base64');
         }
 
+        // Obtener servicios para el paquete
+        const serviciosResult = await client.query(
+            `SELECT s.id, s.nombre, s.costo
+             FROM servicios s
+             JOIN paquetes_servicios ps ON s.id = ps.servicio_id
+             WHERE ps.paquete_id = $1`,
+            [row.id]
+        );
+
         return {
-            id: row.ID,
-            nombre: row.NOMBRE,
-            descripcion: row.DESCRIPCION,
-            precio: parseFloat(row.PRECIO),
-            descuento: parseFloat(row.DESCUENTO),
+            id: row.id,
+            nombre: row.nombre,
+            descripcion: row.descripcion,
+            precio: parseFloat(row.precio),
+            descuento: parseFloat(row.descuento),
             imagen: imagenBase64,
-            habitacion_id: row.HABITACION_ID,
-            habitacion_nombre: row.HABITACION_NOMBRE,
-            habitacion_precio: parseFloat(row.HABITACION_PRECIO)
+            habitacion_id: row.habitacion_id,
+            habitacion_nombre: row.habitacion_nombre,
+            habitacion_precio: parseFloat(row.habitacion_precio),
+            servicios: serviciosResult.rows.map(servicio => ({
+                id: servicio.id,
+                nombre: servicio.nombre,
+                costo: parseFloat(servicio.costo)
+            }))
         };
     } catch (error) {
         throw error;
     } finally {
-        if (connection) {
-            await connection.close();
-        }
+        client.release();
     }
 }
 
-
-module.exports = { createPaquete, getPaquetes, updatePaquete, deletePaquete, getPaqueteById };
+module.exports = { 
+    createPaquete, 
+    getPaquetes, 
+    updatePaquete, 
+    deletePaquete, 
+    getPaqueteById 
+};

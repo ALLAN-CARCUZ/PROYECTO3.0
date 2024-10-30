@@ -1,6 +1,5 @@
 const API_BASE_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : 'https://proyecto3-0.onrender.com/api';
 
-
 // Variables para almacenar los precios de habitaciones y servicios
 let preciosHabitaciones = {};
 let preciosServicios = {};
@@ -19,13 +18,15 @@ function closeModal(modalId) {
 }
 
 // Ocultar el botón de agregar reservación si el rol no es admin
-document.getElementById('openRegisterModal').style.display = (rol === 'admin') ? 'block' : 'none';
+const openRegisterModalBtn = document.getElementById('openRegisterModal');
+if (openRegisterModalBtn) {
+    openRegisterModalBtn.style.display = (rol === 'admin') ? 'block' : 'none';
+}
 
-// Función para cargar habitaciones y servicios en el formulario de actualización
 // Función para cargar habitaciones y servicios en el formulario de actualización
 async function cargarDatosFormularioActualizacion(reservacion) {
     try {
-        const response = await fetch('/api/paquetes/datos/formulario');
+        const response = await fetch(`${API_BASE_URL}/paquetes/datos/formulario`);
         const { habitaciones, servicios } = await response.json();
 
         const habitacionSelect = document.getElementById('newIdHabitacion');
@@ -67,7 +68,7 @@ async function cargarDatosFormularioActualizacion(reservacion) {
                 checkbox.value = servicio.id;
                 preciosServicios[servicio.id] = servicio.costo;
 
-                if (reservacion.servicios.some(s => s.ID == servicio.id || s.id == servicio.id)) {
+                if (reservacion.servicios.some(s => s.id === servicio.id)) { // Asegurarse de que la comparación sea correcta
                     checkbox.checked = true;
                 }
 
@@ -83,7 +84,6 @@ async function cargarDatosFormularioActualizacion(reservacion) {
         console.error('Error al cargar habitaciones y servicios:', error);
     }
 }
-
 
 // Función para calcular el precio total de la reservación
 function calcularPrecioTotal() {
@@ -108,7 +108,7 @@ function calcularPrecioTotal() {
 // Función para actualizar una reservación
 async function updateReservacion(id, id_habitacion, servicios, costo_total, metodo_pago, fecha_ingreso, fecha_salida) {
     try {
-        const response = await fetch(`/api/reservaciones/update/${id}`, {
+        const response = await fetch(`${API_BASE_URL}/reservaciones/update/${id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -122,7 +122,7 @@ async function updateReservacion(id, id_habitacion, servicios, costo_total, meto
             alert('Reservación actualizada exitosamente');
             cargarReservaciones(); // Recargar la lista de reservaciones
         } else {
-            alert(`Error: ${result.error}`);
+            alert(`Error: ${result.message || result.error}`);
         }
     } catch (error) {
         console.error('Error al actualizar la reservación:', error);
@@ -132,10 +132,11 @@ async function updateReservacion(id, id_habitacion, servicios, costo_total, meto
 // Función para cargar las reservaciones y mostrarlas en la lista
 async function cargarReservaciones() {
     try {
-        const response = await fetch('/api/reservaciones');
+        const response = await fetch(`${API_BASE_URL}/reservaciones`);
         const reservaciones = await response.json();
 
         const reservacionesList = document.getElementById('reservaciones-list');
+        if (!reservacionesList) return;
         reservacionesList.innerHTML = '';
 
         reservaciones.forEach(reservacion => {
@@ -143,14 +144,15 @@ async function cargarReservaciones() {
             row.innerHTML = `
                 <td>${reservacion.id_reservacion}</td>
                 <td>${reservacion.id_usuario}</td>
-                <td>${reservacion.id_habitacion}</td>
-                <td>$${reservacion.costo_total.toFixed(2)}</td>
+                <td>${reservacion.id_habitacion || 'N/A'}</td>
+                <td>$${parseFloat(reservacion.costo_total).toFixed(2)}</td>
                 <td>${reservacion.metodo_pago}</td>
                 <td>${new Date(reservacion.fecha_ingreso).toLocaleDateString()}</td>
                 <td>${new Date(reservacion.fecha_salida).toLocaleDateString()}</td>
             `;
 
             if (rol === 'admin') {
+                // Botón de Actualizar
                 const updateBtn = document.createElement('button');
                 updateBtn.textContent = 'Actualizar';
                 updateBtn.onclick = () => {
@@ -183,7 +185,7 @@ async function cargarReservaciones() {
                     document.getElementById('saveChanges').onclick = async () => {
                         const newIdHabitacion = document.getElementById('newIdHabitacion').value;
                         const newServicios = Array.from(document.querySelectorAll('input[name="servicios"]:checked')).map(cb => cb.value);
-                        const newCostoTotal = parseFloat(document.getElementById('newCostoTotal').value.replace('Q', ''));
+                        const newCostoTotal = parseFloat(document.getElementById('newCostoTotal').value.replace('$', '')); // Corregido de 'Q' a '$'
                         const newMetodoPago = document.getElementById('newMetodoPago').value;
                         const newFechaIngreso = document.getElementById('newFechaIngreso').value;
                         const newFechaSalida = document.getElementById('newFechaSalida').value;
@@ -194,6 +196,7 @@ async function cargarReservaciones() {
                 };
                 row.appendChild(updateBtn);
 
+                // Botón de Eliminar
                 const deleteBtn = document.createElement('button');
                 deleteBtn.textContent = 'Eliminar';
                 deleteBtn.onclick = () => {
@@ -214,7 +217,7 @@ async function cargarReservaciones() {
 // Función para eliminar una reservación
 async function deleteReservacion(id) {
     try {
-        const response = await fetch(`/api/reservaciones/delete/${id}`, {
+        const response = await fetch(`${API_BASE_URL}/reservaciones/delete/${id}`, {
             method: 'DELETE'
         });
 
@@ -223,7 +226,7 @@ async function deleteReservacion(id) {
             cargarReservaciones();
         } else {
             const result = await response.json();
-            alert(`Error: ${result.error}`);
+            alert(`Error: ${result.message || result.error}`);
         }
     } catch (error) {
         console.error('Error al eliminar la reservación:', error);
@@ -234,6 +237,9 @@ async function deleteReservacion(id) {
 document.addEventListener('DOMContentLoaded', cargarReservaciones);
 
 // Asignar evento al botón de cerrar modal
-document.getElementById('closeUpdateModal').addEventListener('click', () => {
-    closeModal('updateModal');
-});
+const closeUpdateModalBtn = document.getElementById('closeUpdateModal');
+if (closeUpdateModalBtn) {
+    closeUpdateModalBtn.addEventListener('click', () => {
+        closeModal('updateModal');
+    });
+}

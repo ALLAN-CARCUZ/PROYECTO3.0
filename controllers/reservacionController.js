@@ -1,11 +1,11 @@
 const reservacionModel = require('../models/reservacionModel');
 const { getUserById } = require('../models/usuarioModel');
-const { getServicioById } = require('../models/servicioModel'); // Importamos la función de búsqueda de servicio por ID
+const { getServicioById } = require('../models/servicioModel');
 const nodemailer = require('nodemailer');
 
-// Configurar el transporte para enviar correos
+// Configuración del transporte de correo
 const transporter = nodemailer.createTransport({
-    service: 'gmail',  // Puedes usar otro servicio si lo prefieres
+    service: 'gmail',
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASSWORD
@@ -15,88 +15,62 @@ const transporter = nodemailer.createTransport({
 async function createReservacion(req, res) {
     const { id_usuario, id_habitacion, id_paquete, costo_total, metodo_pago, fecha_ingreso, fecha_salida, servicios = [] } = req.body;
 
-    console.log("Datos recibidos:", req.body);
-
-    // Validar los campos requeridos
     if (!id_usuario || (!id_paquete && !id_habitacion) || !costo_total || !metodo_pago || !fecha_ingreso || !fecha_salida) {
         return res.status(400).json({ error: 'Debes seleccionar una habitación o un paquete, y proporcionar todos los campos requeridos' });
     }
 
     try {
-                // Verificar si el paquete está disponible
-                if (id_paquete) {
-                    const paqueteDisponible = await reservacionModel.checkDisponibilidadPaquete(id_paquete, fecha_ingreso, fecha_salida);
-                    if (!paqueteDisponible.length === 0) {
-                        return res.status(400).json({ error: 'El paquete no está disponible para las fechas seleccionadas' });
-                    }
-                }
+        // Verificar disponibilidad del paquete
+        if (id_paquete) {
+            const paqueteDisponible = await reservacionModel.checkDisponibilidadPaquete(id_paquete, fecha_ingreso, fecha_salida);
+            if (!paqueteDisponible.length === 0) {
+                return res.status(400).json({ error: 'El paquete no está disponible para las fechas seleccionadas' });
+            }
+        }
 
-
-        // Verificar si la habitación está disponible
+        // Verificar disponibilidad de la habitación
         if (id_habitacion) {
             const habitacionDisponible = await isHabitacionDisponible(id_habitacion, fecha_ingreso, fecha_salida);
             if (!habitacionDisponible) {
                 return res.status(400).json({ error: 'La habitación no está disponible para las fechas seleccionadas' });
             }
         }
-        // Intentar crear la reservación
+
         const result = await reservacionModel.createReservacion(id_usuario, id_habitacion, id_paquete, costo_total, metodo_pago, fecha_ingreso, fecha_salida, servicios);
         const usuario = await getUserById(id_usuario);
-        if (!usuario) {
-            return res.status(404).json({ error: 'Usuario no encontrado' });
-        }
+        if (!usuario) return res.status(404).json({ error: 'Usuario no encontrado' });
 
         const correoCliente = usuario.correo;
-
-        // Preparar el contenido del correo
         const mailOptions = {
             from: process.env.EMAIL_USER,
             to: correoCliente,
             subject: 'Confirmación de reservación - Hotel El Dodo',
-            text: `Estimado/a ${usuario.nombre},\n\nSu reservación ha sido creada exitosamente. Aquí están los detalles:\n\n
-            ${id_paquete ? `Paquete ID: ${id_paquete}` : `Habitación: ${id_habitacion}`}\n
-            Fecha de entrada: ${fecha_ingreso}\n
-            Fecha de salida: ${fecha_salida}\n
-            Servicios adicionales: ${servicios.length > 0 ? servicios.join(', ') : 'Ninguno'}\n
-            Total: $${costo_total.toFixed(2)}\n\n
-            ¡Gracias por elegir nuestro hotel!`
+            text: `Estimado/a ${usuario.nombre},\n\nSu reservación ha sido creada exitosamente.\n\n${id_paquete ? `Paquete ID: ${id_paquete}` : `Habitación: ${id_habitacion}`}\nFecha de entrada: ${fecha_ingreso}\nFecha de salida: ${fecha_salida}\nServicios adicionales: ${servicios.length > 0 ? servicios.join(', ') : 'Ninguno'}\nTotal: $${costo_total.toFixed(2)}\n\n¡Gracias por elegir nuestro hotel!`
         };
 
-        // Enviar el correo
         await transporter.sendMail(mailOptions);
 
-        // Si la reservación incluye un servicio especial (1, 2, 3, 4 o 5), enviar el correo adicional
+        // Si se selecciona un servicio especial (1, 2, 3, 4 o 5), enviar un correo adicional
         const serviciosEspeciales = [1, 2, 3, 4, 5];
         const servicioSolicitado = servicios.find(servicio => serviciosEspeciales.includes(servicio));
-
         if (servicioSolicitado) {
-            // Obtener el nombre del servicio solicitado
             const servicioInfo = await getServicioById(servicioSolicitado);
             const nombreServicio = servicioInfo ? servicioInfo.nombre : 'Servicio desconocido';
-
-            // Preparar el correo para medicappcom@gmail.com
             const mailOptionsEspecial = {
                 from: process.env.EMAIL_USER,
                 to: 'medicappcom@gmail.com',
                 subject: 'Notificación de Servicio Especial Solicitado',
                 text: `Se ha solicitado el servicio: ${nombreServicio} para la habitación con ID: ${id_habitacion}.`
             };
-
-            // Enviar el correo a medicappcom@gmail.com
             await transporter.sendMail(mailOptionsEspecial);
         }
 
-        // Si la reservación se crea exitosamente, responder con éxito y finalizar el flujo
-        return res.status(201).json({ message: 'Reservación creada exitosamente, y correos enviados.', id_reservacion: result.id_reservacion });
-
+        res.status(201).json({ message: 'Reservación creada exitosamente, y correos enviados.', id_reservacion: result.id_reservacion });
     } catch (error) {
         console.error("Error al crear la reservación:", error);
-        return res.status(500).json({ error: 'Error al crear la reservación: ' + error.message });
+        res.status(500).json({ error: 'Error al crear la reservación: ' + error.message });
     }
 }
-
-
-
 
 
 // Función para obtener las reservaciones del usuario autenticado
@@ -293,5 +267,3 @@ module.exports = {
     getReservacionesPorMes,
     getPromedioDiasReservacion
 };
-
-

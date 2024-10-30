@@ -1,4 +1,3 @@
-// servicioController.js
 const servicioModel = require('../models/servicioModel');
 
 // Crear un nuevo servicio
@@ -34,7 +33,7 @@ async function updateServicio(req, res) {
     }
     try {
         const result = await servicioModel.updateServicio(id, nombre, descripcion, costo, imagen);
-        if (result.rowsAffected === 0) {
+        if (result.rowCount === 0) {
             return res.status(404).json({ error: 'Servicio no encontrado' });
         }
         res.status(200).json({ message: 'Servicio actualizado exitosamente' });
@@ -48,7 +47,7 @@ async function deleteServicio(req, res) {
     const { id } = req.params;
     try {
         const result = await servicioModel.deleteServicio(id);
-        if (result.rowsAffected === 0) {
+        if (result.rowCount === 0) {
             return res.status(404).json({ error: 'Servicio no encontrado' });
         }
         res.status(200).json({ message: 'Servicio eliminado exitosamente' });
@@ -71,26 +70,16 @@ async function getServicioById(req, res) {
     }
 }
 
-
+// Obtener los servicios más utilizados
 async function getServiciosMasUtilizados(req, res) {
     try {
-      const servicios = await servicioModel.getServiciosMasUtilizados();
-      
-      const labels = [];
-      const values = [];
-  
-      servicios.forEach(row => {
-        labels.push(row[0]);  // Nombre del servicio
-        values.push(row[1]);  // Número de veces utilizado
-      });
-  
-      res.json({ labels, values });
-  
+        const servicios = await servicioModel.getServiciosMasUtilizados();
+        const labels = servicios.map(row => row.nombre);
+        const values = servicios.map(row => row.uso);
+        res.json({ labels, values });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Error al obtener los servicios más utilizados' });
+        res.status(500).json({ error: 'Error al obtener los servicios más utilizados' });
     }
-  }
-
+}
 
 module.exports = { createServicio, getServicios, updateServicio, deleteServicio, getServicioById, getServiciosMasUtilizados };

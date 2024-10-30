@@ -20,7 +20,6 @@ function closeModal(modalId) {
 // Ocultar el botón de agregar paquete si el rol no es admin
 document.getElementById('openRegisterModal').style.display = (rol === 'admin') ? 'block' : 'none';
 
-
 // Añadir eventos para abrir y cerrar los popups
 document.getElementById('openRegisterModal').addEventListener('click', () => openModal('registerModal'));
 document.getElementById('closeRegisterModal').addEventListener('click', () => closeModal('registerModal'));
@@ -60,17 +59,17 @@ function calcularPrecioTotal(event) {
         }
     });
 
-    // **Nuevo: Obtener el descuento ingresado**
+    // Obtener el descuento ingresado
     const descuentoInput = formElement.querySelector('input[name="descuento"], input[name="updateDescuento"]');
     const descuento = descuentoInput ? parseFloat(descuentoInput.value) || 0 : 0;
 
-    // **Nuevo: Calcular el precio con descuento**
+    // Calcular el precio con descuento
     const precioConDescuento = precioTotal - (precioTotal * (descuento / 100));
 
     // Actualizar el campo de precio total en el formulario actual
     const precioInput = formElement.querySelector('input[name="precioTotal"], input[name="updatePrecio"]');
     if (precioInput) {
-        precioInput.value = `$${precioTotal.toFixed(2)}`;
+        precioInput.value = `$${precioConDescuento.toFixed(2)}`;
     }
 }
 
@@ -83,7 +82,7 @@ async function cargarDatosFormulario() {
         // Cargar habitaciones en el select
         const habitacionSelect = document.getElementById('habitacion_id');
 
-        // **Corregido: Limpiar las opciones existentes antes de agregar nuevas**
+        // Limpiar las opciones existentes antes de agregar nuevas
         habitacionSelect.innerHTML = '';
 
         // Añadir una opción vacía al principio
@@ -96,7 +95,7 @@ async function cargarDatosFormulario() {
             const option = document.createElement('option');
             option.value = habitacion.id;
             option.textContent = `${habitacion.nombre} - $${habitacion.precio}`;
-            preciosHabitaciones[habitacion.id] = habitacion.precio;
+            preciosHabitaciones[habitacion.id] = parseFloat(habitacion.precio); // Convertir a número
             habitacionSelect.appendChild(option);
         });
 
@@ -107,13 +106,14 @@ async function cargarDatosFormulario() {
 
         // Cargar servicios en los checkboxes
         const serviciosContainer = document.getElementById('serviciosContainer');
+        serviciosContainer.innerHTML = ''; // Limpiar antes de agregar
         servicios.forEach(servicio => {
             const label = document.createElement('label');
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
             checkbox.name = 'servicios';
             checkbox.value = servicio.id;
-            preciosServicios[servicio.id] = servicio.costo;
+            preciosServicios[servicio.id] = parseFloat(servicio.costo); // Convertir a número
 
             checkbox.addEventListener('change', function(event) {
                 calcularPrecioTotal(event);
@@ -130,9 +130,8 @@ async function cargarDatosFormulario() {
         // Obtener el input de descuento y añadir el event listener
         const descuentoInput = document.getElementById('descuento');
         descuentoInput.addEventListener('input', function(event) {
-        calcularPrecioTotal(event);
+            calcularPrecioTotal(event);
         });
-
 
     } catch (error) {
         console.error('Error al cargar habitaciones y servicios:', error);
@@ -143,7 +142,6 @@ function redirigirAReservacion(idPaquete) {
     // Redirigir a la página de reservaciones con el ID del paquete en la URL
     window.location.href = `/wizard.html?paquete_id=${idPaquete}`;
 }
-
 
 // Función para cargar los paquetes y mostrarlos en la lista
 async function loadPaquetes() {
@@ -177,7 +175,7 @@ async function loadPaquetes() {
                     redirigirAReservacion(paquete.id);
                 }
             });
-            
+
             if (rol === 'admin') {
                 const updateBtn = document.createElement('button');
                 updateBtn.textContent = 'Actualizar';
@@ -235,13 +233,13 @@ async function loadPaquetes() {
                         const newHabitacion_id = document.getElementById('updateHabitacion_id').value;
                         const newServicios = Array.from(document.querySelectorAll('#updateServiciosContainer input[name="updateServicios"]:checked')).map(cb => cb.value);
                         const descuento = parseFloat(document.getElementById('updateDescuento').value) || 0;
-                        
+
                         // Procesar el precio sin el símbolo de dólar
                         const newPrecio = parseFloat(precioTotalStr.replace('$', '').trim());
 
                         // Validación de campos
-                        if (!newNombre || isNaN(newPrecio) || !newHabitacion_id || newServicios.length === 0) {
-                            alert('Por favor, completa todos los campos requeridos y selecciona al menos un servicio.');
+                        if (!newNombre || isNaN(newPrecio) || !newHabitacion_id) {
+                            alert('Por favor, completa todos los campos requeridos.');
                             return;
                         }
 
@@ -285,7 +283,6 @@ async function loadPaquetes() {
     }
 }
 
-
 // Función para cargar habitaciones y servicios en el formulario de actualización
 async function cargarDatosFormularioActualizacion(paquete) {
     try {
@@ -294,6 +291,9 @@ async function cargarDatosFormularioActualizacion(paquete) {
 
         // Cargar habitaciones en el select
         const habitacionSelect = document.getElementById('updateHabitacion_id');
+
+        // Limpiar las opciones existentes
+        habitacionSelect.innerHTML = '';
 
         // Añadir una opción vacía al principio
         const defaultOption = document.createElement('option');
@@ -305,7 +305,7 @@ async function cargarDatosFormularioActualizacion(paquete) {
             const option = document.createElement('option');
             option.value = habitacion.id;
             option.textContent = `${habitacion.nombre} - $${habitacion.precio}`;
-            preciosHabitaciones[habitacion.id] = habitacion.precio;
+            preciosHabitaciones[habitacion.id] = parseFloat(habitacion.precio); // Convertir a número
             if (habitacion.id == paquete.habitacion_id) {
                 option.selected = true;
             }
@@ -319,6 +319,7 @@ async function cargarDatosFormularioActualizacion(paquete) {
 
         // Cargar servicios en los checkboxes
         const serviciosContainer = document.getElementById('updateServiciosContainer');
+        serviciosContainer.innerHTML = ''; // Limpiar antes de agregar
         servicios.forEach(servicio => {
             const label = document.createElement('label');
             label.style.display = 'block';
@@ -326,9 +327,9 @@ async function cargarDatosFormularioActualizacion(paquete) {
             checkbox.type = 'checkbox';
             checkbox.name = 'updateServicios';
             checkbox.value = servicio.id;
-            preciosServicios[servicio.id] = servicio.costo;
+            preciosServicios[servicio.id] = parseFloat(servicio.costo); // Convertir a número
 
-            if (paquete.servicios.some(s => s.ID == servicio.id || s.id == servicio.id)) {
+            if (paquete.servicios.some(s => s.id == servicio.id)) {
                 checkbox.checked = true;
             }
 
@@ -346,14 +347,13 @@ async function cargarDatosFormularioActualizacion(paquete) {
         calcularPrecioTotal({ target: document.getElementById('updatePaqueteForm') });
 
         // Obtener el input de descuento y añadir el event listener
-const descuentoInput = document.getElementById('updateDescuento');
-descuentoInput.addEventListener('input', function(event) {
-    calcularPrecioTotal(event);
-});
+        const descuentoInput = document.getElementById('updateDescuento');
+        descuentoInput.addEventListener('input', function(event) {
+            calcularPrecioTotal(event);
+        });
 
-// Establecer el valor del descuento en el formulario
-document.getElementById('updateDescuento').value = paquete.descuento || 0;
-
+        // Establecer el valor del descuento en el formulario
+        document.getElementById('updateDescuento').value = paquete.descuento || 0;
 
     } catch (error) {
         console.error('Error al cargar habitaciones y servicios:', error);
@@ -381,7 +381,6 @@ async function updatePaquete(id, nombre, descripcion, precio, imagen, habitacion
         }
     } catch (error) {
         console.error('Error al actualizar el paquete:', error);
-        res.status(500).json({ error: error.message });
     }
 }
 
@@ -406,7 +405,6 @@ async function deletePaquete(id) {
 }
 
 // Manejar el envío del formulario para agregar un nuevo paquete
-// Manejar el envío del formulario para agregar un nuevo paquete
 document.getElementById('paqueteForm').addEventListener('submit', async function(e) {
     e.preventDefault();
 
@@ -417,9 +415,10 @@ document.getElementById('paqueteForm').addEventListener('submit', async function
     const habitacion_id = document.getElementById('habitacion_id').value;
     const servicios = Array.from(document.querySelectorAll('input[name="servicios"]:checked')).map(cb => cb.value);
     const imagenInput = document.getElementById('imagen').files[0];
+    const descuento = parseFloat(document.getElementById('descuento').value) || 0;
 
-    if (!nombre || isNaN(precio) || !habitacion_id || servicios.length === 0) {
-        alert('Por favor, ingresa todos los campos requeridos y selecciona al menos un servicio.');
+    if (!nombre || isNaN(precio) || !habitacion_id) {
+        alert('Por favor, ingresa todos los campos requeridos.');
         return;
     }
 
@@ -432,7 +431,7 @@ document.getElementById('paqueteForm').addEventListener('submit', async function
             imagenBase64 = reader.result.split(',')[1]; // Tomar solo la parte del Base64
 
             // Aquí se asegura de que la imagen convertida se envíe correctamente al servidor
-            await registrarPaquete(nombre, descripcion, precio, imagenBase64, habitacion_id, servicios);
+            await registrarPaquete(nombre, descripcion, precio, imagenBase64, habitacion_id, servicios, descuento);
         };
         reader.onerror = function (error) {
             console.error('Error al leer la imagen:', error);
@@ -440,15 +439,13 @@ document.getElementById('paqueteForm').addEventListener('submit', async function
         };
     } else {
         // Si no hay imagen seleccionada
-        await registrarPaquete(nombre, descripcion, precio, null, habitacion_id, servicios);
+        await registrarPaquete(nombre, descripcion, precio, null, habitacion_id, servicios, descuento);
     }
 });
 
-
 // Función para registrar un nuevo paquete
-async function registrarPaquete(nombre, descripcion, precio, imagenBase64, habitacion_id, servicios) {
+async function registrarPaquete(nombre, descripcion, precio, imagenBase64, habitacion_id, servicios, descuento) {
     try {
-        const descuento = parseFloat(document.getElementById('descuento').value) || 0;
         // Enviar los datos a la API
         const response = await fetch('/api/paquetes/create', {
             method: 'POST',
@@ -463,6 +460,10 @@ async function registrarPaquete(nombre, descripcion, precio, imagenBase64, habit
         if (response.ok) {
             alert('Paquete agregado exitosamente');
             document.getElementById('paqueteForm').reset(); // Limpiar el formulario
+            // Reiniciar los precios
+            preciosHabitaciones = {};
+            preciosServicios = {};
+            cargarDatosFormulario(); // Recargar los datos del formulario
             loadPaquetes(); // Recargar la lista de paquetes
             closeModal('registerModal');
         } else {

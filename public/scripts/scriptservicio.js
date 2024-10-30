@@ -226,3 +226,6 @@ async function registrarServicio(nombre, descripcion, costo, imagenBase64) {
 
 // Cargar los servicios cuando se cargue la página
 loadServicios();
+
+
+//:v
