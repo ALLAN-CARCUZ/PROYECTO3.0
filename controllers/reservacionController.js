@@ -216,23 +216,15 @@ async function getTotalIngresos(req, res) {
 async function getReservacionesPorMes(req, res) {
     try {
         const reservaciones = await reservacionModel.getReservacionesPorMes();
-        const labels = [];
-        const values = [];
+        const labels = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
+        const values = Array(12).fill(0);  // Inicializa un array con 12 ceros para cada mes
 
-        // Configurar los meses en un arreglo para ordenar de enero a diciembre
-        const meses = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
-        const dataPorMes = meses.map(mes => ({ mes, cantidad: 0 }));
-
+        // Itera sobre las reservaciones y asigna la cantidad al mes correspondiente
         reservaciones.forEach(row => {
-            const mesIndex = dataPorMes.findIndex(d => d.mes === row[0]);
+            const mesIndex = labels.indexOf(row.mes);
             if (mesIndex !== -1) {
-                dataPorMes[mesIndex].cantidad = row[1];
+                values[mesIndex] = parseInt(row.cantidad, 10);  // Asigna el valor convertido a número
             }
-        });
-
-        dataPorMes.forEach(d => {
-            labels.push(d.mes);
-            values.push(d.cantidad);
         });
 
         res.json({ labels, values });
@@ -240,6 +232,7 @@ async function getReservacionesPorMes(req, res) {
         res.status(500).json({ error: 'Error al obtener las reservaciones por mes' });
     }
 }
+
 
 
 

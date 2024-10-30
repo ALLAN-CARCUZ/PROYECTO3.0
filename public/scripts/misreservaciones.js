@@ -252,21 +252,41 @@ async function cargarDatosFormularioActualizacion(reservacion) {
             serviciosContainer.appendChild(label);
         });
 
+        // Agregar eventos a las fechas para recalcular el precio total al cambiarlas
+        document.getElementById('newFechaIngreso').addEventListener('change', calcularPrecioTotal);
+        document.getElementById('newFechaSalida').addEventListener('change', calcularPrecioTotal);
+
         calcularPrecioTotal();
     } catch (error) {
         console.error('Error al cargar habitaciones y servicios:', error);
     }
 }
 
-// Función para calcular el precio total de la reservación
-function calcularPrecioTotal() {
-    let precioTotal = 0;
 
-    const habitacionId = document.getElementById('newIdHabitacion').value;
-    if (habitacionId && preciosHabitaciones[habitacionId] != null) {
-        precioTotal += Number(preciosHabitaciones[habitacionId]);
+// Función para calcular el precio total de la reservación// Función para calcular el precio total de la reservación
+function calcularPrecioTotal() {
+    const fechaIngreso = document.getElementById('newFechaIngreso').value;
+    const fechaSalida = document.getElementById('newFechaSalida').value;
+    
+    if (!fechaIngreso || !fechaSalida) {
+        console.error("No se han seleccionado las fechas de entrada y salida.");
+        return;
     }
 
+    const fecha1 = new Date(fechaIngreso);
+    const fecha2 = new Date(fechaSalida);
+    const cantidadNoches = Math.ceil((fecha2.getTime() - fecha1.getTime()) / (1000 * 3600 * 24));
+
+    let precioTotal = 0;
+
+    // Obtiene el precio de la habitación y multiplica por la cantidad de noches
+    const habitacionId = document.getElementById('newIdHabitacion').value;
+    if (habitacionId && preciosHabitaciones[habitacionId] != null) {
+        const costoBaseHabitacion = Number(preciosHabitaciones[habitacionId]);
+        precioTotal += costoBaseHabitacion * cantidadNoches;
+    }
+
+    // Suma el costo de los servicios seleccionados
     const serviciosSeleccionados = Array.from(document.querySelectorAll('input[name="servicios"]:checked'));
     serviciosSeleccionados.forEach(servicio => {
         const servicioId = servicio.value;
@@ -275,8 +295,10 @@ function calcularPrecioTotal() {
         }
     });
 
+    // Actualiza el campo de costo total en el formulario
     document.getElementById('newCostoTotal').value = precioTotal.toFixed(2);
 }
+
 
 
 

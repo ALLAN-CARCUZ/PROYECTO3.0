@@ -389,13 +389,14 @@ async function getReservacionesPorMes() {
     const client = await pool.connect();
     try {
         const query = `
-            SELECT TO_CHAR(FECHA_RESERVACION, 'MM') AS MES, COUNT(*) AS CANTIDAD
+            SELECT TO_CHAR(FECHA_RESERVACION, 'MM') AS mes, COUNT(*) AS cantidad
             FROM RESERVACIONES
-            WHERE TO_CHAR(FECHA_RESERVACION, 'YYYY') = '2024'
+            WHERE EXTRACT(YEAR FROM FECHA_RESERVACION) = 2024
             GROUP BY TO_CHAR(FECHA_RESERVACION, 'MM')
-            ORDER BY MES
+            ORDER BY mes
         `;
         const result = await client.query(query);
+        console.log('Resultados de la consulta:', result.rows); // Log para verificar resultados
         return result.rows;
     } catch (error) {
         console.error('Error al obtener las reservaciones por mes:', error);
@@ -404,6 +405,9 @@ async function getReservacionesPorMes() {
         client.release();
     }
 }
+
+
+
 
 // Función para calcular el promedio de días de estadía
 async function getPromedioDiasReservacion() {

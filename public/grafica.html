@@ -149,11 +149,19 @@ document.getElementById('download-pdf').addEventListener('click', async () => {
 
     <script>
         fetch('/api/reservaciones/promedio/promedio-dias')
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('promedio-dias').innerText = `${data.promedio.toFixed(1)} días`; // Muestra el promedio con un decimal
-            })
-            .catch(error => console.error('Error al obtener el promedio de días:', error));
+    .then(response => response.json())
+    .then(data => {
+        console.log('Data recibida:', data); // Verifica el contenido completo de data
+        const promedio = parseFloat(data.promedio); // Convierte a número
+
+        if (!isNaN(promedio)) {
+            document.getElementById('promedio-dias').innerText = `${promedio.toFixed(1)} días`;
+        } else {
+            document.getElementById('promedio-dias').innerText = 'Datos no disponibles';
+            console.error('Error: "promedio" no es un número', data);
+        }
+    })
+    .catch(error => console.error('Error al obtener el promedio de días:', error));
     </script>
     
     

@@ -1,7 +1,7 @@
 // controllers/paymentController.js
 
 const Stripe = require('stripe');
-const stripe = Stripe('sk_test_51Q9a2gRqSLao4U6Dr8D74mPGjFTUVrDGAWvW8czJNpNLGZnGA4SpDOCTpH8Wl7fsFFS906XaxkUQv3RRiIRacbyp00G9V7zjUC');  // Asegúrate de usar la clave secreta de Stripe
+const stripe = Stripe('sk_test_51Q9B1WRvmJhKXph8E7J0WFPn4YHYTWdFpC2IWQNvGjWXPrWEYm383yrBchAcnBKDE684ST9uBXAJ7Hf0dTXEpUPM00sERFPm3S');  // Asegúrate de usar la clave secreta de Stripe
 
 exports.createPayment = async (req, res) => {
     const { payment_method_id, costo_total, id_usuario } = req.body;

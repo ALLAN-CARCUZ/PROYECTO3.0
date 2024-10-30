@@ -15,7 +15,7 @@ let stripe, elements, cardNumber, cardExpiry, cardCvc, cardZip;
 function initializeStripeElements() {
     if (!stripe) {
         console.log("Inicializando Stripe Elements");
-        stripe = Stripe('TU_CLAVE_PUBLICA_DE_STRIPE');
+        stripe = Stripe('pk_test_51Q9B1WRvmJhKXph8QE0FpzBgIwDpJsXa5G1t8zayNZTWYjoMbFBI6mJ1Gf9dSnDIT3xgztPNRAop9YZHyiB0CPFP00ryAjfoGg');
         elements = stripe.elements();
 
         cardNumber = elements.create('cardNumber');
@@ -424,7 +424,9 @@ function calcularPrecioTotal() {
     const cantidadNoches = Math.ceil((fecha2.getTime() - fecha1.getTime()) / (1000 * 3600 * 24));
 
     // Cálculo del costo de la habitación
-    let costoBaseHabitacion = selectedHabitacion && typeof selectedHabitacion.precio === 'number' ? selectedHabitacion.precio : 0;
+    let costoBaseHabitacion = selectedHabitacion && !isNaN(parseFloat(selectedHabitacion.precio))
+        ? parseFloat(selectedHabitacion.precio)
+        : 0;
     let totalHabitacion = costoBaseHabitacion * cantidadNoches;
 
     const porcentajeAdicionalPorNoche = 0.1;
@@ -433,7 +435,7 @@ function calcularPrecioTotal() {
     let totalServicios = 0;
 
     selectedServicios.forEach(servicioId => {
-        const costoBase = parseFloat(preciosServicios[servicioId]) || 0;  // Asegura que costoBase sea un número
+        const costoBase = parseFloat(preciosServicios[servicioId]) || 0;
         if (costoBase) {
             const costoServicioConExtra = costoBase + (costoBase * porcentajeAdicionalPorNoche * cantidadNoches);
             costoServiciosBase += costoBase;
@@ -442,13 +444,22 @@ function calcularPrecioTotal() {
             console.error(`Costo base no encontrado o no es un número para el servicio ID: ${servicioId}`);
         }
     });
-    
 
     if (paqueteId) {
+        console.log("paqueteId encontrado:", paqueteId); // Verifica que paqueteId no sea undefined o null
         fetch(`${API_BASE_URL}/paquetes/${paqueteId}`)
             .then(response => response.json())
             .then(paquete => {
-                total = (paquete.precio * cantidadNoches) + totalServicios;
+                const precioPaquete = !isNaN(parseFloat(paquete.precio)) ? parseFloat(paquete.precio) : 0;
+                const habitacionPrecio = !isNaN(parseFloat(paquete.habitacion_precio)) ? parseFloat(paquete.habitacion_precio) : 0;
+                
+                // Usa el precio de la habitación del paquete si existe
+                if (habitacionPrecio) {
+                    costoBaseHabitacion = habitacionPrecio;
+                    totalHabitacion = costoBaseHabitacion * cantidadNoches;
+                }
+    
+                total = (precioPaquete * cantidadNoches) + totalServicios;
                 actualizarResumenPrecio(costoBaseHabitacion, cantidadNoches, totalHabitacion, costoServiciosBase, totalServicios);
             })
             .catch(error => {
@@ -458,7 +469,12 @@ function calcularPrecioTotal() {
         total = totalHabitacion + totalServicios;
         actualizarResumenPrecio(costoBaseHabitacion, cantidadNoches, totalHabitacion, costoServiciosBase, totalServicios);
     }
+    
+    
+    
+    
 }
+
 
 
 // Función para actualizar el desglose del precio en la UI
@@ -475,6 +491,7 @@ function actualizarResumenPrecio(costoBaseHabitacion, cantidadNoches, totalHabit
     document.getElementById("total-servicios").textContent = `$${parseFloat(totalServicios).toFixed(2)}`;
     document.getElementById("total-price").textContent = `$${(parseFloat(totalHabitacion) + parseFloat(totalServicios)).toFixed(2)}`;
 }
+
 
 // Alternar selección de servicios adicionales
 function toggleServicio(id, costo) {
