@@ -1,42 +1,51 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const username = localStorage.getItem('username');
-    const authMenu = document.getElementById('authMenu');
-    const loginSection = document.querySelector('.auth-section');
-    const registerBtn = document.getElementById('registerBtn');
-    const loginBtn = document.getElementById('loginBtn');
-    const userGreeting = document.getElementById('userGreeting');
-    const userDropdown = document.getElementById('userDropdown');
-    const dropdownMenu = document.getElementById('dropdownMenu');
-    const logoutLink = document.getElementById('logoutLink');
+    // Cargar el contenido del header
+    fetch('header.html')
+        .then(response => response.text())
+        .then(data => {
+            document.querySelector('header').innerHTML = data;
 
-    if (username) {
-        // Mostrar menú desplegable para el usuario autenticado
-        authMenu.style.display = 'inline-block';
-        userGreeting.textContent = `Hola, ${username}!`;
-        registerBtn.style.display = 'none';
-        loginBtn.style.display = 'none';
+            // Obtener elementos del header
+            const username = localStorage.getItem('username');
+            const rolUsuario = localStorage.getItem('rol'); // Asume que el rol está almacenado en localStorage
+            const authMenu = document.getElementById('authMenu');
+            const registerBtn = document.getElementById('registerBtn');
+            const loginBtn = document.getElementById('loginBtn');
+            const userGreeting = document.getElementById('userGreeting');
+            const userDropdown = document.getElementById('userDropdown');
+            const dropdownMenu = document.getElementById('dropdownMenu');
+            const logoutLink = document.getElementById('logoutLink');
+            const graficaTab = document.querySelector('a[href="grafica.html"]'); // Selector para la pestaña de Gráficas
 
-        // Mostrar el dropdown al hacer clic en "Mi Cuenta"
-        userDropdown.addEventListener('click', function() {
-            dropdownMenu.style.display = dropdownMenu.style.display === 'none' ? 'block' : 'none';
-        });
-
-        // Funcionalidad para cerrar sesión
-        logoutLink.addEventListener('click', function() {
-            localStorage.clear();
-            window.location.href = 'login.html';
-        });
-
-        // Cerrar el menú si se hace clic fuera de él
-        window.onclick = function(event) {
-            if (!event.target.matches('.dropdown-toggle')) {
-                dropdownMenu.style.display = 'none';
+            // Mostrar/ocultar la pestaña de Gráficas basado en el rol
+            if (rolUsuario !== 'admin' && graficaTab) {
+                graficaTab.style.display = 'none'; // Oculta "Gráficas" si el usuario no es admin
             }
-        };
-    } else {
-        // Mostrar los botones de "Iniciar Sesión" y "Registrarse" cuando no hay sesión
-        authMenu.style.display = 'none';
-        registerBtn.style.display = 'inline-block';
-        loginBtn.style.display = 'inline-block';
-    }
+
+            if (username) {
+                authMenu.style.display = 'inline-block';
+                userGreeting.textContent = `Hola, ${username}!`;
+                registerBtn.style.display = 'none';
+                loginBtn.style.display = 'none';
+
+                userDropdown.addEventListener('click', function() {
+                    dropdownMenu.style.display = dropdownMenu.style.display === 'none' ? 'block' : 'none';
+                });
+
+                logoutLink.addEventListener('click', function() {
+                    localStorage.clear();
+                    window.location.href = 'login.html';
+                });
+
+                window.onclick = function(event) {
+                    if (!event.target.matches('.dropdown-toggle')) {
+                        dropdownMenu.style.display = 'none';
+                    }
+                };
+            } else {
+                authMenu.style.display = 'none';
+                registerBtn.style.display = 'inline-block';
+                loginBtn.style.display = 'inline-block';
+            }
+        });
 });

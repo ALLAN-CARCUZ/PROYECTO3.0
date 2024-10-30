@@ -19,6 +19,54 @@ body {
     padding: 0 20px;
 }
 
+/* Estilos para las secciones cuadradas con fondo blanco */
+.section-habitaciones, .section-servicios, .section-paquetes {
+    background-color: #ffffff; /* Fondo blanco */
+    padding: 50px 20px;
+    text-align: center;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1); /* Sombra ligera */
+    margin-bottom: 20px;
+    color: #333; /* Color de texto oscuro */
+    width: 100%;
+}
+
+.section-habitaciones h2, .section-servicios h2, .section-paquetes h2 {
+    font-size: 2rem;
+    color: #333333; /* Color negro para el texto */
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.section-habitaciones p, .section-servicios p, .section-paquetes p {
+    font-size: 1rem;
+    color: #666666; /* Gris oscuro para el subtítulo */
+}
+
+/* Estilos del carrusel de servicios */
+.carousel-item img {
+    width: 100%;
+    height: 400px; /* Ajusta la altura según tus preferencias */
+    object-fit: cover;
+    border-radius: 8px; /* Bordes redondeados opcionales */
+}
+
+.carousel-caption {
+    background: rgba(0, 0, 0, 0.5); /* Fondo semitransparente para el texto */
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.carousel-caption h5 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+.carousel-caption p {
+    font-size: 1rem;
+    color: #f1f1f1;
+}
+
 
 /* Estilos del Hero */
 .hero {
@@ -73,65 +121,6 @@ body {
 
 .search-button:hover {
     background: linear-gradient(to right, #764ba2, #667eea);
-}
-
-/* Estilos de Hoteles Populares */
-.popular-hotels {
-    padding: 50px 0;
-    text-align: center;
-    font-family: 'Arial', sans-serif; /* Aseguramos la fuente Arial */
-}
-
-.popular-hotels h2 {
-    font-size: 2.5rem;
-    margin-bottom: 30px;
-}
-
-ul#hotelList {
-    display: flex;
-    justify-content: space-around;
-    list-style: none;
-    padding: 0;
-}
-
-ul#hotelList li {
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    width: 300px;
-    transition: transform 0.3s ease;
-}
-
-ul#hotelList li:hover {
-    transform: translateY(-5px);
-}
-
-ul#hotelList li img {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
-}
-
-.hotel-info {
-    padding: 15px;
-}
-
-.hotel-info strong {
-    font-size: 1.5rem;
-    color: #333;
-}
-
-.hotel-info p {
-    font-size: 1rem;
-    color: #666;
-}
-
-.hotel-info .price {
-    font-size: 1.2rem;
-    color: #e74c3c;
-    font-weight: bold;
 }
 
 /* Footer */
