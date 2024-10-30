@@ -1,7 +1,9 @@
+/* headerlogin.css */
+
 header {
     background: linear-gradient(to right, #667eea, #764ba2);
     color: white;
-    padding: 15px 0;
+    padding: 40px 0; /* Mantener la banda más grande */
     width: 100%;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
 }
@@ -15,10 +17,11 @@ header {
     padding: 0 20px;
 }
 
+/* Aumentar aún más el tamaño de la fuente de los enlaces de navegación */
 nav a {
     color: white;
     text-decoration: none;
     margin: 0 15px;
-    font-size: 1.1rem;
+    font-size: 1.5rem; /* Aumentado a 1.5rem para un tamaño de letra mayor */
     font-weight: bold;
 }

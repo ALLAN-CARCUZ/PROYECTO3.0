@@ -8,55 +8,60 @@
     <link rel="stylesheet" href="css/headerlogin.css">
 </head>
 <body>
-    <!-- Barra de navegación -->
     <header>
     </header>
-    
 
-    <!-- Título de la página -->
-    <h1>Registro de Usuario</h1>
 
-    <!-- Formulario de registro -->
-    <form id="usuarioForm">
-        <label for="nombre">Nombre:</label>
-        <input type="text" id="nombre" name="nombre">
-    
-        <label for="apellido">Apellido:</label>
-        <input type="text" id="apellido" name="apellido">
-    
-        <label for="email">Correo electrónico:</label>
-        <input type="email" id="email" name="email">
-    
-        <label for="password">Contraseña:</label>
-        <input type="password" id="password" name="password">
-    
-        <label for="pais">País:</label>
-        <select id="pais" name="pais">
-            <option value="" disabled selected>Seleccione su país</option>
-            <option value="Estados Unidos">Estados Unidos</option>
-            <option value="China">China</option>
-            <option value="India">India</option>
-            <option value="Brasil">Brasil</option>
-            <option value="Rusia">Rusia</option>
-            <option value="Japón">Japón</option>
-            <option value="Alemania">Alemania</option>
-            <option value="Reino Unido">Reino Unido</option>
-            <option value="Francia">Francia</option>
-            <option value="Italia">Italia</option>
-            <option value="Canadá">Canadá</option>
-            <option value="Australia">Australia</option>
-            <option value="México">México</option>
-            <option value="Guatemala">Guatemala</option>
-            <option value="Argentina">Argentina</option>
-        </select>
 
-        <button type="submit">Registrarse</button>
-    </form>
-
-    <!-- Enlace para redirigir a la página de iniciar sesión -->
-    <div class="login-link">
-        <p>¿Ya tienes cuenta? <a href="login.html">Inicia sesión aquí</a></p>
+    <!-- Contenedor del logo y formulario -->
+    <div class="main-container">
+        <div class="form-container">
+            <h1>Registro de Usuario</h1>
+            <div class="form-logo">
+                <img src="imagenes/logo.jpg" alt="Hotel El Dodo Logo">
+            </div>
+            <form id="usuarioForm">
+                <label for="nombre">Nombre:</label>
+                <input type="text" id="nombre" name="nombre">
+            
+                <label for="apellido">Apellido:</label>
+                <input type="text" id="apellido" name="apellido">
+            
+                <label for="email">Correo electrónico:</label>
+                <input type="email" id="email" name="email">
+            
+                <label for="password">Contraseña:</label>
+                <input type="password" id="password" name="password">
+            
+                <label for="pais">País:</label>
+                <select id="pais" name="pais">
+                    <option value="" disabled selected>Seleccione su país</option>
+                <option value="Estados Unidos">Estados Unidos</option>
+                <option value="China">China</option>
+                <option value="India">India</option>
+                <option value="Brasil">Brasil</option>
+                <option value="Rusia">Rusia</option>
+                <option value="Japón">Japón</option>
+                <option value="Alemania">Alemania</option>
+                <option value="Reino Unido">Reino Unido</option>
+                <option value="Francia">Francia</option>
+                <option value="Italia">Italia</option>
+                <option value="Canadá">Canadá</option>
+                <option value="Australia">Australia</option>
+                <option value="México">México</option>
+                <option value="Guatemala">Guatemala</option>
+                <option value="Argentina">Argentina</option>
+            </select>
+        
+            <button type="submit">Registrarse</button>
+        </form>
+        <div class="login-link">
+            <p>¿Ya tienes cuenta? <a href="login.html">Inicia sesión aquí</a></p>
+        </div>
     </div>
+</div>
+
+
     <script src="scripts/register.js"></script>
     <script src="scripts/headerlogin.js"></script>
 </body>

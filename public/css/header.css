@@ -1,3 +1,4 @@
+/* Estilos generales */
 header {
     background: linear-gradient(to right, #667eea, #764ba2);
     color: white;
@@ -21,19 +22,23 @@ header {
     vertical-align: middle;
 }
 
-
+/* Ajuste para los enlaces de navegación */
 .nav-left {
     display: flex;
     align-items: center;
 }
 
-
 nav a {
     color: white;
     text-decoration: none;
     margin: 0 15px;
-    font-size: 1.1rem;
+    font-size: 1.5rem; /* Aumenta el tamaño de la fuente */
     font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+nav a:hover {
+    color: #c3bff3;
 }
 
 .nav-right {
@@ -42,72 +47,57 @@ nav a {
 }
 
 .register-button, .auth-button {
-    padding: 10px 20px;
+    padding: 12px 25px;
     border: none;
     border-radius: 5px;
-    font-size: 1rem;
+    font-size: 1.1rem; /* Tamaño de fuente aumentado */
     cursor: pointer;
     transition: background 0.3s ease;
 }
 
-/* Estilos para el boton Registrar */
+/* Estilos para el botón Registrar */
 .register-button {
     background: linear-gradient(to right, #667eea, #764ba2);
     color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    font-size: 1rem;
     text-transform: uppercase;
-    cursor: pointer;
     text-align: center;
-    transition: background 0.3s ease;
-    margin-left: 10px; /* Agrega un pequeño margen */
+    margin-right: 10px; /* Aumenta el margen derecho del botón de registro */
 }
 
 .register-button:hover {
     background: linear-gradient(to right, #764ba2, #667eea);
 }
 
-/* Estilos para el boton Iniciar Sesión */
+/* Estilos para el botón Iniciar Sesión */
 .auth-button {
     background-color: #28a745;
     color: white;
-    padding: 10px 20px;
-    border-radius: 5px;
     text-transform: uppercase;
     font-weight: bold;
-    margin-right: 10px;
-    transition: background 0.3s ease;
 }
 
 .auth-button:hover {
     background-color: #218838;
-    color: white;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-
 /* Ajuste para la posición del dropdown */
 .auth-menu {
-    position: relative; /* Para hacer que el menú desplegable sea relativo al contenedor del botón */
+    position: relative;
 }
 
 .auth-menu .dropdown-toggle {
     background-color: #667eea;
     color: white;
-    padding: 10px 20px;
+    padding: 12px 20px;
     border-radius: 5px;
-    margin-left: 20px;
-    font-size: 1rem;
+    font-size: 1.1rem;
     cursor: pointer;
     transition: background 0.3s ease;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .auth-menu .dropdown-toggle:hover {
     background-color: #764ba2;
-    box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.2);
 }
 
 /* Estilos para el menú desplegable */
@@ -120,16 +110,16 @@ nav a {
     z-index: 1;
     border-radius: 5px;
     right: 0;
-    top: 170%; /* Esto coloca el menú justo debajo del botón */
+    top: 150%;
     padding: 10px 0;
 }
-
 
 .dropdown-menu a {
     color: black;
     padding: 12px 16px;
     text-decoration: none;
     display: block;
+    font-size: 1rem;
 }
 
 .dropdown-menu a:hover {
